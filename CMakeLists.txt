@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.12)
 # Information about the project
 project(
         caffeine-hal
-        VERSION 0.0.0
+        VERSION 0.1.0
         LANGUAGES C
         DESCRIPTION "A header-only c library, it provides the hal layer for the Caffeine framework"
         HOMEPAGE_URL "https://github.com/while-one/caffeine-hal"
