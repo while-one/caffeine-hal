@@ -1,0 +1,64 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  lint-format:
+    name: Lint Format (Clang-Format)
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Clang-Format
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-format
+
+    - name: Check Formatting
+      run: |
+        # Find all header and test files and check their format
+        # --dry-run: don't change the files
+        # --Werror: treat formatting violations as errors
+        find include tests -name "*.h" -o -name "*.cpp" | xargs clang-format --style=file:config/coding/.clang-format --dry-run --Werror
+
+  static-analysis:
+    name: Static Analysis (Cppcheck & Clang-Tidy)
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Analysis Tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cppcheck clang-tidy cmake
+
+    - name: Configure CMake
+      run: cmake -B build -S .
+
+    - name: Run Analysis
+      run: cmake --build build --target analyze
+
+  build-and-test:
+    name: Build & Unit Tests
+    runs-on: ubuntu-24.04
+    needs: [lint-format] # Optional: only build if format is correct
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake g++ make
+
+    - name: Configure CMake
+      run: cmake -B build -S .
+
+    - name: Build Tests
+      run: cmake --build build --target caffeine-hal-test -j 4
+
+    - name: Run Unit Tests
+      run: ./build/tests/caffeine-hal-test
