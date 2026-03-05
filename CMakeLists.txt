@@ -103,19 +103,35 @@ file(
 
 # Copy the header files to the destination CMAKE_INSTALL_INCLUDEDIR
 install(FILES ${EXPORTED_INCLUDES} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+# Gather test sources for formatting and analysis
+file(GLOB TEST_SOURCES "${PROJECT_SOURCE_DIR}/tests/*.cpp")
+set(ALL_ANALYSIS_SOURCES ${EXPORTED_INCLUDES} ${TEST_SOURCES})
+
 # ==============================================================================
 # Code Formatting (clang-format)
 # ==============================================================================
 find_program(CLANG_FORMAT clang-format)
 if(CLANG_FORMAT)
-    # Define formatting target to format all header files in the include directory
+    # Option to run clang-format in dry-run mode (useful for CI)
+    option(FORMAT_DRY_RUN "Run clang-format in dry-run mode (fails if formatting is required)" OFF)
+    
+    if(FORMAT_DRY_RUN)
+        set(FORMAT_ARGS --dry-run --Werror)
+        set(FORMAT_COMMENT "Checking header formatting with clang-format (BARR-C style)...")
+    else()
+        set(FORMAT_ARGS -i)
+        set(FORMAT_COMMENT "Formatting header files with clang-format (BARR-C style)...")
+    endif()
+
+    # Define formatting target
     add_custom_target(
         format
         COMMAND ${CLANG_FORMAT}
-        -i
+        ${FORMAT_ARGS}
         -style=file:${PROJECT_SOURCE_DIR}/config/coding/.clang-format
-        ${EXPORTED_INCLUDES}
-        COMMENT "Formatting header files with clang-format (BARR-C style)..."
+        ${ALL_ANALYSIS_SOURCES}
+        COMMENT "${FORMAT_COMMENT}"
     )
 else()
     message(WARNING "clang-format not found. 'format' target will not be available.")

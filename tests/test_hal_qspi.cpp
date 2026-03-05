@@ -26,12 +26,14 @@
 #include <gtest/gtest.h>
 #include "hal_qspi.h"
 
-class QspiTest : public ::testing::Test {
-protected:
-    hal_qspi_t driver{};
+class QspiTest : public ::testing::Test
+{
+  protected:
+    hal_qspi_t     driver{};
     hal_qspi_api_t api{};
 
-    void SetUp() override {
+    void SetUp () override
+    {
         driver.base.status = HAL_PERIPHERAL_STATUS_UNKNOWN;
         driver.base.type = HAL_PERIPHERAL_TYPE_QSPI;
         driver.base.on_config = nullptr;
@@ -41,37 +43,37 @@ protected:
 
 // --- Negative Tests ---
 
-TEST_F(QspiTest, NullDriverReturnsBadParam) {
-    EXPECT_EQ(hal_qspi_init(nullptr), HAL_ERROR_BAD_PARAM);
+TEST_F (QspiTest, NullDriverReturnsBadParam)
+{
+    EXPECT_EQ (hal_qspi_init (nullptr), HAL_ERROR_BAD_PARAM);
 }
 
-TEST_F(QspiTest, WrongPeripheralTypeReturnsBadParam) {
+TEST_F (QspiTest, WrongPeripheralTypeReturnsBadParam)
+{
     driver.base.type = HAL_PERIPHERAL_TYPE_UNKNOWN;
-    EXPECT_EQ(hal_qspi_deinit(&driver), HAL_ERROR_BAD_PARAM);
+    EXPECT_EQ (hal_qspi_deinit (&driver), HAL_ERROR_BAD_PARAM);
 }
 
-TEST_F(QspiTest, UnimplementedApiReturnsNotSupported) {
+TEST_F (QspiTest, UnimplementedApiReturnsNotSupported)
+{
     api.hal_qspi_deinit = nullptr; // Explicitly null
-    EXPECT_EQ(hal_qspi_deinit(&driver), HAL_ERROR_NOT_SUPPORTED);
+    EXPECT_EQ (hal_qspi_deinit (&driver), HAL_ERROR_NOT_SUPPORTED);
 }
 
-TEST_F(QspiTest, OnConfigFailureAbortsInit) {
-    driver.base.on_config = [](hal_driver_t* b, bool init) -> hal_error_code_t {
-        return HAL_ERROR_FAIL;
-    };
-    EXPECT_EQ(hal_qspi_init(&driver), HAL_ERROR_FAIL);
+TEST_F (QspiTest, OnConfigFailureAbortsInit)
+{
+    driver.base.on_config = [] (hal_driver_t *b, bool init) -> hal_error_code_t { return HAL_ERROR_FAIL; };
+    EXPECT_EQ (hal_qspi_init (&driver), HAL_ERROR_FAIL);
 }
 
-TEST_F(QspiTest, hal_qspi_init_Success) {
-    api.hal_qspi_init = [](hal_qspi_t *driver) -> hal_error_code_t {
-        return HAL_ERROR_OK;
-    };
-    EXPECT_EQ(hal_qspi_init(&driver), HAL_ERROR_OK);
+TEST_F (QspiTest, hal_qspi_init_Success)
+{
+    api.hal_qspi_init = [] (hal_qspi_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
+    EXPECT_EQ (hal_qspi_init (&driver), HAL_ERROR_OK);
 }
 
-TEST_F(QspiTest, hal_qspi_deinit_Success) {
-    api.hal_qspi_deinit = [](hal_qspi_t *driver) -> hal_error_code_t {
-        return HAL_ERROR_OK;
-    };
-    EXPECT_EQ(hal_qspi_deinit(&driver), HAL_ERROR_OK);
+TEST_F (QspiTest, hal_qspi_deinit_Success)
+{
+    api.hal_qspi_deinit = [] (hal_qspi_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
+    EXPECT_EQ (hal_qspi_deinit (&driver), HAL_ERROR_OK);
 }

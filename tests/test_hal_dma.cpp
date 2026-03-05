@@ -26,12 +26,14 @@
 #include <gtest/gtest.h>
 #include "hal_dma.h"
 
-class DmaTest : public ::testing::Test {
-protected:
-    hal_dma_t driver{};
+class DmaTest : public ::testing::Test
+{
+  protected:
+    hal_dma_t     driver{};
     hal_dma_api_t api{};
 
-    void SetUp() override {
+    void SetUp () override
+    {
         driver.base.status = HAL_PERIPHERAL_STATUS_UNKNOWN;
         driver.base.type = HAL_PERIPHERAL_TYPE_DMA;
         driver.base.on_config = nullptr;
@@ -41,82 +43,80 @@ protected:
 
 // --- Negative Tests ---
 
-TEST_F(DmaTest, NullDriverReturnsBadParam) {
-    EXPECT_EQ(hal_dma_init(nullptr), HAL_ERROR_BAD_PARAM);
+TEST_F (DmaTest, NullDriverReturnsBadParam)
+{
+    EXPECT_EQ (hal_dma_init (nullptr), HAL_ERROR_BAD_PARAM);
 }
 
-TEST_F(DmaTest, WrongPeripheralTypeReturnsBadParam) {
+TEST_F (DmaTest, WrongPeripheralTypeReturnsBadParam)
+{
     driver.base.type = HAL_PERIPHERAL_TYPE_UNKNOWN;
-    EXPECT_EQ(hal_dma_deinit(&driver), HAL_ERROR_BAD_PARAM);
+    EXPECT_EQ (hal_dma_deinit (&driver), HAL_ERROR_BAD_PARAM);
 }
 
-TEST_F(DmaTest, UnimplementedApiReturnsNotSupported) {
+TEST_F (DmaTest, UnimplementedApiReturnsNotSupported)
+{
     api.hal_dma_deinit = nullptr; // Explicitly null
-    EXPECT_EQ(hal_dma_deinit(&driver), HAL_ERROR_NOT_SUPPORTED);
+    EXPECT_EQ (hal_dma_deinit (&driver), HAL_ERROR_NOT_SUPPORTED);
 }
 
-TEST_F(DmaTest, OnConfigFailureAbortsInit) {
-    driver.base.on_config = [](hal_driver_t* b, bool init) -> hal_error_code_t {
-        return HAL_ERROR_FAIL;
-    };
-    EXPECT_EQ(hal_dma_init(&driver), HAL_ERROR_FAIL);
+TEST_F (DmaTest, OnConfigFailureAbortsInit)
+{
+    driver.base.on_config = [] (hal_driver_t *b, bool init) -> hal_error_code_t { return HAL_ERROR_FAIL; };
+    EXPECT_EQ (hal_dma_init (&driver), HAL_ERROR_FAIL);
 }
 
-TEST_F(DmaTest, hal_dma_init_Success) {
-    api.hal_dma_init = [](hal_dma_t *driver) -> hal_error_code_t {
-        return HAL_ERROR_OK;
-    };
-    EXPECT_EQ(hal_dma_init(&driver), HAL_ERROR_OK);
+TEST_F (DmaTest, hal_dma_init_Success)
+{
+    api.hal_dma_init = [] (hal_dma_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
+    EXPECT_EQ (hal_dma_init (&driver), HAL_ERROR_OK);
 }
 
-TEST_F(DmaTest, hal_dma_deinit_Success) {
-    api.hal_dma_deinit = [](hal_dma_t *driver) -> hal_error_code_t {
-        return HAL_ERROR_OK;
-    };
-    EXPECT_EQ(hal_dma_deinit(&driver), HAL_ERROR_OK);
+TEST_F (DmaTest, hal_dma_deinit_Success)
+{
+    api.hal_dma_deinit = [] (hal_dma_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
+    EXPECT_EQ (hal_dma_deinit (&driver), HAL_ERROR_OK);
 }
 
-TEST_F(DmaTest, hal_dma_start_Success) {
-    api.hal_dma_start = [](hal_dma_t *driver, uint32_t src_addr, uint32_t dst_addr, uint32_t length) -> hal_error_code_t {
-        return HAL_ERROR_OK;
-    };
-    EXPECT_EQ(hal_dma_start(&driver, 0, 0, 0), HAL_ERROR_OK);
+TEST_F (DmaTest, hal_dma_start_Success)
+{
+    api.hal_dma_start = [] (hal_dma_t *driver, uint32_t src_addr, uint32_t dst_addr,
+                            uint32_t length) -> hal_error_code_t { return HAL_ERROR_OK; };
+    EXPECT_EQ (hal_dma_start (&driver, 0, 0, 0), HAL_ERROR_OK);
 }
 
-TEST_F(DmaTest, hal_dma_stop_Success) {
-    api.hal_dma_stop = [](hal_dma_t *driver) -> hal_error_code_t {
-        return HAL_ERROR_OK;
-    };
-    EXPECT_EQ(hal_dma_stop(&driver), HAL_ERROR_OK);
+TEST_F (DmaTest, hal_dma_stop_Success)
+{
+    api.hal_dma_stop = [] (hal_dma_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
+    EXPECT_EQ (hal_dma_stop (&driver), HAL_ERROR_OK);
 }
 
-TEST_F(DmaTest, hal_dma_register_cb_Success) {
-    api.hal_dma_register_cb = [](hal_dma_t *driver, hal_dma_callback_t cb, void *user_arg) -> hal_error_code_t {
-        return HAL_ERROR_OK;
-    };
-    EXPECT_EQ(hal_dma_register_cb(&driver, (hal_dma_callback_t)nullptr, nullptr), HAL_ERROR_OK);
+TEST_F (DmaTest, hal_dma_register_cb_Success)
+{
+    api.hal_dma_register_cb = [] (hal_dma_t *driver, hal_dma_callback_t cb, void *user_arg) -> hal_error_code_t
+    { return HAL_ERROR_OK; };
+    EXPECT_EQ (hal_dma_register_cb (&driver, (hal_dma_callback_t) nullptr, nullptr), HAL_ERROR_OK);
 }
 
-TEST_F(DmaTest, hal_dma_cfg_irq_enable_Success) {
-    api.hal_dma_cfg_irq_enable = [](hal_dma_t *driver, hal_dma_interrupts_t irq) -> hal_error_code_t {
-        return HAL_ERROR_OK;
-    };
-    EXPECT_EQ(hal_dma_cfg_irq_enable(&driver, (hal_dma_interrupts_t)0), HAL_ERROR_OK);
+TEST_F (DmaTest, hal_dma_cfg_irq_enable_Success)
+{
+    api.hal_dma_cfg_irq_enable = [] (hal_dma_t *driver, hal_dma_interrupts_t irq) -> hal_error_code_t
+    { return HAL_ERROR_OK; };
+    EXPECT_EQ (hal_dma_cfg_irq_enable (&driver, (hal_dma_interrupts_t) 0), HAL_ERROR_OK);
 }
 
-TEST_F(DmaTest, hal_dma_cfg_irq_disable_Success) {
-    api.hal_dma_cfg_irq_disable = [](hal_dma_t *driver, hal_dma_interrupts_t irq) -> hal_error_code_t {
-        return HAL_ERROR_OK;
-    };
-    EXPECT_EQ(hal_dma_cfg_irq_disable(&driver, (hal_dma_interrupts_t)0), HAL_ERROR_OK);
+TEST_F (DmaTest, hal_dma_cfg_irq_disable_Success)
+{
+    api.hal_dma_cfg_irq_disable = [] (hal_dma_t *driver, hal_dma_interrupts_t irq) -> hal_error_code_t
+    { return HAL_ERROR_OK; };
+    EXPECT_EQ (hal_dma_cfg_irq_disable (&driver, (hal_dma_interrupts_t) 0), HAL_ERROR_OK);
 }
 
-TEST_F(DmaTest, LockTimeoutAbortsOperation) {
+TEST_F (DmaTest, LockTimeoutAbortsOperation)
+{
     // Mock the lock function to simulate a timeout
-    driver.base.lock = [](hal_driver_t* b, uint32_t timeout) -> hal_error_code_t {
-        return HAL_ERROR_TIMING_TIMEOUT;
-    };
-    
+    driver.base.lock = [] (hal_driver_t *b, uint32_t timeout) -> hal_error_code_t { return HAL_ERROR_TIMING_TIMEOUT; };
+
     // Attempt the locked operation
-    EXPECT_EQ(hal_dma_start(&driver, 0, 0, 0), HAL_ERROR_TIMING_TIMEOUT);
+    EXPECT_EQ (hal_dma_start (&driver, 0, 0, 0), HAL_ERROR_TIMING_TIMEOUT);
 }
