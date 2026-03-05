@@ -16,7 +16,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.SEMVER_BUMP_TOKEN }}
           fetch-depth: 0
 
       - name: Setup Python
