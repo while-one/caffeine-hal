@@ -26,9 +26,12 @@ jobs:
 
       - name: Determine Bump Type
         id: bump_type
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          BODY="${{ github.event.pull_request.body }}"
-          TITLE="${{ github.event.pull_request.title }}"
+          BODY="$PR_BODY"
+          TITLE="$PR_TITLE"
           
           # Default to patch
           BUMP="patch"
@@ -82,7 +85,7 @@ jobs:
           # Only commit if there are changes
           if ! git diff --quiet CMakeLists.txt; then
             git add CMakeLists.txt
-            git commit -m "chore: bump version to ${{ env.NEW_VERSION }} [skip ci]"
+            git commit -m "semberbot: bump version to ${{ env.NEW_VERSION }} [skip ci]"
             git push origin main
             
             # Create and push tag
