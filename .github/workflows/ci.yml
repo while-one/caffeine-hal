@@ -18,12 +18,11 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y clang-format
 
+    - name: Configure CMake (Dry Run Format)
+      run: cmake -B build -S . -DFORMAT_DRY_RUN=ON
+
     - name: Check Formatting
-      run: |
-        # Find all header and test files and check their format
-        # --dry-run: don't change the files
-        # --Werror: treat formatting violations as errors
-        find include tests -name "*.h" -o -name "*.cpp" | xargs clang-format --style=file:config/coding/.clang-format --dry-run --Werror
+      run: cmake --build build --target format
 
   static-analysis:
     name: Static Analysis (Cppcheck & Clang-Tidy)

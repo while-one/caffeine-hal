@@ -26,12 +26,14 @@
 #include <gtest/gtest.h>
 #include "hal_i2s.h"
 
-class I2sTest : public ::testing::Test {
-protected:
-    hal_i2s_t driver{};
+class I2sTest : public ::testing::Test
+{
+  protected:
+    hal_i2s_t     driver{};
     hal_i2s_api_t api{};
 
-    void SetUp() override {
+    void SetUp () override
+    {
         driver.base.status = HAL_PERIPHERAL_STATUS_UNKNOWN;
         driver.base.type = HAL_PERIPHERAL_TYPE_I2S;
         driver.base.on_config = nullptr;
@@ -41,37 +43,37 @@ protected:
 
 // --- Negative Tests ---
 
-TEST_F(I2sTest, NullDriverReturnsBadParam) {
-    EXPECT_EQ(hal_i2s_init(nullptr), HAL_ERROR_BAD_PARAM);
+TEST_F (I2sTest, NullDriverReturnsBadParam)
+{
+    EXPECT_EQ (hal_i2s_init (nullptr), HAL_ERROR_BAD_PARAM);
 }
 
-TEST_F(I2sTest, WrongPeripheralTypeReturnsBadParam) {
+TEST_F (I2sTest, WrongPeripheralTypeReturnsBadParam)
+{
     driver.base.type = HAL_PERIPHERAL_TYPE_UNKNOWN;
-    EXPECT_EQ(hal_i2s_deinit(&driver), HAL_ERROR_BAD_PARAM);
+    EXPECT_EQ (hal_i2s_deinit (&driver), HAL_ERROR_BAD_PARAM);
 }
 
-TEST_F(I2sTest, UnimplementedApiReturnsNotSupported) {
+TEST_F (I2sTest, UnimplementedApiReturnsNotSupported)
+{
     api.hal_i2s_deinit = nullptr; // Explicitly null
-    EXPECT_EQ(hal_i2s_deinit(&driver), HAL_ERROR_NOT_SUPPORTED);
+    EXPECT_EQ (hal_i2s_deinit (&driver), HAL_ERROR_NOT_SUPPORTED);
 }
 
-TEST_F(I2sTest, OnConfigFailureAbortsInit) {
-    driver.base.on_config = [](hal_driver_t* b, bool init) -> hal_error_code_t {
-        return HAL_ERROR_FAIL;
-    };
-    EXPECT_EQ(hal_i2s_init(&driver), HAL_ERROR_FAIL);
+TEST_F (I2sTest, OnConfigFailureAbortsInit)
+{
+    driver.base.on_config = [] (hal_driver_t *b, bool init) -> hal_error_code_t { return HAL_ERROR_FAIL; };
+    EXPECT_EQ (hal_i2s_init (&driver), HAL_ERROR_FAIL);
 }
 
-TEST_F(I2sTest, hal_i2s_init_Success) {
-    api.hal_i2s_init = [](hal_i2s_t *driver) -> hal_error_code_t {
-        return HAL_ERROR_OK;
-    };
-    EXPECT_EQ(hal_i2s_init(&driver), HAL_ERROR_OK);
+TEST_F (I2sTest, hal_i2s_init_Success)
+{
+    api.hal_i2s_init = [] (hal_i2s_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
+    EXPECT_EQ (hal_i2s_init (&driver), HAL_ERROR_OK);
 }
 
-TEST_F(I2sTest, hal_i2s_deinit_Success) {
-    api.hal_i2s_deinit = [](hal_i2s_t *driver) -> hal_error_code_t {
-        return HAL_ERROR_OK;
-    };
-    EXPECT_EQ(hal_i2s_deinit(&driver), HAL_ERROR_OK);
+TEST_F (I2sTest, hal_i2s_deinit_Success)
+{
+    api.hal_i2s_deinit = [] (hal_i2s_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
+    EXPECT_EQ (hal_i2s_deinit (&driver), HAL_ERROR_OK);
 }

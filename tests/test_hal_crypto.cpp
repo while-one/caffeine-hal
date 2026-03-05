@@ -26,12 +26,14 @@
 #include <gtest/gtest.h>
 #include "hal_crypto.h"
 
-class CryptoTest : public ::testing::Test {
-protected:
-    hal_crypto_t driver{};
+class CryptoTest : public ::testing::Test
+{
+  protected:
+    hal_crypto_t     driver{};
     hal_crypto_api_t api{};
 
-    void SetUp() override {
+    void SetUp () override
+    {
         driver.base.status = HAL_PERIPHERAL_STATUS_UNKNOWN;
         driver.base.type = HAL_PERIPHERAL_TYPE_CRYPTO;
         driver.base.on_config = nullptr;
@@ -41,37 +43,37 @@ protected:
 
 // --- Negative Tests ---
 
-TEST_F(CryptoTest, NullDriverReturnsBadParam) {
-    EXPECT_EQ(hal_crypto_init(nullptr), HAL_ERROR_BAD_PARAM);
+TEST_F (CryptoTest, NullDriverReturnsBadParam)
+{
+    EXPECT_EQ (hal_crypto_init (nullptr), HAL_ERROR_BAD_PARAM);
 }
 
-TEST_F(CryptoTest, WrongPeripheralTypeReturnsBadParam) {
+TEST_F (CryptoTest, WrongPeripheralTypeReturnsBadParam)
+{
     driver.base.type = HAL_PERIPHERAL_TYPE_UNKNOWN;
-    EXPECT_EQ(hal_crypto_deinit(&driver), HAL_ERROR_BAD_PARAM);
+    EXPECT_EQ (hal_crypto_deinit (&driver), HAL_ERROR_BAD_PARAM);
 }
 
-TEST_F(CryptoTest, UnimplementedApiReturnsNotSupported) {
+TEST_F (CryptoTest, UnimplementedApiReturnsNotSupported)
+{
     api.hal_crypto_deinit = nullptr; // Explicitly null
-    EXPECT_EQ(hal_crypto_deinit(&driver), HAL_ERROR_NOT_SUPPORTED);
+    EXPECT_EQ (hal_crypto_deinit (&driver), HAL_ERROR_NOT_SUPPORTED);
 }
 
-TEST_F(CryptoTest, OnConfigFailureAbortsInit) {
-    driver.base.on_config = [](hal_driver_t* b, bool init) -> hal_error_code_t {
-        return HAL_ERROR_FAIL;
-    };
-    EXPECT_EQ(hal_crypto_init(&driver), HAL_ERROR_FAIL);
+TEST_F (CryptoTest, OnConfigFailureAbortsInit)
+{
+    driver.base.on_config = [] (hal_driver_t *b, bool init) -> hal_error_code_t { return HAL_ERROR_FAIL; };
+    EXPECT_EQ (hal_crypto_init (&driver), HAL_ERROR_FAIL);
 }
 
-TEST_F(CryptoTest, hal_crypto_init_Success) {
-    api.hal_crypto_init = [](hal_crypto_t *driver) -> hal_error_code_t {
-        return HAL_ERROR_OK;
-    };
-    EXPECT_EQ(hal_crypto_init(&driver), HAL_ERROR_OK);
+TEST_F (CryptoTest, hal_crypto_init_Success)
+{
+    api.hal_crypto_init = [] (hal_crypto_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
+    EXPECT_EQ (hal_crypto_init (&driver), HAL_ERROR_OK);
 }
 
-TEST_F(CryptoTest, hal_crypto_deinit_Success) {
-    api.hal_crypto_deinit = [](hal_crypto_t *driver) -> hal_error_code_t {
-        return HAL_ERROR_OK;
-    };
-    EXPECT_EQ(hal_crypto_deinit(&driver), HAL_ERROR_OK);
+TEST_F (CryptoTest, hal_crypto_deinit_Success)
+{
+    api.hal_crypto_deinit = [] (hal_crypto_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
+    EXPECT_EQ (hal_crypto_deinit (&driver), HAL_ERROR_OK);
 }
