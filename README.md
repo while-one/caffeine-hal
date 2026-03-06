@@ -123,11 +123,16 @@ The project includes built-in targets for maintaining code quality:
 
 ---
 
-## Porting Examples
+## The Caffeine Framework Layers
 
-For comprehensive examples of how to port this HAL to specific targets (e.g., STM32, NXP, ESP32), please refer to the **Porting Examples Repository**:
+Caffeine-HAL is the foundational interface within the broader **Caffeine Framework**—a strictly decoupled, layered architecture designed for modern embedded systems. This separation of concerns ensures that business logic remains completely portable across different microcontrollers and even host operating systems.
 
-👉 [Caffeine-HAL Porting Examples (Coming Soon)](https://github.com/your-username/caffeine-hal-ports)
+The framework is composed of the following distinct layers:
+
+1.  **Generic Interface (`caffeine-hal`):** This repository. Header-only definitions of the Hardware Abstraction Layer and Virtual Method Tables (VMTs).
+2.  **Hardware Ports ([`caffeine-hal-ports`](https://github.com/while-one/caffeine-hal-ports)):** The concrete implementations of the HAL for specific vendors (e.g., STM32, NXP, nRF, TI) and OS environments (Linux POSIX). It encapsulates vendor SDKs and provides modern CMake cross-compilation presets.
+3.  **Middleware (TBD):** Device drivers (e.g., displays, sensors) and protocols (e.g., Modbus, USB stacks) that build strictly upon the generic `caffeine-hal` interface, remaining completely agnostic to the underlying hardware.
+4.  **Application (TBD):** The top-level business logic, state machines, and system orchestration that utilize the middleware and HAL interfaces.
 
 ---
 
