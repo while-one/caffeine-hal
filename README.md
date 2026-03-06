@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://whileone.me">
-    <img src="https://whileone.me/images/caffeine.png" alt="WhileOne Logo" width="384" height="384">
+    <img src="https://whileone.me/images/caffeine-small.png" alt="Caffeine Logo" width="384" height="384">
   </a>
 </p>
 
