@@ -32,7 +32,7 @@ class PwmTest : public ::testing::Test
     hal_pwm_t     driver{};
     hal_pwm_api_t api{};
 
-    void SetUp () override
+    void SetUp() override
     {
         driver.base.status = HAL_PERIPHERAL_STATUS_UNKNOWN;
         driver.base.type = HAL_PERIPHERAL_TYPE_PWM;
@@ -43,93 +43,93 @@ class PwmTest : public ::testing::Test
 
 // --- Negative Tests ---
 
-TEST_F (PwmTest, NullDriverReturnsBadParam)
+TEST_F(PwmTest, NullDriverReturnsBadParam)
 {
-    EXPECT_EQ (hal_pwm_init (nullptr), HAL_ERROR_BAD_PARAM);
+    EXPECT_EQ(hal_pwm_init(nullptr), HAL_ERROR_BAD_PARAM);
 }
 
-TEST_F (PwmTest, WrongPeripheralTypeReturnsBadParam)
+TEST_F(PwmTest, WrongPeripheralTypeReturnsBadParam)
 {
     driver.base.type = HAL_PERIPHERAL_TYPE_UNKNOWN;
-    EXPECT_EQ (hal_pwm_deinit (&driver), HAL_ERROR_BAD_PARAM);
+    EXPECT_EQ(hal_pwm_deinit(&driver), HAL_ERROR_BAD_PARAM);
 }
 
-TEST_F (PwmTest, UnimplementedApiReturnsNotSupported)
+TEST_F(PwmTest, UnimplementedApiReturnsNotSupported)
 {
     api.hal_pwm_deinit = nullptr; // Explicitly null
-    EXPECT_EQ (hal_pwm_deinit (&driver), HAL_ERROR_NOT_SUPPORTED);
+    EXPECT_EQ(hal_pwm_deinit(&driver), HAL_ERROR_NOT_SUPPORTED);
 }
 
-TEST_F (PwmTest, OnConfigFailureAbortsInit)
+TEST_F(PwmTest, OnConfigFailureAbortsInit)
 {
-    driver.base.on_config = [] (hal_driver_t *b, bool init) -> hal_error_code_t { return HAL_ERROR_FAIL; };
-    EXPECT_EQ (hal_pwm_init (&driver), HAL_ERROR_FAIL);
+    driver.base.on_config = [](hal_driver_t *b, bool init) -> hal_error_code_t { return HAL_ERROR_FAIL; };
+    EXPECT_EQ(hal_pwm_init(&driver), HAL_ERROR_FAIL);
 }
 
-TEST_F (PwmTest, hal_pwm_init_Success)
+TEST_F(PwmTest, hal_pwm_init_Success)
 {
-    api.hal_pwm_init = [] (hal_pwm_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
-    EXPECT_EQ (hal_pwm_init (&driver), HAL_ERROR_OK);
+    api.hal_pwm_init = [](hal_pwm_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
+    EXPECT_EQ(hal_pwm_init(&driver), HAL_ERROR_OK);
 }
 
-TEST_F (PwmTest, hal_pwm_deinit_Success)
+TEST_F(PwmTest, hal_pwm_deinit_Success)
 {
-    api.hal_pwm_deinit = [] (hal_pwm_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
-    EXPECT_EQ (hal_pwm_deinit (&driver), HAL_ERROR_OK);
+    api.hal_pwm_deinit = [](hal_pwm_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
+    EXPECT_EQ(hal_pwm_deinit(&driver), HAL_ERROR_OK);
 }
 
-TEST_F (PwmTest, hal_pwm_start_Success)
+TEST_F(PwmTest, hal_pwm_start_Success)
 {
-    api.hal_pwm_start = [] (hal_pwm_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
-    EXPECT_EQ (hal_pwm_start (&driver), HAL_ERROR_OK);
+    api.hal_pwm_start = [](hal_pwm_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
+    EXPECT_EQ(hal_pwm_start(&driver), HAL_ERROR_OK);
 }
 
-TEST_F (PwmTest, hal_pwm_stop_Success)
+TEST_F(PwmTest, hal_pwm_stop_Success)
 {
-    api.hal_pwm_stop = [] (hal_pwm_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
-    EXPECT_EQ (hal_pwm_stop (&driver), HAL_ERROR_OK);
+    api.hal_pwm_stop = [](hal_pwm_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
+    EXPECT_EQ(hal_pwm_stop(&driver), HAL_ERROR_OK);
 }
 
-TEST_F (PwmTest, hal_pwm_set_frequency_Success)
+TEST_F(PwmTest, hal_pwm_set_frequency_Success)
 {
-    api.hal_pwm_set_frequency = [] (hal_pwm_t *driver, uint32_t frequency_hz) -> hal_error_code_t
+    api.hal_pwm_set_frequency = [](hal_pwm_t *driver, uint32_t frequency_hz) -> hal_error_code_t
     { return HAL_ERROR_OK; };
-    EXPECT_EQ (hal_pwm_set_frequency (&driver, 0), HAL_ERROR_OK);
+    EXPECT_EQ(hal_pwm_set_frequency(&driver, 0), HAL_ERROR_OK);
 }
 
-TEST_F (PwmTest, hal_pwm_set_duty_cycle_Success)
+TEST_F(PwmTest, hal_pwm_set_duty_cycle_Success)
 {
-    api.hal_pwm_set_duty_cycle = [] (hal_pwm_t *driver, uint32_t duty_percent) -> hal_error_code_t
+    api.hal_pwm_set_duty_cycle = [](hal_pwm_t *driver, uint32_t duty_percent) -> hal_error_code_t
     { return HAL_ERROR_OK; };
-    EXPECT_EQ (hal_pwm_set_duty_cycle (&driver, 0), HAL_ERROR_OK);
+    EXPECT_EQ(hal_pwm_set_duty_cycle(&driver, 0), HAL_ERROR_OK);
 }
 
-TEST_F (PwmTest, hal_pwm_register_cb_Success)
+TEST_F(PwmTest, hal_pwm_register_cb_Success)
 {
-    api.hal_pwm_register_cb = [] (hal_pwm_t *driver, hal_pwm_callback_t cb, void *user_arg) -> hal_error_code_t
+    api.hal_pwm_register_cb = [](hal_pwm_t *driver, hal_pwm_callback_t cb, void *user_arg) -> hal_error_code_t
     { return HAL_ERROR_OK; };
-    EXPECT_EQ (hal_pwm_register_cb (&driver, (hal_pwm_callback_t) nullptr, nullptr), HAL_ERROR_OK);
+    EXPECT_EQ(hal_pwm_register_cb(&driver, (hal_pwm_callback_t) nullptr, nullptr), HAL_ERROR_OK);
 }
 
-TEST_F (PwmTest, hal_pwm_cfg_irq_enable_Success)
+TEST_F(PwmTest, hal_pwm_cfg_irq_enable_Success)
 {
-    api.hal_pwm_cfg_irq_enable = [] (hal_pwm_t *driver, hal_pwm_interrupts_t irq) -> hal_error_code_t
+    api.hal_pwm_cfg_irq_enable = [](hal_pwm_t *driver, hal_pwm_interrupts_t irq) -> hal_error_code_t
     { return HAL_ERROR_OK; };
-    EXPECT_EQ (hal_pwm_cfg_irq_enable (&driver, (hal_pwm_interrupts_t) 0), HAL_ERROR_OK);
+    EXPECT_EQ(hal_pwm_cfg_irq_enable(&driver, (hal_pwm_interrupts_t) 0), HAL_ERROR_OK);
 }
 
-TEST_F (PwmTest, hal_pwm_cfg_irq_disable_Success)
+TEST_F(PwmTest, hal_pwm_cfg_irq_disable_Success)
 {
-    api.hal_pwm_cfg_irq_disable = [] (hal_pwm_t *driver, hal_pwm_interrupts_t irq) -> hal_error_code_t
+    api.hal_pwm_cfg_irq_disable = [](hal_pwm_t *driver, hal_pwm_interrupts_t irq) -> hal_error_code_t
     { return HAL_ERROR_OK; };
-    EXPECT_EQ (hal_pwm_cfg_irq_disable (&driver, (hal_pwm_interrupts_t) 0), HAL_ERROR_OK);
+    EXPECT_EQ(hal_pwm_cfg_irq_disable(&driver, (hal_pwm_interrupts_t) 0), HAL_ERROR_OK);
 }
 
-TEST_F (PwmTest, LockTimeoutAbortsOperation)
+TEST_F(PwmTest, LockTimeoutAbortsOperation)
 {
     // Mock the lock function to simulate a timeout
-    driver.base.lock = [] (hal_driver_t *b, uint32_t timeout) -> hal_error_code_t { return HAL_ERROR_TIMING_TIMEOUT; };
+    driver.base.lock = [](hal_driver_t *b, uint32_t timeout) -> hal_error_code_t { return HAL_ERROR_TIMING_TIMEOUT; };
 
     // Attempt the locked operation
-    EXPECT_EQ (hal_pwm_start (&driver), HAL_ERROR_TIMING_TIMEOUT);
+    EXPECT_EQ(hal_pwm_start(&driver), HAL_ERROR_TIMING_TIMEOUT);
 }

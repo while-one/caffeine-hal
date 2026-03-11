@@ -18,6 +18,7 @@ include(GNUInstallDirs)
 #################################### Build ####################################
 # Create our target, this is a header-only library so we should use interface
 add_library(${PROJECT_NAME} INTERFACE)
+add_library(caffeine::hal ALIAS ${PROJECT_NAME})
 
 # Pass the version down to the code using a compiler definition
 target_compile_definitions(${PROJECT_NAME} INTERFACE CAFFEINE_HAL_VERSION="${PROJECT_VERSION}")
@@ -126,7 +127,7 @@ if(CLANG_FORMAT)
 
     # Define formatting target
     add_custom_target(
-        format
+        ${PROJECT_NAME}-format
         COMMAND ${CLANG_FORMAT}
         ${FORMAT_ARGS}
         -style=file:${PROJECT_SOURCE_DIR}/config/coding/.clang-format
@@ -134,7 +135,7 @@ if(CLANG_FORMAT)
         COMMENT "${FORMAT_COMMENT}"
     )
 else()
-    message(WARNING "clang-format not found. 'format' target will not be available.")
+    message(WARNING "clang-format not found. '${PROJECT_NAME}-format' target will not be available.")
 endif()
 
 # ==============================================================================
@@ -144,7 +145,7 @@ find_program(CPPCHECK cppcheck)
 if(CPPCHECK)
     # Define standalone cppcheck target
     add_custom_target(
-        cppcheck
+        ${PROJECT_NAME}-cppcheck
         COMMAND ${CPPCHECK}
         --enable=all
         --suppress=missingIncludeSystem
@@ -157,12 +158,12 @@ if(CPPCHECK)
     )
     
     # Create the top-level 'analyze' target that will wrap both tools
-    if(NOT TARGET analyze)
-        add_custom_target(analyze COMMENT "Running full static analysis suite...")
+    if(NOT TARGET ${PROJECT_NAME}-analyze)
+        add_custom_target(${PROJECT_NAME}-analyze COMMENT "Running full static analysis suite...")
     endif()
-    add_dependencies(analyze cppcheck)
+    add_dependencies(${PROJECT_NAME}-analyze ${PROJECT_NAME}-cppcheck)
 else()
-    message(WARNING "cppcheck not found. 'cppcheck' target will not be available.")
+    message(WARNING "cppcheck not found. '${PROJECT_NAME}-cppcheck' target will not be available.")
 endif()
 
 # ==============================================================================
@@ -172,7 +173,7 @@ find_program(CLANG_TIDY clang-tidy)
 if(CLANG_TIDY)
     # Define clang-tidy target
     add_custom_target(
-        tidy
+        ${PROJECT_NAME}-tidy
         COMMAND ${CLANG_TIDY}
         --config-file=${PROJECT_SOURCE_DIR}/config/coding/.clang-tidy
         --header-filter=.*
@@ -183,9 +184,9 @@ if(CLANG_TIDY)
     )
     
     # Make 'analyze' run both cppcheck and clang-tidy if both exist
-    if(TARGET analyze)
-        add_dependencies(analyze tidy)
+    if(TARGET ${PROJECT_NAME}-analyze)
+        add_dependencies(${PROJECT_NAME}-analyze ${PROJECT_NAME}-tidy)
     endif()
 else()
-    message(WARNING "clang-tidy not found. 'tidy' target will not be available.")
+    message(WARNING "clang-tidy not found. '${PROJECT_NAME}-tidy' target will not be available.")
 endif()

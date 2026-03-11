@@ -21,11 +21,12 @@ AllowShortBlocksOnASingleLine: false
 AllowShortFunctionsOnASingleLine: Empty
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
+Cpp11BracedListStyle: false
 
 # --- Section 4: Whitespace & Parentheses (Rule 1.1) ---
 # BARR-C 1.1.f: "A space shall follow each comma and semicolon."
 # BARR-C 1.1.g: "A space shall separate every binary operator."
-SpaceBeforeParens: Always
+SpaceBeforeParens: ControlStatements
 SpaceAfterCStyleCast: true
 SpacesInParentheses: false
 SpaceBeforeAssignmentOperators: true
@@ -51,8 +52,11 @@ MaxEmptyLinesToKeep: 1
 KeepEmptyLinesAtTheStartOfBlocks: false
 
 # --- Section 8: Formatting Behavior ---
-AlignAfterOpenBracket: Align
+AlignAfterOpenBracket: AlwaysBreak
 AlwaysBreakAfterReturnType: None
 PenaltyReturnTypeOnItsOwnLine: 60
 BreakBeforeBinaryOperators: None
 IndentExternBlock: NoIndent
+BinPackArguments: false
+BinPackParameters: false
+InsertBraces: true

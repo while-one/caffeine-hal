@@ -32,7 +32,7 @@ class EthTest : public ::testing::Test
     hal_eth_t     driver{};
     hal_eth_api_t api{};
 
-    void SetUp () override
+    void SetUp() override
     {
         driver.base.status = HAL_PERIPHERAL_STATUS_UNKNOWN;
         driver.base.type = HAL_PERIPHERAL_TYPE_ETH;
@@ -43,37 +43,37 @@ class EthTest : public ::testing::Test
 
 // --- Negative Tests ---
 
-TEST_F (EthTest, NullDriverReturnsBadParam)
+TEST_F(EthTest, NullDriverReturnsBadParam)
 {
-    EXPECT_EQ (hal_eth_init (nullptr), HAL_ERROR_BAD_PARAM);
+    EXPECT_EQ(hal_eth_init(nullptr), HAL_ERROR_BAD_PARAM);
 }
 
-TEST_F (EthTest, WrongPeripheralTypeReturnsBadParam)
+TEST_F(EthTest, WrongPeripheralTypeReturnsBadParam)
 {
     driver.base.type = HAL_PERIPHERAL_TYPE_UNKNOWN;
-    EXPECT_EQ (hal_eth_deinit (&driver), HAL_ERROR_BAD_PARAM);
+    EXPECT_EQ(hal_eth_deinit(&driver), HAL_ERROR_BAD_PARAM);
 }
 
-TEST_F (EthTest, UnimplementedApiReturnsNotSupported)
+TEST_F(EthTest, UnimplementedApiReturnsNotSupported)
 {
     api.hal_eth_deinit = nullptr; // Explicitly null
-    EXPECT_EQ (hal_eth_deinit (&driver), HAL_ERROR_NOT_SUPPORTED);
+    EXPECT_EQ(hal_eth_deinit(&driver), HAL_ERROR_NOT_SUPPORTED);
 }
 
-TEST_F (EthTest, OnConfigFailureAbortsInit)
+TEST_F(EthTest, OnConfigFailureAbortsInit)
 {
-    driver.base.on_config = [] (hal_driver_t *b, bool init) -> hal_error_code_t { return HAL_ERROR_FAIL; };
-    EXPECT_EQ (hal_eth_init (&driver), HAL_ERROR_FAIL);
+    driver.base.on_config = [](hal_driver_t *b, bool init) -> hal_error_code_t { return HAL_ERROR_FAIL; };
+    EXPECT_EQ(hal_eth_init(&driver), HAL_ERROR_FAIL);
 }
 
-TEST_F (EthTest, hal_eth_init_Success)
+TEST_F(EthTest, hal_eth_init_Success)
 {
-    api.hal_eth_init = [] (hal_eth_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
-    EXPECT_EQ (hal_eth_init (&driver), HAL_ERROR_OK);
+    api.hal_eth_init = [](hal_eth_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
+    EXPECT_EQ(hal_eth_init(&driver), HAL_ERROR_OK);
 }
 
-TEST_F (EthTest, hal_eth_deinit_Success)
+TEST_F(EthTest, hal_eth_deinit_Success)
 {
-    api.hal_eth_deinit = [] (hal_eth_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
-    EXPECT_EQ (hal_eth_deinit (&driver), HAL_ERROR_OK);
+    api.hal_eth_deinit = [](hal_eth_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
+    EXPECT_EQ(hal_eth_deinit(&driver), HAL_ERROR_OK);
 }

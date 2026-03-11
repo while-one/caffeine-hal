@@ -22,7 +22,7 @@ jobs:
       run: cmake -B build -S . -DFORMAT_DRY_RUN=ON
 
     - name: Check Formatting
-      run: cmake --build build --target format
+      run: cmake --build build --target caffeine-hal-format
 
   static-analysis:
     name: Static Analysis (Cppcheck & Clang-Tidy)
@@ -39,7 +39,7 @@ jobs:
       run: cmake -B build -S .
 
     - name: Run Analysis
-      run: cmake --build build --target analyze
+      run: cmake --build build --target caffeine-hal-analyze
 
   build-and-test:
     name: Build & Unit Tests

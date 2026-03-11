@@ -32,7 +32,7 @@ class SdioTest : public ::testing::Test
     hal_sdio_t     driver{};
     hal_sdio_api_t api{};
 
-    void SetUp () override
+    void SetUp() override
     {
         driver.base.status = HAL_PERIPHERAL_STATUS_UNKNOWN;
         driver.base.type = HAL_PERIPHERAL_TYPE_SDIO;
@@ -43,37 +43,37 @@ class SdioTest : public ::testing::Test
 
 // --- Negative Tests ---
 
-TEST_F (SdioTest, NullDriverReturnsBadParam)
+TEST_F(SdioTest, NullDriverReturnsBadParam)
 {
-    EXPECT_EQ (hal_sdio_init (nullptr), HAL_ERROR_BAD_PARAM);
+    EXPECT_EQ(hal_sdio_init(nullptr), HAL_ERROR_BAD_PARAM);
 }
 
-TEST_F (SdioTest, WrongPeripheralTypeReturnsBadParam)
+TEST_F(SdioTest, WrongPeripheralTypeReturnsBadParam)
 {
     driver.base.type = HAL_PERIPHERAL_TYPE_UNKNOWN;
-    EXPECT_EQ (hal_sdio_deinit (&driver), HAL_ERROR_BAD_PARAM);
+    EXPECT_EQ(hal_sdio_deinit(&driver), HAL_ERROR_BAD_PARAM);
 }
 
-TEST_F (SdioTest, UnimplementedApiReturnsNotSupported)
+TEST_F(SdioTest, UnimplementedApiReturnsNotSupported)
 {
     api.hal_sdio_deinit = nullptr; // Explicitly null
-    EXPECT_EQ (hal_sdio_deinit (&driver), HAL_ERROR_NOT_SUPPORTED);
+    EXPECT_EQ(hal_sdio_deinit(&driver), HAL_ERROR_NOT_SUPPORTED);
 }
 
-TEST_F (SdioTest, OnConfigFailureAbortsInit)
+TEST_F(SdioTest, OnConfigFailureAbortsInit)
 {
-    driver.base.on_config = [] (hal_driver_t *b, bool init) -> hal_error_code_t { return HAL_ERROR_FAIL; };
-    EXPECT_EQ (hal_sdio_init (&driver), HAL_ERROR_FAIL);
+    driver.base.on_config = [](hal_driver_t *b, bool init) -> hal_error_code_t { return HAL_ERROR_FAIL; };
+    EXPECT_EQ(hal_sdio_init(&driver), HAL_ERROR_FAIL);
 }
 
-TEST_F (SdioTest, hal_sdio_init_Success)
+TEST_F(SdioTest, hal_sdio_init_Success)
 {
-    api.hal_sdio_init = [] (hal_sdio_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
-    EXPECT_EQ (hal_sdio_init (&driver), HAL_ERROR_OK);
+    api.hal_sdio_init = [](hal_sdio_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
+    EXPECT_EQ(hal_sdio_init(&driver), HAL_ERROR_OK);
 }
 
-TEST_F (SdioTest, hal_sdio_deinit_Success)
+TEST_F(SdioTest, hal_sdio_deinit_Success)
 {
-    api.hal_sdio_deinit = [] (hal_sdio_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
-    EXPECT_EQ (hal_sdio_deinit (&driver), HAL_ERROR_OK);
+    api.hal_sdio_deinit = [](hal_sdio_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
+    EXPECT_EQ(hal_sdio_deinit(&driver), HAL_ERROR_OK);
 }

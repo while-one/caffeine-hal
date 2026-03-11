@@ -37,7 +37,6 @@ Copyright (c) 2026 Hisham Moussa Daou <https://whileone.me>
 ### Key Features
 *   **Zero-Copy & Header-Only:** Designed as a CMake `INTERFACE` library for easy integration.
 *   **Polymorphic API:** Consistent interface across different MCUs using a VMT pattern.
-*   **Opaque Configuration:** Pass complex vendor-specific structures (e.g., STM32 handles) directly through the HAL via `user_config` pointers.
 *   **Board-Level Hooks:** Built-in `on_config` callback for handling clock gating, pin muxing, and DMA routing without breaking the generic API.
 *   **Thread-Safe by Design:** Optional integrated locking mechanisms for multi-threaded RTOS environments.
 *   **Pragmatic Static Analysis:** Pre-configured for `clang-format`, `clang-tidy`, and `cppcheck` (BARR-C 2018 / Allman style).
@@ -48,9 +47,8 @@ Copyright (c) 2026 Hisham Moussa Daou <https://whileone.me>
 
 Every peripheral in Caffeine-HAL follows a standard container pattern:
 
-1.  **Generic Driver (`hal_xxx_t`):** Contains the base state, power status, and VMT pointers.
-2.  **Generic Config (`hal_xxx_config_t`):** Holds standard parameters (baud rates, parity) and a `void *user_config` escape hatch for vendor blobs.
-3.  **Hardware API (`hal_xxx_api_t`):** A structure of function pointers implemented by the specific hardware port.
+1.  **Generic Driver (`cfn_hal_xxx_t`):** Contains the base state, power status, and VMT pointers.
+3.  **Hardware API (`cfn_hal_xxx_api_t`):** A structure of function pointers implemented by the specific hardware port.
 
 ---
 
@@ -86,28 +84,27 @@ target_link_libraries(your_app PRIVATE caffeine-hal)
 
 ### 2. Basic Usage (UART Example)
 ```c
-#include "hal_uart.h"
+#include "cfn_hal_uart.h"
 
 // 1. Define your configuration
-hal_uart_config_t uart_cfg = {
+cfn_hal_uart_config_t uart_cfg = {
     .baudrate = 115200,
     .source_clock_hz = 48000000,
-    .word_length = HAL_UART_WORD_LENGTH_8B,
-    .stop_bits = HAL_UART_STOP_BITS_1,
-    .parity = HAL_UART_PARITY_NONE,
-    .user_config = NULL // Optional vendor-specific settings
+    .word_length = CFN_HAL_UART_WORD_LENGTH_8B,
+    .stop_bits = CFN_HAL_UART_STOP_BITS_1,
+    .parity = CFN_HAL_UART_PARITY_NONE,
 };
 
 // 2. Setup the driver instance
-hal_uart_t my_uart = {
+cfn_hal_uart_t my_uart = {
     .api = &stm32_uart_vmt_impl, // Pointer to the hardware-specific implementation
     .config = &uart_cfg
 };
 
 // 3. Initialize and use
-if (hal_uart_init(&my_uart) == HAL_ERROR_OK) {
+if (cfn_hal_uart_init(&my_uart) == CFN_HAL_ERROR_OK) {
     uint8_t msg[] = "Hello World\n";
-    hal_uart_tx_polling(&my_uart, msg, sizeof(msg), 1000);
+    cfn_hal_uart_tx_polling(&my_uart, msg, sizeof(msg), 1000);
 }
 ```
 

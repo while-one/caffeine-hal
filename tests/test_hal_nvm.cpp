@@ -32,7 +32,7 @@ class NvmTest : public ::testing::Test
     hal_nvm_t     driver{};
     hal_nvm_api_t api{};
 
-    void SetUp () override
+    void SetUp() override
     {
         driver.base.status = HAL_PERIPHERAL_STATUS_UNKNOWN;
         driver.base.type = HAL_PERIPHERAL_TYPE_NVM;
@@ -43,37 +43,37 @@ class NvmTest : public ::testing::Test
 
 // --- Negative Tests ---
 
-TEST_F (NvmTest, NullDriverReturnsBadParam)
+TEST_F(NvmTest, NullDriverReturnsBadParam)
 {
-    EXPECT_EQ (hal_nvm_init (nullptr), HAL_ERROR_BAD_PARAM);
+    EXPECT_EQ(hal_nvm_init(nullptr), HAL_ERROR_BAD_PARAM);
 }
 
-TEST_F (NvmTest, WrongPeripheralTypeReturnsBadParam)
+TEST_F(NvmTest, WrongPeripheralTypeReturnsBadParam)
 {
     driver.base.type = HAL_PERIPHERAL_TYPE_UNKNOWN;
-    EXPECT_EQ (hal_nvm_deinit (&driver), HAL_ERROR_BAD_PARAM);
+    EXPECT_EQ(hal_nvm_deinit(&driver), HAL_ERROR_BAD_PARAM);
 }
 
-TEST_F (NvmTest, UnimplementedApiReturnsNotSupported)
+TEST_F(NvmTest, UnimplementedApiReturnsNotSupported)
 {
     api.hal_nvm_deinit = nullptr; // Explicitly null
-    EXPECT_EQ (hal_nvm_deinit (&driver), HAL_ERROR_NOT_SUPPORTED);
+    EXPECT_EQ(hal_nvm_deinit(&driver), HAL_ERROR_NOT_SUPPORTED);
 }
 
-TEST_F (NvmTest, OnConfigFailureAbortsInit)
+TEST_F(NvmTest, OnConfigFailureAbortsInit)
 {
-    driver.base.on_config = [] (hal_driver_t *b, bool init) -> hal_error_code_t { return HAL_ERROR_FAIL; };
-    EXPECT_EQ (hal_nvm_init (&driver), HAL_ERROR_FAIL);
+    driver.base.on_config = [](hal_driver_t *b, bool init) -> hal_error_code_t { return HAL_ERROR_FAIL; };
+    EXPECT_EQ(hal_nvm_init(&driver), HAL_ERROR_FAIL);
 }
 
-TEST_F (NvmTest, hal_nvm_init_Success)
+TEST_F(NvmTest, hal_nvm_init_Success)
 {
-    api.hal_nvm_init = [] (hal_nvm_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
-    EXPECT_EQ (hal_nvm_init (&driver), HAL_ERROR_OK);
+    api.hal_nvm_init = [](hal_nvm_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
+    EXPECT_EQ(hal_nvm_init(&driver), HAL_ERROR_OK);
 }
 
-TEST_F (NvmTest, hal_nvm_deinit_Success)
+TEST_F(NvmTest, hal_nvm_deinit_Success)
 {
-    api.hal_nvm_deinit = [] (hal_nvm_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
-    EXPECT_EQ (hal_nvm_deinit (&driver), HAL_ERROR_OK);
+    api.hal_nvm_deinit = [](hal_nvm_t *driver) -> hal_error_code_t { return HAL_ERROR_OK; };
+    EXPECT_EQ(hal_nvm_deinit(&driver), HAL_ERROR_OK);
 }

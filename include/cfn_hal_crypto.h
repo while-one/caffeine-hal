@@ -19,67 +19,62 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- * @file hal_eth.h
- * @brief Ethernet / MAC HAL API.
+ * @file cfn_hal_crypto.h
+ * @brief Hardware Crypto HAL API.
  */
 
-#ifndef CAFFEINE_HAL_HAL_ETH_H
-#define CAFFEINE_HAL_HAL_ETH_H
+#ifndef CAFFEINE_HAL_HAL_CRYPTO_H
+#define CAFFEINE_HAL_HAL_CRYPTO_H
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include "hal_types.h"
-#include "hal.h"
+#include "cfn_hal_types.h"
+#include "cfn_hal.h"
 
 typedef struct
 {
     void *user_config;
-} hal_eth_config_t;
+} cfn_hal_crypto_config_t;
 
 typedef struct
 {
     void *port;
     void *user_arg;
-} hal_eth_phy_t;
+} cfn_hal_crypto_phy_t;
 
-typedef struct hal_eth_s     hal_eth_t;
-typedef struct hal_eth_api_s hal_eth_api_t;
+typedef struct cfn_hal_crypto_s     cfn_hal_crypto_t;
+typedef struct cfn_hal_crypto_api_s cfn_hal_crypto_api_t;
 
-struct hal_eth_api_s
+struct cfn_hal_crypto_api_s
 {
-    hal_error_code_t (*hal_eth_init) (hal_eth_t *driver);
-    hal_error_code_t (*hal_eth_deinit) (hal_eth_t *driver);
+    cfn_hal_error_code_t (*cfn_hal_crypto_init)(cfn_hal_crypto_t *driver);
+    cfn_hal_error_code_t (*cfn_hal_crypto_deinit)(cfn_hal_crypto_t *driver);
 };
 
-HAL_CREATE_DRIVER_TYPE (eth, hal_eth_config_t, hal_eth_api_t, hal_eth_phy_t, void *);
+/**
+ * @brief Generated driver structure for crypto.
+ * This macro expands to define `struct cfn_hal_crypto_s` and the typedef `cfn_hal_crypto_t`.
+ */
+CFN_HAL_CREATE_DRIVER_TYPE(crypto, cfn_hal_crypto_config_t, cfn_hal_crypto_api_t, cfn_hal_crypto_phy_t, void *);
 
-static inline hal_error_code_t hal_eth_init (hal_eth_t *driver)
+static inline cfn_hal_error_code_t cfn_hal_crypto_init(cfn_hal_crypto_t *driver)
 {
-    hal_error_code_t error = HAL_ERROR_FAIL;
-    if (driver)
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
+    if (driver && driver->base.on_config)
     {
-        driver->base.type = HAL_PERIPHERAL_TYPE_ETH;
-        if (driver->base.on_config)
+        error = driver->base.on_config(&driver->base, DRIVER_CONFIG_INIT);
+        if (error != CFN_HAL_ERROR_OK)
         {
-            error = driver->base.on_config (&driver->base, DRIVER_CONFIG_INIT);
-            if (error != HAL_ERROR_OK)
-                return error;
+            return error;
         }
     }
-    HAL_CHECK_AND_CALL_FUNC (HAL_PERIPHERAL_TYPE_ETH, hal_eth_init, driver, error);
-    return error;
-}
-
-static inline hal_error_code_t hal_eth_deinit (hal_eth_t *driver)
-{
-    hal_error_code_t error = HAL_ERROR_FAIL;
-    HAL_CHECK_AND_CALL_FUNC (HAL_PERIPHERAL_TYPE_ETH, hal_eth_deinit, driver, error);
-    if (error == HAL_ERROR_OK && driver && driver->base.on_config)
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, cfn_hal_crypto_init, driver, error);
+    if (error == CFN_HAL_ERROR_OK && driver)
     {
-        error = driver->base.on_config (&driver->base, DRIVER_CONFIG_DEINIT);
+        driver->base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     }
     return error;
 }
@@ -88,4 +83,4 @@ static inline hal_error_code_t hal_eth_deinit (hal_eth_t *driver)
 }
 #endif
 
-#endif // CAFFEINE_HAL_HAL_ETH_H
+#endif // CAFFEINE_HAL_HAL_CRYPTO_H

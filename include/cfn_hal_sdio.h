@@ -19,67 +19,62 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- * @file hal_nvm.h
- * @brief NVM (Non-Volatile Memory) HAL API.
+ * @file cfn_hal_sdio.h
+ * @brief SDIO / SDMMC HAL API.
  */
 
-#ifndef CAFFEINE_HAL_HAL_NVM_H
-#define CAFFEINE_HAL_HAL_NVM_H
+#ifndef CAFFEINE_HAL_HAL_SDIO_H
+#define CAFFEINE_HAL_HAL_SDIO_H
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include "hal_types.h"
-#include "hal.h"
+#include "cfn_hal_types.h"
+#include "cfn_hal.h"
 
 typedef struct
 {
     void *user_config;
-} hal_nvm_config_t;
+} cfn_hal_sdio_config_t;
 
 typedef struct
 {
     void *port;
     void *user_arg;
-} hal_nvm_phy_t;
+} cfn_hal_sdio_phy_t;
 
-typedef struct hal_nvm_s     hal_nvm_t;
-typedef struct hal_nvm_api_s hal_nvm_api_t;
+typedef struct cfn_hal_sdio_s     cfn_hal_sdio_t;
+typedef struct cfn_hal_sdio_api_s cfn_hal_sdio_api_t;
 
-struct hal_nvm_api_s
+struct cfn_hal_sdio_api_s
 {
-    hal_error_code_t (*hal_nvm_init) (hal_nvm_t *driver);
-    hal_error_code_t (*hal_nvm_deinit) (hal_nvm_t *driver);
+    cfn_hal_error_code_t (*cfn_hal_sdio_init)(cfn_hal_sdio_t *driver);
+    cfn_hal_error_code_t (*cfn_hal_sdio_deinit)(cfn_hal_sdio_t *driver);
 };
 
-HAL_CREATE_DRIVER_TYPE (nvm, hal_nvm_config_t, hal_nvm_api_t, hal_nvm_phy_t, void *);
+/**
+ * @brief Generated driver structure for sdio.
+ * This macro expands to define `struct cfn_hal_sdio_s` and the typedef `cfn_hal_sdio_t`.
+ */
+CFN_HAL_CREATE_DRIVER_TYPE(sdio, cfn_hal_sdio_config_t, cfn_hal_sdio_api_t, cfn_hal_sdio_phy_t, void *);
 
-static inline hal_error_code_t hal_nvm_init (hal_nvm_t *driver)
+static inline cfn_hal_error_code_t cfn_hal_sdio_init(cfn_hal_sdio_t *driver)
 {
-    hal_error_code_t error = HAL_ERROR_FAIL;
-    if (driver)
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
+    if (driver && driver->base.on_config)
     {
-        driver->base.type = HAL_PERIPHERAL_TYPE_NVM;
-        if (driver->base.on_config)
+        error = driver->base.on_config(&driver->base, DRIVER_CONFIG_INIT);
+        if (error != CFN_HAL_ERROR_OK)
         {
-            error = driver->base.on_config (&driver->base, DRIVER_CONFIG_INIT);
-            if (error != HAL_ERROR_OK)
-                return error;
+            return error;
         }
     }
-    HAL_CHECK_AND_CALL_FUNC (HAL_PERIPHERAL_TYPE_NVM, hal_nvm_init, driver, error);
-    return error;
-}
-
-static inline hal_error_code_t hal_nvm_deinit (hal_nvm_t *driver)
-{
-    hal_error_code_t error = HAL_ERROR_FAIL;
-    HAL_CHECK_AND_CALL_FUNC (HAL_PERIPHERAL_TYPE_NVM, hal_nvm_deinit, driver, error);
-    if (error == HAL_ERROR_OK && driver && driver->base.on_config)
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_SDIO, cfn_hal_sdio_init, driver, error);
+    if (error == CFN_HAL_ERROR_OK && driver)
     {
-        error = driver->base.on_config (&driver->base, DRIVER_CONFIG_DEINIT);
+        driver->base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     }
     return error;
 }
@@ -88,4 +83,4 @@ static inline hal_error_code_t hal_nvm_deinit (hal_nvm_t *driver)
 }
 #endif
 
-#endif // CAFFEINE_HAL_HAL_NVM_H
+#endif // CAFFEINE_HAL_HAL_SDIO_H
