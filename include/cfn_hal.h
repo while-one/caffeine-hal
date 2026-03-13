@@ -128,9 +128,47 @@ extern "C"
         }                                                                                                              \
     } while (0)
 
+#define CFN_HAL_GET_LOCK_MACRO(_1, _2, _3, _4, _5, _6, _7, _8, _9, NAME, ...) NAME
+
 #if (CFN_HAL_USE_LOCK == 1)
 #define CFN_HAL_LOCK(driver, timeout) cfn_hal_base_lock(&(driver)->base, timeout)
 #define CFN_HAL_UNLOCK(driver)        cfn_hal_base_unlock(&(driver)->base)
+
+#define CFN_HAL_WITH_LOCK_0(driver, timeout, result, function)                                                         \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        if ((driver) != NULL)                                                                                          \
+        {                                                                                                              \
+            (result) = cfn_hal_base_lock(&(driver)->base, (timeout));                                                  \
+            if ((result) == CFN_HAL_ERROR_OK)                                                                          \
+            {                                                                                                          \
+                (result) = function((driver));                                                                         \
+                (void) cfn_hal_base_unlock(&(driver)->base);                                                           \
+            }                                                                                                          \
+        }                                                                                                              \
+        else                                                                                                           \
+        {                                                                                                              \
+            (result) = CFN_HAL_ERROR_BAD_PARAM;                                                                        \
+        }                                                                                                              \
+    } while (0)
+
+#define CFN_HAL_WITH_LOCK_N(driver, timeout, result, function, ...)                                                    \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        if ((driver) != NULL)                                                                                          \
+        {                                                                                                              \
+            (result) = cfn_hal_base_lock(&(driver)->base, (timeout));                                                  \
+            if ((result) == CFN_HAL_ERROR_OK)                                                                          \
+            {                                                                                                          \
+                (result) = function((driver), __VA_ARGS__);                                                            \
+                (void) cfn_hal_base_unlock(&(driver)->base);                                                           \
+            }                                                                                                          \
+        }                                                                                                              \
+        else                                                                                                           \
+        {                                                                                                              \
+            (result) = CFN_HAL_ERROR_BAD_PARAM;                                                                        \
+        }                                                                                                              \
+    } while (0)
 
 /**
  * @brief Helper macro to execute a driver function with a concurrency lock.
@@ -140,43 +178,48 @@ extern "C"
  * @param function The driver function to call.
  * @param ... Additional arguments to pass to the function after the driver pointer.
  */
-#define CFN_HAL_WITH_LOCK(driver, timeout, result, function, ...)                                                      \
-    do                                                                                                                 \
-    {                                                                                                                  \
-        if ((driver) != NULL)                                                                                          \
-        {                                                                                                              \
-            (result) = cfn_hal_base_lock(&(driver)->base, (timeout));                             \
-            if ((result) == CFN_HAL_ERROR_OK)                                                                          \
-            {                                                                                                          \
-                (result) = function((driver), ##__VA_ARGS__);                                                          \
-                (void) cfn_hal_base_unlock(&(driver)->base);                                      \
-            }                                                                                                          \
-        }                                                                                                              \
-        else                                                                                                           \
-        {                                                                                                              \
-            (result) = CFN_HAL_ERROR_BAD_PARAM;                                                                        \
-        }                                                                                                              \
-    } while (0)
+#define CFN_HAL_WITH_LOCK(...)                                                                                         \
+    CFN_HAL_GET_LOCK_MACRO(__VA_ARGS__, CFN_HAL_WITH_LOCK_N, CFN_HAL_WITH_LOCK_N, CFN_HAL_WITH_LOCK_N,                  \
+                           CFN_HAL_WITH_LOCK_N, CFN_HAL_WITH_LOCK_N, CFN_HAL_WITH_LOCK_0)(__VA_ARGS__)
 #else
 #define CFN_HAL_LOCK(driver, timeout) (CFN_HAL_ERROR_OK)
 #define CFN_HAL_UNLOCK(driver)        (CFN_HAL_ERROR_OK)
 
-/**
- * @brief Helper macro to execute a driver function (Locking disabled).
- */
-#define CFN_HAL_WITH_LOCK(driver, timeout, result, function, ...)                                                      \
+#define CFN_HAL_WITH_LOCK_NO_LOCK_0(driver, timeout, result, function)                                                 \
     do                                                                                                                 \
     {                                                                                                                  \
         (void) (timeout);                                                                                              \
         if ((driver) != NULL)                                                                                          \
         {                                                                                                              \
-            (result) = function((driver), ##__VA_ARGS__);                                                              \
+            (result) = function((driver));                                                                             \
         }                                                                                                              \
         else                                                                                                           \
         {                                                                                                              \
             (result) = CFN_HAL_ERROR_BAD_PARAM;                                                                        \
         }                                                                                                              \
     } while (0)
+
+#define CFN_HAL_WITH_LOCK_NO_LOCK_N(driver, timeout, result, function, ...)                                            \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        (void) (timeout);                                                                                              \
+        if ((driver) != NULL)                                                                                          \
+        {                                                                                                              \
+            (result) = function((driver), __VA_ARGS__);                                                                \
+        }                                                                                                              \
+        else                                                                                                           \
+        {                                                                                                              \
+            (result) = CFN_HAL_ERROR_BAD_PARAM;                                                                        \
+        }                                                                                                              \
+    } while (0)
+
+/**
+ * @brief Helper macro to execute a driver function (Locking disabled).
+ */
+#define CFN_HAL_WITH_LOCK(...)                                                                                         \
+    CFN_HAL_GET_LOCK_MACRO(__VA_ARGS__, CFN_HAL_WITH_LOCK_NO_LOCK_N, CFN_HAL_WITH_LOCK_NO_LOCK_N,                       \
+                           CFN_HAL_WITH_LOCK_NO_LOCK_N, CFN_HAL_WITH_LOCK_NO_LOCK_N, CFN_HAL_WITH_LOCK_NO_LOCK_N,        \
+                           CFN_HAL_WITH_LOCK_NO_LOCK_0)(__VA_ARGS__)
 #endif
 
 /* Types Enums ------------------------------------------------------*/

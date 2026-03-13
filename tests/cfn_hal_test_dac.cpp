@@ -24,6 +24,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <cstring>
 #include "cfn_hal_dac.h"
 
 class DacTest : public ::testing::Test
@@ -67,7 +68,7 @@ TEST_F(DacTest, UnimplementedApiReturnsNotSupported)
 
 TEST_F(DacTest, OnConfigFailureAbortsInit)
 {
-    driver.base.on_config = [](cfn_hal_driver_t *b, void *user_arg, bool init) -> cfn_hal_error_code_t
+    driver.base.on_config = [](cfn_hal_driver_t *b, void *user_arg, cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t
     {
         return CFN_HAL_ERROR_FAIL;
     };

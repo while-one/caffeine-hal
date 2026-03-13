@@ -97,41 +97,40 @@ typedef enum
     CFN_HAL_GPIO_CONFIG_STRENGTH_HIGH,   /**< GPIO high strength */
 } cfn_hal_gpio_config_strength_t;
 
-typedef enum
-{
-    CFN_HAL_GPIO_PIN_0 = CFN_HAL_BIT(0),
-    CFN_HAL_GPIO_PIN_1 = CFN_HAL_BIT(1),
-    CFN_HAL_GPIO_PIN_2 = CFN_HAL_BIT(2),
-    CFN_HAL_GPIO_PIN_3 = CFN_HAL_BIT(3),
-    CFN_HAL_GPIO_PIN_4 = CFN_HAL_BIT(4),
-    CFN_HAL_GPIO_PIN_5 = CFN_HAL_BIT(5),
-    CFN_HAL_GPIO_PIN_6 = CFN_HAL_BIT(6),
-    CFN_HAL_GPIO_PIN_7 = CFN_HAL_BIT(7),
-    CFN_HAL_GPIO_PIN_8 = CFN_HAL_BIT(8),
-    CFN_HAL_GPIO_PIN_9 = CFN_HAL_BIT(9),
-    CFN_HAL_GPIO_PIN_10 = CFN_HAL_BIT(10),
-    CFN_HAL_GPIO_PIN_11 = CFN_HAL_BIT(11),
-    CFN_HAL_GPIO_PIN_12 = CFN_HAL_BIT(12),
-    CFN_HAL_GPIO_PIN_13 = CFN_HAL_BIT(13),
-    CFN_HAL_GPIO_PIN_14 = CFN_HAL_BIT(14),
-    CFN_HAL_GPIO_PIN_15 = CFN_HAL_BIT(15),
-    CFN_HAL_GPIO_PIN_16 = CFN_HAL_BIT(16),
-    CFN_HAL_GPIO_PIN_17 = CFN_HAL_BIT(17),
-    CFN_HAL_GPIO_PIN_18 = CFN_HAL_BIT(18),
-    CFN_HAL_GPIO_PIN_19 = CFN_HAL_BIT(19),
-    CFN_HAL_GPIO_PIN_20 = CFN_HAL_BIT(20),
-    CFN_HAL_GPIO_PIN_21 = CFN_HAL_BIT(21),
-    CFN_HAL_GPIO_PIN_22 = CFN_HAL_BIT(22),
-    CFN_HAL_GPIO_PIN_23 = CFN_HAL_BIT(23),
-    CFN_HAL_GPIO_PIN_24 = CFN_HAL_BIT(24),
-    CFN_HAL_GPIO_PIN_25 = CFN_HAL_BIT(25),
-    CFN_HAL_GPIO_PIN_26 = CFN_HAL_BIT(26),
-    CFN_HAL_GPIO_PIN_27 = CFN_HAL_BIT(27),
-    CFN_HAL_GPIO_PIN_28 = CFN_HAL_BIT(28),
-    CFN_HAL_GPIO_PIN_29 = CFN_HAL_BIT(29),
-    CFN_HAL_GPIO_PIN_30 = CFN_HAL_BIT(30),
-    CFN_HAL_GPIO_PIN_31 = CFN_HAL_BIT(31),
-} cfn_hal_gpio_pin_t;
+typedef uint32_t cfn_hal_gpio_pin_t;
+
+#define CFN_HAL_GPIO_PIN_0 CFN_HAL_BIT(0)
+#define CFN_HAL_GPIO_PIN_1 CFN_HAL_BIT(1)
+#define CFN_HAL_GPIO_PIN_2 CFN_HAL_BIT(2)
+#define CFN_HAL_GPIO_PIN_3 CFN_HAL_BIT(3)
+#define CFN_HAL_GPIO_PIN_4 CFN_HAL_BIT(4)
+#define CFN_HAL_GPIO_PIN_5 CFN_HAL_BIT(5)
+#define CFN_HAL_GPIO_PIN_6 CFN_HAL_BIT(6)
+#define CFN_HAL_GPIO_PIN_7 CFN_HAL_BIT(7)
+#define CFN_HAL_GPIO_PIN_8 CFN_HAL_BIT(8)
+#define CFN_HAL_GPIO_PIN_9 CFN_HAL_BIT(9)
+#define CFN_HAL_GPIO_PIN_10 CFN_HAL_BIT(10)
+#define CFN_HAL_GPIO_PIN_11 CFN_HAL_BIT(11)
+#define CFN_HAL_GPIO_PIN_12 CFN_HAL_BIT(12)
+#define CFN_HAL_GPIO_PIN_13 CFN_HAL_BIT(13)
+#define CFN_HAL_GPIO_PIN_14 CFN_HAL_BIT(14)
+#define CFN_HAL_GPIO_PIN_15 CFN_HAL_BIT(15)
+#define CFN_HAL_GPIO_PIN_16 CFN_HAL_BIT(16)
+#define CFN_HAL_GPIO_PIN_17 CFN_HAL_BIT(17)
+#define CFN_HAL_GPIO_PIN_18 CFN_HAL_BIT(18)
+#define CFN_HAL_GPIO_PIN_19 CFN_HAL_BIT(19)
+#define CFN_HAL_GPIO_PIN_20 CFN_HAL_BIT(20)
+#define CFN_HAL_GPIO_PIN_21 CFN_HAL_BIT(21)
+#define CFN_HAL_GPIO_PIN_22 CFN_HAL_BIT(22)
+#define CFN_HAL_GPIO_PIN_23 CFN_HAL_BIT(23)
+#define CFN_HAL_GPIO_PIN_24 CFN_HAL_BIT(24)
+#define CFN_HAL_GPIO_PIN_25 CFN_HAL_BIT(25)
+#define CFN_HAL_GPIO_PIN_26 CFN_HAL_BIT(26)
+#define CFN_HAL_GPIO_PIN_27 CFN_HAL_BIT(27)
+#define CFN_HAL_GPIO_PIN_28 CFN_HAL_BIT(28)
+#define CFN_HAL_GPIO_PIN_29 CFN_HAL_BIT(29)
+#define CFN_HAL_GPIO_PIN_30 CFN_HAL_BIT(30)
+#define CFN_HAL_GPIO_PIN_31 CFN_HAL_BIT(31)
 
 /* Types Structs ----------------------------------------------------*/
 
@@ -253,20 +252,21 @@ static inline cfn_hal_error_code_t cfn_hal_gpio_config_get(cfn_hal_gpio_t *drive
 /**
  * @brief Registers a callback for GPIO events and errors.
  * @param driver Pointer to the GPIO driver instance.
- * @param CALLBACK The callback function to register.
+ * @param callback The callback function to register.
  * @param user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t
-cfn_hal_gpio_callback_register(cfn_hal_gpio_t *driver, const cfn_hal_gpio_callback_t CALLBACK, void *user_arg)
+cfn_hal_gpio_callback_register(cfn_hal_gpio_t *driver, const cfn_hal_gpio_callback_t callback, void *user_arg)
 {
     if (driver)
     {
-        driver->cb = CALLBACK;
+        driver->cb          = callback;
         driver->cb_user_arg = user_arg;
     }
+
     return cfn_hal_base_callback_register(
-        &driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, (const void *) CALLBACK, user_arg);
+        &driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, (cfn_hal_callback_t) callback, user_arg);
 }
 
 /**
@@ -377,9 +377,12 @@ static inline cfn_hal_error_code_t cfn_hal_gpio_error_get(cfn_hal_gpio_t *driver
 /* GPIO Specific Functions ------------------------------------------ */
 
 /**
- * @brief Reads the logical state of a GPIO pin.
+ * @brief Reads the logical state of one or more GPIO pins.
  * @param driver Pointer to the GPIO driver instance.
+ * @param pin A single pin or a bitmask of multiple pins.
  * @param state [out] Pointer to store the read state.
+ *              If a multi-bit mask is provided, the result is implementation-defined
+ *              (typically a bitmask of all requested pins or the state of the first set bit).
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t
@@ -391,9 +394,11 @@ cfn_hal_gpio_read(cfn_hal_gpio_t *driver, cfn_hal_gpio_pin_t pin, cfn_hal_gpio_s
 }
 
 /**
- * @brief Writes a logical state to a GPIO pin.
+ * @brief Writes a logical state to one or more GPIO pins.
  * @param driver Pointer to the GPIO driver instance.
- * @param state The state value to write.
+ * @param pin A single pin or a bitmask of multiple pins to be updated.
+ * @param state The state value to write. If a multi-bit mask is provided,
+ *              the same state is applied to all pins in the mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t
@@ -405,11 +410,13 @@ cfn_hal_gpio_write(cfn_hal_gpio_t *driver, cfn_hal_gpio_pin_t pin, cfn_hal_gpio_
 }
 
 /**
- * @brief Toggles the logical state of a GPIO pin.
+ * @brief Toggles the logical state of one or more GPIO pins.
  * @param driver Pointer to the GPIO driver instance.
+ * @param pin A single pin or a bitmask of multiple pins to be toggled.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_gpio_toggle(cfn_hal_gpio_t *driver, cfn_hal_gpio_pin_t pin)
+static inline cfn_hal_error_code_t
+cfn_hal_gpio_toggle(cfn_hal_gpio_t *driver, cfn_hal_gpio_pin_t pin)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_GPIO, toggle, driver, error, pin);

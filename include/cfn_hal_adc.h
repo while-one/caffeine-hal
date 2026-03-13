@@ -177,15 +177,15 @@ static inline cfn_hal_error_code_t cfn_hal_adc_config_get(cfn_hal_adc_t *driver,
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t
-cfn_hal_adc_callback_register(cfn_hal_adc_t *driver, const cfn_hal_adc_callback_t CALLBACK, void *user_arg)
+cfn_hal_adc_callback_register(cfn_hal_adc_t *driver, const cfn_hal_adc_callback_t callback, void *user_arg)
 {
     if (driver)
     {
-        driver->cb = CALLBACK;
+        driver->cb = callback;
         driver->cb_user_arg = user_arg;
     }
     return cfn_hal_base_callback_register(
-        &driver->base, CFN_HAL_PERIPHERAL_TYPE_ADC, (const void *) CALLBACK, user_arg);
+        &driver->base, CFN_HAL_PERIPHERAL_TYPE_ADC, (cfn_hal_callback_t) callback, user_arg);
 }
 
 /**

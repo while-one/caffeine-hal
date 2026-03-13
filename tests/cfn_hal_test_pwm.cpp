@@ -24,6 +24,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <cstring>
 #include "cfn_hal_pwm.h"
 
 class PwmTest : public ::testing::Test
@@ -65,9 +66,9 @@ TEST_F(PwmTest, UnimplementedApiReturnsNotSupported)
 
 TEST_F(PwmTest, OnConfigFailureAbortsInit)
 {
-    driver.base.on_config = [](cfn_hal_driver_t *b, void *arg, bool is_init) -> cfn_hal_error_code_t
+    driver.base.on_config = [](cfn_hal_driver_t *b, void *arg, cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t
     {
-        return is_init ? CFN_HAL_ERROR_FAIL : CFN_HAL_ERROR_OK;
+        return (phase == CFN_HAL_CONFIG_PHASE_INIT) ? CFN_HAL_ERROR_FAIL : CFN_HAL_ERROR_OK;
     };
     EXPECT_EQ(cfn_hal_pwm_init(&driver), CFN_HAL_ERROR_FAIL);
 }

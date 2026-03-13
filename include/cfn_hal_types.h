@@ -36,11 +36,15 @@ extern "C"
 #include <stdint.h>
 #include <stdbool.h>
 /* Defines ----------------------------------------------------------*/
-#define DRIVER_CONFIG_DEINIT false
-#define DRIVER_CONFIG_INIT   true
 
 /* Macro ------------------------------------------------------------*/
 /* Types Enums ------------------------------------------------------*/
+typedef enum
+{
+    CFN_HAL_CONFIG_PHASE_DEINIT = 0,
+    CFN_HAL_CONFIG_PHASE_INIT
+} cfn_hal_config_phase_t;
+
 typedef enum error_codes
 {
     CFN_HAL_ERROR_OK = 0x00,
@@ -82,33 +86,51 @@ typedef enum error_codes
 
 typedef uint32_t cfn_hal_peripheral_type_t;
 
+/**
+ * @brief Generic function pointer for HAL callbacks.
+ * Used as a standard-compliant carrier in the base layer.
+ */
+typedef void (*cfn_hal_callback_t)(void);
+
 // Macro to pack 4 characters into a 32-bit integer (FourCC)
 #define CFN_HAL_MAKE_TYPE(a, b, c, d)                                                                                  \
     (((uint32_t) (a)) | ((uint32_t) (b) << 8) | ((uint32_t) (c) << 16) | ((uint32_t) (d) << 24))
 
+/**
+ * @brief Prefix for all HAL-level peripheral types.
+ * Reserving 'A' for the base HAL layer to avoid collisions with other layers.
+ */
+#define CFN_HAL_PERIPHERAL_PREFIX 'A'
+
+/**
+ * @brief Helper macro to create a HAL-level peripheral FourCC.
+ * Packs the HAL prefix and 3 characters into a 32-bit integer.
+ */
+#define CFN_HAL_PERIPHERAL_TYPE(a, b, c) CFN_HAL_MAKE_TYPE(CFN_HAL_PERIPHERAL_PREFIX, a, b, c)
+
 #define CFN_HAL_PERIPHERAL_TYPE_UNKNOWN 0
-#define CFN_HAL_PERIPHERAL_TYPE_ADC     CFN_HAL_MAKE_TYPE('A', 'D', 'C', ' ')
-#define CFN_HAL_PERIPHERAL_TYPE_CAN     CFN_HAL_MAKE_TYPE('C', 'A', 'N', ' ')
-#define CFN_HAL_PERIPHERAL_TYPE_CLOCK   CFN_HAL_MAKE_TYPE('C', 'L', 'K', ' ')
-#define CFN_HAL_PERIPHERAL_TYPE_DAC     CFN_HAL_MAKE_TYPE('D', 'A', 'C', ' ')
-#define CFN_HAL_PERIPHERAL_TYPE_DMA     CFN_HAL_MAKE_TYPE('D', 'M', 'A', ' ')
-#define CFN_HAL_PERIPHERAL_TYPE_GPIO    CFN_HAL_MAKE_TYPE('G', 'P', 'I', 'O')
-#define CFN_HAL_PERIPHERAL_TYPE_I2C     CFN_HAL_MAKE_TYPE('I', '2', 'C', ' ')
-#define CFN_HAL_PERIPHERAL_TYPE_PWM     CFN_HAL_MAKE_TYPE('P', 'W', 'M', ' ')
-#define CFN_HAL_PERIPHERAL_TYPE_RTC     CFN_HAL_MAKE_TYPE('R', 'T', 'C', ' ')
-#define CFN_HAL_PERIPHERAL_TYPE_SPI     CFN_HAL_MAKE_TYPE('S', 'P', 'I', ' ')
-#define CFN_HAL_PERIPHERAL_TYPE_TIMER   CFN_HAL_MAKE_TYPE('T', 'I', 'M', 'R')
-#define CFN_HAL_PERIPHERAL_TYPE_UART    CFN_HAL_MAKE_TYPE('U', 'A', 'R', 'T')
-#define CFN_HAL_PERIPHERAL_TYPE_WDT     CFN_HAL_MAKE_TYPE('W', 'D', 'T', ' ')
-#define CFN_HAL_PERIPHERAL_TYPE_IRQ     CFN_HAL_MAKE_TYPE('I', 'R', 'Q', ' ')
-#define CFN_HAL_PERIPHERAL_TYPE_NVM     CFN_HAL_MAKE_TYPE('N', 'V', 'M', ' ')
-#define CFN_HAL_PERIPHERAL_TYPE_I2S     CFN_HAL_MAKE_TYPE('I', '2', 'S', ' ')
-#define CFN_HAL_PERIPHERAL_TYPE_QSPI    CFN_HAL_MAKE_TYPE('Q', 'S', 'P', 'I')
-#define CFN_HAL_PERIPHERAL_TYPE_CRYPTO  CFN_HAL_MAKE_TYPE('C', 'R', 'Y', 'P')
-#define CFN_HAL_PERIPHERAL_TYPE_SDIO    CFN_HAL_MAKE_TYPE('S', 'D', 'I', 'O')
-#define CFN_HAL_PERIPHERAL_TYPE_USB     CFN_HAL_MAKE_TYPE('U', 'S', 'B', ' ')
-#define CFN_HAL_PERIPHERAL_TYPE_ETH     CFN_HAL_MAKE_TYPE('E', 'T', 'H', ' ')
-#define CFN_HAL_PERIPHERAL_TYPE_COMP    CFN_HAL_MAKE_TYPE('C', 'O', 'M', 'P')
+#define CFN_HAL_PERIPHERAL_TYPE_ADC     CFN_HAL_PERIPHERAL_TYPE('A', 'D', 'C')
+#define CFN_HAL_PERIPHERAL_TYPE_CAN     CFN_HAL_PERIPHERAL_TYPE('C', 'A', 'N')
+#define CFN_HAL_PERIPHERAL_TYPE_CLOCK   CFN_HAL_PERIPHERAL_TYPE('C', 'L', 'K')
+#define CFN_HAL_PERIPHERAL_TYPE_DAC     CFN_HAL_PERIPHERAL_TYPE('D', 'A', 'C')
+#define CFN_HAL_PERIPHERAL_TYPE_DMA     CFN_HAL_PERIPHERAL_TYPE('D', 'M', 'A')
+#define CFN_HAL_PERIPHERAL_TYPE_GPIO    CFN_HAL_PERIPHERAL_TYPE('G', 'P', 'O')
+#define CFN_HAL_PERIPHERAL_TYPE_I2C     CFN_HAL_PERIPHERAL_TYPE('I', '2', 'C')
+#define CFN_HAL_PERIPHERAL_TYPE_PWM     CFN_HAL_PERIPHERAL_TYPE('P', 'W', 'M')
+#define CFN_HAL_PERIPHERAL_TYPE_RTC     CFN_HAL_PERIPHERAL_TYPE('R', 'T', 'C')
+#define CFN_HAL_PERIPHERAL_TYPE_SPI     CFN_HAL_PERIPHERAL_TYPE('S', 'P', 'I')
+#define CFN_HAL_PERIPHERAL_TYPE_TIMER   CFN_HAL_PERIPHERAL_TYPE('T', 'I', 'M')
+#define CFN_HAL_PERIPHERAL_TYPE_UART    CFN_HAL_PERIPHERAL_TYPE('U', 'R', 'T')
+#define CFN_HAL_PERIPHERAL_TYPE_WDT     CFN_HAL_PERIPHERAL_TYPE('W', 'D', 'T')
+#define CFN_HAL_PERIPHERAL_TYPE_IRQ     CFN_HAL_PERIPHERAL_TYPE('I', 'R', 'Q')
+#define CFN_HAL_PERIPHERAL_TYPE_NVM     CFN_HAL_PERIPHERAL_TYPE('N', 'V', 'M')
+#define CFN_HAL_PERIPHERAL_TYPE_I2S     CFN_HAL_PERIPHERAL_TYPE('I', '2', 'S')
+#define CFN_HAL_PERIPHERAL_TYPE_QSPI    CFN_HAL_PERIPHERAL_TYPE('Q', 'S', 'P')
+#define CFN_HAL_PERIPHERAL_TYPE_CRYPTO  CFN_HAL_PERIPHERAL_TYPE('C', 'R', 'Y')
+#define CFN_HAL_PERIPHERAL_TYPE_SDIO    CFN_HAL_PERIPHERAL_TYPE('S', 'D', 'I')
+#define CFN_HAL_PERIPHERAL_TYPE_USB     CFN_HAL_PERIPHERAL_TYPE('U', 'S', 'B')
+#define CFN_HAL_PERIPHERAL_TYPE_ETH     CFN_HAL_PERIPHERAL_TYPE('E', 'T', 'H')
+#define CFN_HAL_PERIPHERAL_TYPE_COMP    CFN_HAL_PERIPHERAL_TYPE('C', 'M', 'P')
 
 typedef enum
 {
@@ -128,22 +150,32 @@ typedef enum
     CFN_HAL_POWER_STATE_OFF        /*!< Physically unpowered or fully disabled */
 } cfn_hal_power_state_t;
 
+/**
+ * @brief Base structure for all peripheral drivers.
+ * Contains common state and polymorphic interface linkage.
+ */
 typedef struct cfn_hal_driver_s
 {
-    cfn_hal_peripheral_type_t type;
-    cfn_hal_driver_status_t   status;
-    cfn_hal_power_state_t     power_state;
+    cfn_hal_peripheral_type_t type;        /*!< FourCC peripheral type code (e.g. 'UART') */
+    cfn_hal_driver_status_t   status;      /*!< Current software state of the driver */
+    cfn_hal_power_state_t     power_state; /*!< Current power/clocking state of the hardware */
 
 #if (CFN_HAL_USE_LOCK == 1)
-    void *lock_obj;
-    cfn_hal_error_code_t (*lock)(struct cfn_hal_driver_s *base, uint32_t timeout);
-    cfn_hal_error_code_t (*unlock)(struct cfn_hal_driver_s *base);
+    void *lock_obj; /*!< Opaque pointer to an RTOS mutex or critical section object */
 #endif
-    cfn_hal_error_code_t (*on_config)(struct cfn_hal_driver_s *base, void *user_arg, bool is_init);
-    void       *on_config_arg;
-    void       *dep;
-    void       *ext;
-    const void *vmt;
+
+    /**
+     * @brief Board-level configuration hook (BSP).
+     * Called by the generic HAL to handle hardware-specific setup like pin muxing.
+     */
+    cfn_hal_error_code_t (*on_config)(struct cfn_hal_driver_s *base, void *user_arg, cfn_hal_config_phase_t phase);
+
+    void *on_config_arg; /*!< User argument passed to the on_config hook */
+
+    void *dependency; /*!< Pointer to an optional peripheral dependency (e.g., DMA handle or parent bus) */
+    void *extension;  /*!< Pointer to an optional driver extension or private implementation state */
+
+    const void *vmt; /*!< Pointer to the peripheral-specific Virtual Method Table (API) */
 } cfn_hal_driver_t;
 /* Functions prototypes ---------------------------------------------*/
 

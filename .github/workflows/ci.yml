@@ -39,7 +39,9 @@ jobs:
       run: cmake -B build -S .
 
     - name: Run Analysis
-      run: cmake --build build --target caffeine-hal-analyze
+      run: |
+        cmake --build build --target caffeine-hal-analyze
+        cmake --build build --target caffeine-hal-compliance
 
   build-and-test:
     name: Build & Unit Tests
@@ -60,4 +62,4 @@ jobs:
       run: cmake --build build --target caffeine-hal-test -j 4
 
     - name: Run Unit Tests
-      run: ./build/tests/caffeine-hal-test
+      run: ctest --test-dir build --output-on-failure

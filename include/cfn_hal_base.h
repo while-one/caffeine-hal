@@ -48,7 +48,7 @@ typedef struct
 
     cfn_hal_error_code_t (*power_state_set)(cfn_hal_driver_t *base, cfn_hal_power_state_t state);
     cfn_hal_error_code_t (*config_set)(cfn_hal_driver_t *base, const void *config);
-    cfn_hal_error_code_t (*callback_register)(cfn_hal_driver_t *base, const void *callback, void *user_arg);
+    cfn_hal_error_code_t (*callback_register)(cfn_hal_driver_t *base, cfn_hal_callback_t callback, void *user_arg);
 
     cfn_hal_error_code_t (*event_enable)(cfn_hal_driver_t *base, uint32_t event_mask);
     cfn_hal_error_code_t (*event_disable)(cfn_hal_driver_t *base, uint32_t event_mask);
@@ -96,7 +96,7 @@ static inline cfn_hal_error_code_t cfn_hal_base_init(cfn_hal_driver_t *base, cfn
      */
     if (base->on_config)
     {
-        error = base->on_config(base, base->on_config_arg, DRIVER_CONFIG_INIT);
+        error = base->on_config(base, base->on_config_arg, CFN_HAL_CONFIG_PHASE_INIT);
         if (error != CFN_HAL_ERROR_OK)
         {
             return error;
@@ -122,7 +122,7 @@ static inline cfn_hal_error_code_t cfn_hal_base_init(cfn_hal_driver_t *base, cfn
     else if (base->on_config)
     {
         /* Roll back board-level config if hardware init failed */
-        error = base->on_config(base, base->on_config_arg, DRIVER_CONFIG_DEINIT);
+        error = base->on_config(base, base->on_config_arg, CFN_HAL_CONFIG_PHASE_DEINIT);
     }
 
     return error;
@@ -165,7 +165,7 @@ static inline cfn_hal_error_code_t cfn_hal_base_deinit(cfn_hal_driver_t *base, c
 
     /* Board-level Deinitialization Hook (Phase B)
      * Only after the peripheral logic is stopped do we release clocks and pins.
-     * We use DRIVER_CONFIG_DEINIT to signify teardown to the hook.
+     * We use CFN_HAL_CONFIG_PHASE_DEINIT to signify teardown to the hook.
      */
     if (error == CFN_HAL_ERROR_OK)
     {
@@ -175,7 +175,7 @@ static inline cfn_hal_error_code_t cfn_hal_base_deinit(cfn_hal_driver_t *base, c
         if (base->on_config)
         {
 
-            error = base->on_config(base, base->on_config_arg, DRIVER_CONFIG_DEINIT);
+            error = base->on_config(base, base->on_config_arg, CFN_HAL_CONFIG_PHASE_DEINIT);
         }
     }
 
@@ -230,9 +230,14 @@ cfn_hal_base_config_set(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expect
  */
 static inline cfn_hal_error_code_t cfn_hal_base_callback_register(cfn_hal_driver_t         *base,
                                                                   cfn_hal_peripheral_type_t expected_type,
-                                                                  const void               *callback,
+                                                                  cfn_hal_callback_t        callback,
                                                                   void                     *user_arg)
 {
+    if (!base || base->type != expected_type)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
 
     /*
@@ -571,9 +576,8 @@ cfn_hal_base_error_get(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expecte
 
 #if (CFN_HAL_USE_LOCK == 1)
 /**
- * @brief Type-validated concurrency lock.
+ * @brief Concurrency lock for a driver instance.
  * @param base Pointer to the base driver structure.
- * @param expected_type FourCC code for peripheral type validation.
  * @param timeout Lock acquisition timeout in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or an error code on failure.
  */
@@ -595,9 +599,8 @@ cfn_hal_base_lock(cfn_hal_driver_t *base, uint32_t timeout)
 }
 
 /**
- * @brief Type-validated concurrency unlock.
+ * @brief Concurrency unlock for a driver instance.
  * @param base Pointer to the base driver structure.
- * @param expected_type FourCC code for peripheral type validation.
  * @return CFN_HAL_ERROR_OK on success, or an error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_base_unlock(cfn_hal_driver_t *base)

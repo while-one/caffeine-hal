@@ -37,8 +37,9 @@ Copyright (c) 2026 Hisham Moussa Daou <https://whileone.me>
 ### Key Features
 *   **Zero-Copy & Header-Only:** Designed as a CMake `INTERFACE` library for easy integration.
 *   **Base Driver Architecture:** All peripherals inherit from a common base (`cfn_hal_base.h`), ensuring a consistent lifecycle across the entire library.
+*   **Layered FourCC Identification:** Uses FourCC codes with `CFN_HAL_PERIPHERAL_PREFIX` (reserved 'A' for the HAL layer) to uniquely identify peripheral types across system layers.
 *   **Nominal/Exception Separation:** Standardized splitting of peripheral status into nominal `events` and exception `errors`.
-*   **Board-Level Hooks:** Built-in `on_config` callback for handling clock gating, pin muxing, and DMA routing without breaking the generic API.
+*   **Board-Level Hooks:** Built-in `on_config` callback (using `cfn_hal_config_phase_t`) for handling clock gating, pin muxing, and DMA routing without breaking the generic API.
 *   **Thread-Safe by Design:** Optimized locking strategy using `CFN_HAL_WITH_LOCK` for clean multi-threaded RTOS environments.
 *   **Pragmatic Static Analysis:** Pre-configured for `clang-format`, `clang-tidy`, and `cppcheck` (BARR-C 2018 / Allman style).
 
@@ -124,6 +125,7 @@ The project includes built-in targets for maintaining code quality:
 
 *   **Format Code:** `make caffeine-hal-format` (Requires `clang-format`)
 *   **Run Static Analysis:** `make caffeine-hal-analyze` (Runs `cppcheck` and `clang-tidy`)
+*   **Verify C11 Compliance:** `make caffeine-hal-compliance` (Strict C11 check)
 *   **Run Unit Tests:** `make caffeine-hal-test` (Requires `GoogleTest`)
 
 ---

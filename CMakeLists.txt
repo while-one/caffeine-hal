@@ -197,3 +197,21 @@ if(CLANG_TIDY)
         add_dependencies(${PROJECT_NAME}-analyze ${PROJECT_NAME}-tidy)
     endif()
 endif()
+
+# 4. C11 Compliance Check
+# This target compiles a minimal C file that includes all HAL headers
+# using strict C11 flags to ensure no non-standard extensions are used.
+add_executable(${PROJECT_NAME}-compliance ${PROJECT_SOURCE_DIR}/tests/compliance.c)
+target_link_libraries(${PROJECT_NAME}-compliance PRIVATE ${PROJECT_NAME})
+target_compile_options(${PROJECT_NAME}-compliance PRIVATE
+    -std=c11
+    -pedantic-errors
+    -Wall
+    -Wextra
+    -Werror
+)
+set_target_properties(${PROJECT_NAME}-compliance PROPERTIES EXCLUDE_FROM_ALL ON)
+
+if(TARGET ${PROJECT_NAME}-analyze)
+    add_dependencies(${PROJECT_NAME}-analyze ${PROJECT_NAME}-compliance)
+endif()
