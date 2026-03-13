@@ -115,8 +115,13 @@ struct cfn_hal_comp_api_s
     cfn_hal_error_code_t (*stop)(cfn_hal_comp_t *driver);
 };
 
+CFN_HAL_VMT_CHECK(struct cfn_hal_comp_api_s);
+
 CFN_HAL_CREATE_DRIVER_TYPE(
     comp, cfn_hal_comp_config_t, cfn_hal_comp_api_t, cfn_hal_comp_phy_t, cfn_hal_comp_callback_t);
+
+#define CFN_HAL_COMP_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                         \
+    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_COMP, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
 

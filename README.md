@@ -93,7 +93,7 @@ target_link_libraries(your_app PRIVATE caffeine-hal)
 cfn_hal_uart_config_t uart_cfg = {
     .baudrate = 115200,
     .data_len = CFN_HAL_UART_CONFIG_DATA_LEN_8,
-    .stop_bits = CFN_HAL_UART_STOP_ONE_BIT,
+    .stop_bits = CFN_HAL_UART_CONFIG_STOP_ONE_BIT,
     .parity = CFN_HAL_UART_CONFIG_PARITY_NONE,
 };
 
@@ -102,16 +102,11 @@ cfn_hal_uart_phy_t uart_phy = {
     .instance = (void*)UART1_BASE, // Peripheral base address
 };
 
-// 3. Setup the driver instance
-cfn_hal_uart_t my_uart = {
-    .api = &stm32_uart_vmt_impl, // Pointer to hardware implementation
-    .phy = &uart_phy
-};
+// 3. Setup the driver instance using the static initializer macro (Recommended)
+cfn_hal_uart_t my_uart = CFN_HAL_UART_INITIALIZER(&stm32_uart_vmt_impl, &uart_phy, &uart_cfg);
 
 // 4. Initialize and use
 if (cfn_hal_uart_init(&my_uart) == CFN_HAL_ERROR_OK) {
-    cfn_hal_uart_config_set(&my_uart, &uart_cfg);
-    
     uint8_t msg[] = "Hello World\n";
     cfn_hal_uart_tx_polling(&my_uart, msg, sizeof(msg), 1000);
 }

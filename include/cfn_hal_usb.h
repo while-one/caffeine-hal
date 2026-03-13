@@ -130,7 +130,12 @@ struct cfn_hal_usb_api_s
     cfn_hal_error_code_t (*ep_stall)(cfn_hal_usb_t *driver, uint8_t ep_addr, bool stall);
 };
 
+CFN_HAL_VMT_CHECK(struct cfn_hal_usb_api_s);
+
 CFN_HAL_CREATE_DRIVER_TYPE(usb, cfn_hal_usb_config_t, cfn_hal_usb_api_t, cfn_hal_usb_phy_t, cfn_hal_usb_callback_t);
+
+#define CFN_HAL_USB_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                          \
+    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_USB, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
 

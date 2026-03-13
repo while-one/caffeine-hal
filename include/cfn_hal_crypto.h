@@ -122,8 +122,13 @@ struct cfn_hal_crypto_api_s
     cfn_hal_error_code_t (*set_key)(cfn_hal_crypto_t *driver, const uint8_t *key, size_t key_size);
 };
 
+CFN_HAL_VMT_CHECK(struct cfn_hal_crypto_api_s);
+
 CFN_HAL_CREATE_DRIVER_TYPE(
     crypto, cfn_hal_crypto_config_t, cfn_hal_crypto_api_t, cfn_hal_crypto_phy_t, cfn_hal_crypto_callback_t);
+
+#define CFN_HAL_CRYPTO_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                       \
+    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
 

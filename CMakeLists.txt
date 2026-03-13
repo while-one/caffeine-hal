@@ -54,7 +54,8 @@ set(PROJECT_ALL_HEADERS
         ${PROJECT_SOURCE_DIR}/include/cfn_hal_timer.h
         ${PROJECT_SOURCE_DIR}/include/cfn_hal_uart.h
         ${PROJECT_SOURCE_DIR}/include/cfn_hal_usb.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_wdt.h )
+        ${PROJECT_SOURCE_DIR}/include/cfn_hal_wdt.h
+)
 # We use FILE_SET to define public headers. This automatically:
 # 1. Handles include directories for both build and install.
 # 2. Ensures IDEs like CLion index the headers for syntax highlighting.

@@ -129,7 +129,12 @@ struct cfn_hal_can_api_s
     cfn_hal_error_code_t (*add_filter)(cfn_hal_can_t *driver, const cfn_hal_can_filter_t *filter);
 };
 
+CFN_HAL_VMT_CHECK(struct cfn_hal_can_api_s);
+
 CFN_HAL_CREATE_DRIVER_TYPE(can, cfn_hal_can_config_t, cfn_hal_can_api_t, cfn_hal_can_phy_t, cfn_hal_can_callback_t);
+
+#define CFN_HAL_CAN_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                          \
+    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_CAN, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
 

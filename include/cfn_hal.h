@@ -54,12 +54,7 @@ extern "C"
 #define CFN_HAL_INTERNAL_CONCAT(x, y) x##y                             /*!< Internal concat, not to be used */
 #define CFN_HAL_CONCAT(x, y)          CFN_HAL_INTERNAL_CONCAT(x, y)    /*!< Actual concat, can be called           */
 #define CFN_HAL_UNUSED(x)             (void) (x)
-/**
- * @brief Core Hardware Abstraction Layer definitions and macros.
- *
- * This file defines the standard interface for the Core Hardware Abstraction
- * Layer definitions and macros..
- */
+
 #define CFN_HAL_CONTAINER_OF(ptr, type, member) ((type *) ((char *) (ptr) - offsetof(type, member)))
 
 /**
@@ -70,12 +65,25 @@ extern "C"
  * @return Typed pointer to the peripheral driver structure.
  */
 #define CFN_HAL_GET_DRIVER_FROM_BASE(ptr, type) CFN_HAL_CONTAINER_OF(ptr, type, base)
+
 /**
- * @brief Core Hardware Abstraction Layer definitions and macros.
- *
- * This file defines the standard interface for the Core Hardware Abstraction
- * Layer definitions and macros..
+ * @brief Helper macro to initialize a peripheral driver structure.
+ * 
+ * @param type_code The FourCC peripheral type code.
+ * @param api_ptr Pointer to the VMT implementation.
+ * @param phy_ptr Pointer to the physical mapping.
+ * @param config_ptr Pointer to the configuration structure.
  */
+#define CFN_HAL_DRIVER_INITIALIZER(type_code, api_ptr, phy_ptr, config_ptr)                                            \
+    {                                                                                                                  \
+        .base = {.type = (type_code), .status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED, .vmt = (const void *) (api_ptr)},    \
+        .config      = (config_ptr),                                                                                   \
+        .api         = (api_ptr),                                                                                      \
+        .phy         = (phy_ptr),                                                                                      \
+        .cb          = NULL,                                                                                           \
+        .cb_user_arg = NULL                                                                                            \
+    }
+
 #define CFN_HAL_CREATE_DRIVER_TYPE(prefix, config_type, api_type, phy_type, cb_type)                                   \
     struct cfn_hal_##prefix##_s                                                                                        \
     {                                                                                                                  \
@@ -100,7 +108,7 @@ extern "C"
             else                                                                                                       \
             {                                                                                                          \
                 (result) = CFN_HAL_ERROR_NOT_SUPPORTED;                                                                \
-            }                                                                                                          \
+            }                                                                                                              \
         }                                                                                                              \
         else                                                                                                           \
         {                                                                                                              \
@@ -120,7 +128,7 @@ extern "C"
             else                                                                                                       \
             {                                                                                                          \
                 (result) = CFN_HAL_ERROR_NOT_SUPPORTED;                                                                \
-            }                                                                                                          \
+            }                                                                                                              \
         }                                                                                                              \
         else                                                                                                           \
         {                                                                                                              \

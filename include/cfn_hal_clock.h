@@ -110,8 +110,13 @@ struct cfn_hal_clock_api_s
     cfn_hal_error_code_t (*disable_gate)(cfn_hal_clock_t *driver, uint32_t peripheral_id);
 };
 
+CFN_HAL_VMT_CHECK(struct cfn_hal_clock_api_s);
+
 CFN_HAL_CREATE_DRIVER_TYPE(
     clock, cfn_hal_clock_config_t, cfn_hal_clock_api_t, cfn_hal_clock_phy_t, cfn_hal_clock_callback_t);
+
+#define CFN_HAL_CLOCK_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                        \
+    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_CLOCK, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
 

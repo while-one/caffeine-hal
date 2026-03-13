@@ -184,8 +184,13 @@ struct cfn_hal_gpio_api_s
     cfn_hal_error_code_t (*toggle)(cfn_hal_gpio_t *driver, cfn_hal_gpio_pin_t pin);
 };
 
+CFN_HAL_VMT_CHECK(struct cfn_hal_gpio_api_s);
+
 CFN_HAL_CREATE_DRIVER_TYPE(
     gpio, cfn_hal_gpio_config_t, cfn_hal_gpio_api_t, cfn_hal_gpio_phy_t, cfn_hal_gpio_callback_t);
+
+#define CFN_HAL_GPIO_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                         \
+    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_GPIO, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
 
@@ -377,12 +382,10 @@ static inline cfn_hal_error_code_t cfn_hal_gpio_error_get(cfn_hal_gpio_t *driver
 /* GPIO Specific Functions ------------------------------------------ */
 
 /**
- * @brief Reads the logical state of one or more GPIO pins.
+ * @brief Reads the logical state of a single GPIO pin.
  * @param driver Pointer to the GPIO driver instance.
- * @param pin A single pin or a bitmask of multiple pins.
+ * @param pin A single pin identifier (MUST NOT be a bitmask of multiple pins).
  * @param state [out] Pointer to store the read state.
- *              If a multi-bit mask is provided, the result is implementation-defined
- *              (typically a bitmask of all requested pins or the state of the first set bit).
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t

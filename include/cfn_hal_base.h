@@ -64,11 +64,15 @@ typedef struct
 #endif
 } cfn_hal_api_base_t;
 
+/**
+ * @brief Compile-time check to ensure a peripheral API struct is compatible with the base layer.
+ * All peripheral APIs must have 'cfn_hal_api_base_t base' as their FIRST member.
+ */
+#define CFN_HAL_VMT_CHECK(api_struct_type)                                                                             \
+    _Static_assert(offsetof(api_struct_type, base) == 0, "cfn_hal_api_base_t must be the first member of the VMT struct")
+
 /* Functions inline  ---------------------------------------------*/
 
-/**
- * @brief Generic initialization for any driver.
- */
 /**
  * @brief Generic initialization for any driver.
  * Handles board-level hooks, type validation, and hardware-specific commitment.
@@ -121,8 +125,11 @@ static inline cfn_hal_error_code_t cfn_hal_base_init(cfn_hal_driver_t *base, cfn
     }
     else if (base->on_config)
     {
-        /* Roll back board-level config if hardware init failed */
-        error = base->on_config(base, base->on_config_arg, CFN_HAL_CONFIG_PHASE_DEINIT);
+        /* Roll back board-level config if hardware init failed.
+         * We ignore the error code from the DEINIT phase to ensure
+         * the original Phase B error is returned to the caller.
+         */
+        (void) base->on_config(base, base->on_config_arg, CFN_HAL_CONFIG_PHASE_DEINIT);
     }
 
     return error;
@@ -222,11 +229,18 @@ cfn_hal_base_config_set(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expect
 
 /**
  * @brief Generic callback registration for any driver.
+ *
  * @param base Pointer to the base driver structure.
  * @param expected_type FourCC code for peripheral type validation.
- * @param cb Pointer to the callback function (type erased to void*).
- * @param user_arg User-defined argument passed to the callback during events.
- * @return cfn_hal_error_code_t status code.
+ * @param callback Generic callback function pointer.
+ * @param user_arg User-defined argument passed to the callback.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ *
+ * @warning The 'callback' parameter is type-erased for storage in the base structure.
+ * Implementation of the callback_register VMT hook MUST ensure the callback is correctly
+ * cast back to its original signature (e.g., cfn_hal_uart_callback_t) before it is called.
+ * Calling it via the generic void(*)(void) signature is UNDEFINED BEHAVIOR if the original
+ * function signature is different.
  */
 static inline cfn_hal_error_code_t cfn_hal_base_callback_register(cfn_hal_driver_t         *base,
                                                                   cfn_hal_peripheral_type_t expected_type,

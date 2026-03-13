@@ -105,7 +105,12 @@ struct cfn_hal_adc_api_s
     cfn_hal_error_code_t (*read_dma)(cfn_hal_adc_t *driver, uint32_t *data, size_t nbr_of_samples);
 };
 
+CFN_HAL_VMT_CHECK(struct cfn_hal_adc_api_s);
+
 CFN_HAL_CREATE_DRIVER_TYPE(adc, cfn_hal_adc_config_t, cfn_hal_adc_api_t, cfn_hal_adc_phy_t, cfn_hal_adc_callback_t);
+
+#define CFN_HAL_ADC_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                          \
+    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_ADC, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
 

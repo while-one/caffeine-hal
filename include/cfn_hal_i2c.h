@@ -169,7 +169,12 @@ struct cfn_hal_i2c_api_s
     cfn_hal_error_code_t (*xfr_dma)(cfn_hal_i2c_t *driver, cfn_hal_i2c_transaction_t *xfr);
 };
 
+CFN_HAL_VMT_CHECK(struct cfn_hal_i2c_api_s);
+
 CFN_HAL_CREATE_DRIVER_TYPE(i2c, cfn_hal_i2c_config_t, cfn_hal_i2c_api_t, cfn_hal_i2c_phy_t, cfn_hal_i2c_callback_t);
+
+#define CFN_HAL_I2C_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                          \
+    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_I2C, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
 

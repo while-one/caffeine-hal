@@ -138,7 +138,12 @@ struct cfn_hal_rtc_api_s
     cfn_hal_error_code_t (*stop_alarm)(cfn_hal_rtc_t *driver, uint32_t id);
 };
 
+CFN_HAL_VMT_CHECK(struct cfn_hal_rtc_api_s);
+
 CFN_HAL_CREATE_DRIVER_TYPE(rtc, cfn_hal_rtc_config_t, cfn_hal_rtc_api_t, cfn_hal_rtc_phy_t, cfn_hal_rtc_callback_t);
+
+#define CFN_HAL_RTC_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                          \
+    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_RTC, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
 

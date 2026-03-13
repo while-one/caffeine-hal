@@ -145,8 +145,6 @@ typedef struct
 typedef struct
 {
     bool                            echo;          /*!< Local echo enabled */
-    uint32_t                        read_timeout;  /*!< Read timeout in ms */
-    uint32_t                        write_timeout; /*!< Write timeout in ms */
     uint32_t                        baudrate;      /*!< Bus speed in bps */
     cfn_hal_uart_config_mode_t      read_mode;     /*!< RX operational mode */
     cfn_hal_uart_config_mode_t      write_mode;    /*!< TX operational mode */
@@ -199,8 +197,13 @@ struct cfn_hal_uart_api_s
     cfn_hal_error_code_t (*rx_dma)(cfn_hal_uart_t *driver, uint8_t *data, size_t nbr_of_bytes);
 };
 
+CFN_HAL_VMT_CHECK(struct cfn_hal_uart_api_s);
+
 CFN_HAL_CREATE_DRIVER_TYPE(
     uart, cfn_hal_uart_config_t, cfn_hal_uart_api_t, cfn_hal_uart_phy_t, cfn_hal_uart_callback_t);
+
+#define CFN_HAL_UART_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                         \
+    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_UART, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
 

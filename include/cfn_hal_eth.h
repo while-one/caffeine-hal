@@ -144,7 +144,12 @@ struct cfn_hal_eth_api_s
     cfn_hal_error_code_t (*get_link_status)(cfn_hal_eth_t *driver, cfn_hal_eth_link_status_t *status);
 };
 
+CFN_HAL_VMT_CHECK(struct cfn_hal_eth_api_s);
+
 CFN_HAL_CREATE_DRIVER_TYPE(eth, cfn_hal_eth_config_t, cfn_hal_eth_api_t, cfn_hal_eth_phy_t, cfn_hal_eth_callback_t);
+
+#define CFN_HAL_ETH_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                          \
+    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_ETH, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
 

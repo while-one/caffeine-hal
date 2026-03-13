@@ -138,8 +138,13 @@ struct cfn_hal_qspi_api_s
         cfn_hal_qspi_t *driver, const cfn_hal_qspi_cmd_t *cmd, uint32_t match, uint32_t mask, uint32_t timeout);
 };
 
+CFN_HAL_VMT_CHECK(struct cfn_hal_qspi_api_s);
+
 CFN_HAL_CREATE_DRIVER_TYPE(
     qspi, cfn_hal_qspi_config_t, cfn_hal_qspi_api_t, cfn_hal_qspi_phy_t, cfn_hal_qspi_callback_t);
+
+#define CFN_HAL_QSPI_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                         \
+    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_QSPI, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
 

@@ -154,7 +154,12 @@ struct cfn_hal_spi_api_s
     cfn_hal_error_code_t (*xfr_dma)(cfn_hal_spi_t *driver, cfn_hal_spi_transaction_t *xfr);
 };
 
+CFN_HAL_VMT_CHECK(struct cfn_hal_spi_api_s);
+
 CFN_HAL_CREATE_DRIVER_TYPE(spi, cfn_hal_spi_config_t, cfn_hal_spi_api_t, cfn_hal_spi_phy_t, cfn_hal_spi_callback_t);
+
+#define CFN_HAL_SPI_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                          \
+    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_SPI, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
 

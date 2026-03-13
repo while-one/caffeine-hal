@@ -45,7 +45,7 @@ typedef enum
     CFN_HAL_CONFIG_PHASE_INIT
 } cfn_hal_config_phase_t;
 
-typedef enum error_codes
+typedef enum cfn_hal_error_codes
 {
     CFN_HAL_ERROR_OK = 0x00,
 
@@ -89,6 +89,11 @@ typedef uint32_t cfn_hal_peripheral_type_t;
 /**
  * @brief Generic function pointer for HAL callbacks.
  * Used as a standard-compliant carrier in the base layer.
+ *
+ * @warning Calling this pointer directly as a void(void) function is UNDEFINED BEHAVIOR
+ * if the original callback has a different signature. Hardware port implementers
+ * MUST cast this pointer back to the peripheral-specific callback type
+ * (e.g., cfn_hal_uart_callback_t) before execution.
  */
 typedef void (*cfn_hal_callback_t)(void);
 

@@ -123,8 +123,13 @@ struct cfn_hal_timer_api_s
     cfn_hal_error_code_t (*set_period)(cfn_hal_timer_t *driver, const cfn_hal_timer_period_t *period);
 };
 
+CFN_HAL_VMT_CHECK(struct cfn_hal_timer_api_s);
+
 CFN_HAL_CREATE_DRIVER_TYPE(
     timer, cfn_hal_timer_config_t, cfn_hal_timer_api_t, cfn_hal_timer_phy_t, cfn_hal_timer_callback_t);
+
+#define CFN_HAL_TIMER_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                        \
+    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_TIMER, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
 

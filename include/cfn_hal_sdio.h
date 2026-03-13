@@ -140,9 +140,13 @@ struct cfn_hal_sdio_api_s
     cfn_hal_error_code_t (*get_card_info)(cfn_hal_sdio_t *driver, cfn_hal_sdio_card_info_t *info);
     cfn_hal_error_code_t (*wait_card_ready)(cfn_hal_sdio_t *driver, uint32_t timeout);
 };
+CFN_HAL_VMT_CHECK(struct cfn_hal_sdio_api_s);
 
 CFN_HAL_CREATE_DRIVER_TYPE(
     sdio, cfn_hal_sdio_config_t, cfn_hal_sdio_api_t, cfn_hal_sdio_phy_t, cfn_hal_sdio_callback_t);
+
+#define CFN_HAL_SDIO_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                        \
+    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_SDIO, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
 
