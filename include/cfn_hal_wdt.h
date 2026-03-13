@@ -136,7 +136,7 @@ CFN_HAL_CREATE_DRIVER_TYPE(wdt, cfn_hal_wdt_config_t, cfn_hal_wdt_api_t, cfn_hal
  * @param driver Pointer to the WDT driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_wdt_init(cfn_hal_wdt_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_wdt_init(cfn_hal_wdt_t *driver)
 {
     if (!driver)
     {
@@ -151,7 +151,7 @@ static inline cfn_hal_error_code_t cfn_hal_wdt_init(cfn_hal_wdt_t *driver)
  * @param driver Pointer to the WDT driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_wdt_deinit(cfn_hal_wdt_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_wdt_deinit(cfn_hal_wdt_t *driver)
 {
     if (!driver)
     {
@@ -166,7 +166,7 @@ static inline cfn_hal_error_code_t cfn_hal_wdt_deinit(cfn_hal_wdt_t *driver)
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_wdt_config_set(cfn_hal_wdt_t *driver, const cfn_hal_wdt_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_wdt_config_set(cfn_hal_wdt_t *driver, const cfn_hal_wdt_config_t *config)
 {
     if (driver)
     {
@@ -181,7 +181,7 @@ static inline cfn_hal_error_code_t cfn_hal_wdt_config_set(cfn_hal_wdt_t *driver,
  * @param config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_wdt_config_get(cfn_hal_wdt_t *driver, cfn_hal_wdt_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_wdt_config_get(cfn_hal_wdt_t *driver, cfn_hal_wdt_config_t *config)
 {
     if (!driver || !config || !driver->config)
     {
@@ -198,8 +198,9 @@ static inline cfn_hal_error_code_t cfn_hal_wdt_config_get(cfn_hal_wdt_t *driver,
  * @param user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t
-cfn_hal_wdt_callback_register(cfn_hal_wdt_t *driver, const cfn_hal_wdt_callback_t callback, void *user_arg)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_wdt_callback_register(cfn_hal_wdt_t               *driver,
+                                                                  const cfn_hal_wdt_callback_t callback,
+                                                                  void                        *user_arg)
 {
     if (driver)
     {
@@ -216,7 +217,7 @@ cfn_hal_wdt_callback_register(cfn_hal_wdt_t *driver, const cfn_hal_wdt_callback_
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_wdt_power_state_set(cfn_hal_wdt_t *driver, cfn_hal_power_state_t state)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_wdt_power_state_set(cfn_hal_wdt_t *driver, cfn_hal_power_state_t state)
 {
     if (!driver)
     {
@@ -231,7 +232,7 @@ static inline cfn_hal_error_code_t cfn_hal_wdt_power_state_set(cfn_hal_wdt_t *dr
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_wdt_event_enable(cfn_hal_wdt_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_wdt_event_enable(cfn_hal_wdt_t *driver, uint32_t event_mask)
 {
     if (!driver)
     {
@@ -246,7 +247,7 @@ static inline cfn_hal_error_code_t cfn_hal_wdt_event_enable(cfn_hal_wdt_t *drive
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_wdt_event_disable(cfn_hal_wdt_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_wdt_event_disable(cfn_hal_wdt_t *driver, uint32_t event_mask)
 {
     if (!driver)
     {
@@ -261,7 +262,7 @@ static inline cfn_hal_error_code_t cfn_hal_wdt_event_disable(cfn_hal_wdt_t *driv
  * @param event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_wdt_event_get(cfn_hal_wdt_t *driver, uint32_t *event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_wdt_event_get(cfn_hal_wdt_t *driver, uint32_t *event_mask)
 {
     if (!driver)
     {
@@ -276,7 +277,7 @@ static inline cfn_hal_error_code_t cfn_hal_wdt_event_get(cfn_hal_wdt_t *driver, 
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_wdt_error_enable(cfn_hal_wdt_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_wdt_error_enable(cfn_hal_wdt_t *driver, uint32_t error_mask)
 {
     if (!driver)
     {
@@ -291,7 +292,7 @@ static inline cfn_hal_error_code_t cfn_hal_wdt_error_enable(cfn_hal_wdt_t *drive
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_wdt_error_disable(cfn_hal_wdt_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_wdt_error_disable(cfn_hal_wdt_t *driver, uint32_t error_mask)
 {
     if (!driver)
     {
@@ -306,7 +307,7 @@ static inline cfn_hal_error_code_t cfn_hal_wdt_error_disable(cfn_hal_wdt_t *driv
  * @param error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_wdt_error_get(cfn_hal_wdt_t *driver, uint32_t *error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_wdt_error_get(cfn_hal_wdt_t *driver, uint32_t *error_mask)
 {
     if (!driver)
     {
@@ -322,7 +323,7 @@ static inline cfn_hal_error_code_t cfn_hal_wdt_error_get(cfn_hal_wdt_t *driver, 
  * @param driver Pointer to the WDT driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_wdt_start(cfn_hal_wdt_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_wdt_start(cfn_hal_wdt_t *driver)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_WDT, start, driver, error);
@@ -334,7 +335,7 @@ static inline cfn_hal_error_code_t cfn_hal_wdt_start(cfn_hal_wdt_t *driver)
  * @param driver Pointer to the WDT driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_wdt_stop(cfn_hal_wdt_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_wdt_stop(cfn_hal_wdt_t *driver)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_WDT, stop, driver, error);
@@ -346,7 +347,7 @@ static inline cfn_hal_error_code_t cfn_hal_wdt_stop(cfn_hal_wdt_t *driver)
  * @param driver Pointer to the WDT driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_wdt_feed(cfn_hal_wdt_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_wdt_feed(cfn_hal_wdt_t *driver)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_WDT, feed, driver, error);

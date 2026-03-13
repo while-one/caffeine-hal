@@ -68,8 +68,14 @@ typedef struct
  * @brief Compile-time check to ensure a peripheral API struct is compatible with the base layer.
  * All peripheral APIs must have 'cfn_hal_api_base_t base' as their FIRST member.
  */
+#ifdef __cplusplus
 #define CFN_HAL_VMT_CHECK(api_struct_type)                                                                             \
-    _Static_assert(offsetof(api_struct_type, base) == 0, "cfn_hal_api_base_t must be the first member of the VMT struct")
+    static_assert(offsetof(api_struct_type, base) == 0, "cfn_hal_api_base_t must be the first member of the VMT struct")
+#else
+#define CFN_HAL_VMT_CHECK(api_struct_type)                                                                             \
+    _Static_assert(offsetof(api_struct_type, base) == 0,                                                               \
+                   "cfn_hal_api_base_t must be the first member of the VMT struct")
+#endif
 
 /* Functions inline  ---------------------------------------------*/
 
@@ -80,7 +86,7 @@ typedef struct
  * @param expected_type FourCC code for peripheral type validation.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_base_init(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expected_type)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_init(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expected_type)
 {
     if (!base || base->type != expected_type || !base->vmt)
     {
@@ -142,7 +148,7 @@ static inline cfn_hal_error_code_t cfn_hal_base_init(cfn_hal_driver_t *base, cfn
  * @param expected_type FourCC code for peripheral type validation.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_base_deinit(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expected_type)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_deinit(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expected_type)
 {
     if (!base || base->type != expected_type || !base->vmt)
     {
@@ -181,7 +187,6 @@ static inline cfn_hal_error_code_t cfn_hal_base_deinit(cfn_hal_driver_t *base, c
 
         if (base->on_config)
         {
-
             error = base->on_config(base, base->on_config_arg, CFN_HAL_CONFIG_PHASE_DEINIT);
         }
     }
@@ -196,8 +201,9 @@ static inline cfn_hal_error_code_t cfn_hal_base_deinit(cfn_hal_driver_t *base, c
  * @param config Pointer to the peripheral-specific configuration structure.
  * @return cfn_hal_error_code_t status code.
  */
-static inline cfn_hal_error_code_t
-cfn_hal_base_config_set(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expected_type, const void *config)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_config_set(cfn_hal_driver_t         *base,
+                                                            cfn_hal_peripheral_type_t expected_type,
+                                                            const void               *config)
 {
     if (!base || base->type != expected_type || !config)
     {
@@ -242,10 +248,10 @@ cfn_hal_base_config_set(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expect
  * Calling it via the generic void(*)(void) signature is UNDEFINED BEHAVIOR if the original
  * function signature is different.
  */
-static inline cfn_hal_error_code_t cfn_hal_base_callback_register(cfn_hal_driver_t         *base,
-                                                                  cfn_hal_peripheral_type_t expected_type,
-                                                                  cfn_hal_callback_t        callback,
-                                                                  void                     *user_arg)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_callback_register(cfn_hal_driver_t         *base,
+                                                                   cfn_hal_peripheral_type_t expected_type,
+                                                                   cfn_hal_callback_t        callback,
+                                                                   void                     *user_arg)
 {
     if (!base || base->type != expected_type)
     {
@@ -283,8 +289,9 @@ static inline cfn_hal_error_code_t cfn_hal_base_callback_register(cfn_hal_driver
  * @param state The target power state to transition to.
  * @return cfn_hal_error_code_t status code.
  */
-static inline cfn_hal_error_code_t
-cfn_hal_power_state_set(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expected_type, cfn_hal_power_state_t state)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_power_state_set(cfn_hal_driver_t         *base,
+                                                            cfn_hal_peripheral_type_t expected_type,
+                                                            cfn_hal_power_state_t     state)
 {
     if (!base || base->type != expected_type)
     {
@@ -335,7 +342,7 @@ cfn_hal_power_state_set(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expect
  * @param base Pointer to the base driver structure.
  * @return Current cfn_hal_power_state_t.
  */
-static inline cfn_hal_power_state_t cfn_hal_power_state_get(const cfn_hal_driver_t *base)
+CFN_HAL_INLINE cfn_hal_power_state_t cfn_hal_power_state_get(const cfn_hal_driver_t *base)
 {
     if (!base)
     {
@@ -354,8 +361,9 @@ static inline cfn_hal_power_state_t cfn_hal_power_state_get(const cfn_hal_driver
  * @param event_mask Pointer to a peripheral-specific event mask.
  * @return cfn_hal_error_code_t status code.
  */
-static inline cfn_hal_error_code_t
-cfn_hal_base_event_enable(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expected_type, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_event_enable(cfn_hal_driver_t         *base,
+                                                              cfn_hal_peripheral_type_t expected_type,
+                                                              uint32_t                  event_mask)
 {
     if (!base || base->type != expected_type || !base->vmt)
     {
@@ -395,8 +403,9 @@ cfn_hal_base_event_enable(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expe
  * @param event_mask Pointer to a peripheral-specific event mask.
  * @return cfn_hal_error_code_t status code.
  */
-static inline cfn_hal_error_code_t
-cfn_hal_base_event_disable(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expected_type, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_event_disable(cfn_hal_driver_t         *base,
+                                                               cfn_hal_peripheral_type_t expected_type,
+                                                               uint32_t                  event_mask)
 {
     if (!base || base->type != expected_type || !base->vmt)
     {
@@ -436,8 +445,9 @@ cfn_hal_base_event_disable(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t exp
  * @param event_mask [out] Pointer to a buffer to receive the event status.
  * @return cfn_hal_error_code_t status code.
  */
-static inline cfn_hal_error_code_t
-cfn_hal_base_event_get(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expected_type, uint32_t *event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_event_get(cfn_hal_driver_t         *base,
+                                                           cfn_hal_peripheral_type_t expected_type,
+                                                           uint32_t                 *event_mask)
 {
     if (!base || base->type != expected_type || !event_mask || !base->vmt)
     {
@@ -476,8 +486,9 @@ cfn_hal_base_event_get(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expecte
  * @param error_mask Pointer to a peripheral-specific error mask.
  * @return cfn_hal_error_code_t status code.
  */
-static inline cfn_hal_error_code_t
-cfn_hal_base_error_enable(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expected_type, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_error_enable(cfn_hal_driver_t         *base,
+                                                              cfn_hal_peripheral_type_t expected_type,
+                                                              uint32_t                  error_mask)
 {
     if (!base || base->type != expected_type || !base->vmt)
     {
@@ -517,8 +528,9 @@ cfn_hal_base_error_enable(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expe
  * @param error_mask Pointer to a peripheral-specific error mask.
  * @return cfn_hal_error_code_t status code.
  */
-static inline cfn_hal_error_code_t
-cfn_hal_base_error_disable(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expected_type, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_error_disable(cfn_hal_driver_t         *base,
+                                                               cfn_hal_peripheral_type_t expected_type,
+                                                               uint32_t                  error_mask)
 {
     if (!base || base->type != expected_type || !base->vmt)
     {
@@ -556,8 +568,9 @@ cfn_hal_base_error_disable(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t exp
  * @param error_mask [out] Pointer to a buffer to receive the error status.
  * @return cfn_hal_error_code_t status code.
  */
-static inline cfn_hal_error_code_t
-cfn_hal_base_error_get(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expected_type, uint32_t *error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_error_get(cfn_hal_driver_t         *base,
+                                                           cfn_hal_peripheral_type_t expected_type,
+                                                           uint32_t                 *error_mask)
 {
     if (!base || base->type != expected_type || !error_mask || !base->vmt)
     {
@@ -595,8 +608,7 @@ cfn_hal_base_error_get(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expecte
  * @param timeout Lock acquisition timeout in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or an error code on failure.
  */
-static inline cfn_hal_error_code_t
-cfn_hal_base_lock(cfn_hal_driver_t *base, uint32_t timeout)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_lock(cfn_hal_driver_t *base, uint32_t timeout)
 {
     if (!base || !base->vmt)
     {
@@ -617,9 +629,9 @@ cfn_hal_base_lock(cfn_hal_driver_t *base, uint32_t timeout)
  * @param base Pointer to the base driver structure.
  * @return CFN_HAL_ERROR_OK on success, or an error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_base_unlock(cfn_hal_driver_t *base)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_unlock(cfn_hal_driver_t *base)
 {
-    if (!base|| !base->vmt)
+    if (!base || !base->vmt)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }

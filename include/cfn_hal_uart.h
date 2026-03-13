@@ -129,13 +129,13 @@ typedef enum
 typedef struct
 {
     void                      *instance;  /*!< Peripheral base instance */
-    cfn_hal_gpio_pin_driver_t *tx;        /*!< TX pin driver mapping */
-    cfn_hal_gpio_pin_driver_t *rx;        /*!< RX pin driver mapping */
-    cfn_hal_gpio_pin_driver_t *cts;       /*!< CTS pin driver mapping */
-    cfn_hal_gpio_pin_driver_t *rts;       /*!< RTS pin driver mapping */
-    cfn_hal_gpio_pin_driver_t *dtr;       /*!< DTR pin driver mapping */
-    cfn_hal_gpio_pin_driver_t *dcd;       /*!< DCD pin driver mapping */
-    cfn_hal_gpio_pin_driver_t *de;        /*!< RS-485 DE pin driver mapping */
+    cfn_hal_gpio_pin_handle_t *tx;        /*!< TX pin driver mapping */
+    cfn_hal_gpio_pin_handle_t *rx;        /*!< RX pin driver mapping */
+    cfn_hal_gpio_pin_handle_t *cts;       /*!< CTS pin driver mapping */
+    cfn_hal_gpio_pin_handle_t *rts;       /*!< RTS pin driver mapping */
+    cfn_hal_gpio_pin_handle_t *dtr;       /*!< DTR pin driver mapping */
+    cfn_hal_gpio_pin_handle_t *dcd;       /*!< DCD pin driver mapping */
+    cfn_hal_gpio_pin_handle_t *de;        /*!< RS-485 DE pin driver mapping */
     void                      *user_data; /*!< Peripheral instance user argument */
 } cfn_hal_uart_phy_t;
 
@@ -144,15 +144,15 @@ typedef struct
  */
 typedef struct
 {
-    bool                            echo;          /*!< Local echo enabled */
-    uint32_t                        baudrate;      /*!< Bus speed in bps */
-    cfn_hal_uart_config_mode_t      read_mode;     /*!< RX operational mode */
-    cfn_hal_uart_config_mode_t      write_mode;    /*!< TX operational mode */
-    cfn_hal_uart_config_data_len_t  data_len;      /*!< Word length */
-    cfn_hal_uart_config_stop_bits_t stop_bits;     /*!< Stop bits */
-    cfn_hal_uart_config_parity_t    parity;        /*!< Parity check mode */
-    cfn_hal_uart_config_flow_ctrl_t flow_ctrl;     /*!< Hardware flow control */
-    void                           *custom;        /*!< Vendor-specific custom configuration */
+    bool                            echo;       /*!< Local echo enabled */
+    uint32_t                        baudrate;   /*!< Bus speed in bps */
+    cfn_hal_uart_config_mode_t      read_mode;  /*!< RX operational mode */
+    cfn_hal_uart_config_mode_t      write_mode; /*!< TX operational mode */
+    cfn_hal_uart_config_data_len_t  data_len;   /*!< Word length */
+    cfn_hal_uart_config_stop_bits_t stop_bits;  /*!< Stop bits */
+    cfn_hal_uart_config_parity_t    parity;     /*!< Parity check mode */
+    cfn_hal_uart_config_flow_ctrl_t flow_ctrl;  /*!< Hardware flow control */
+    void                           *custom;     /*!< Vendor-specific custom configuration */
 } cfn_hal_uart_config_t;
 
 typedef struct cfn_hal_uart_s     cfn_hal_uart_t;
@@ -212,7 +212,7 @@ CFN_HAL_CREATE_DRIVER_TYPE(
  * @param driver Pointer to the UART driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_uart_init(cfn_hal_uart_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_init(cfn_hal_uart_t *driver)
 {
     if (!driver)
     {
@@ -227,7 +227,7 @@ static inline cfn_hal_error_code_t cfn_hal_uart_init(cfn_hal_uart_t *driver)
  * @param driver Pointer to the UART driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_uart_deinit(cfn_hal_uart_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_deinit(cfn_hal_uart_t *driver)
 {
     if (!driver)
     {
@@ -242,7 +242,7 @@ static inline cfn_hal_error_code_t cfn_hal_uart_deinit(cfn_hal_uart_t *driver)
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_uart_config_set(cfn_hal_uart_t *driver, const cfn_hal_uart_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_config_set(cfn_hal_uart_t *driver, const cfn_hal_uart_config_t *config)
 {
     if (driver)
     {
@@ -257,7 +257,7 @@ static inline cfn_hal_error_code_t cfn_hal_uart_config_set(cfn_hal_uart_t *drive
  * @param config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_uart_config_get(cfn_hal_uart_t *driver, cfn_hal_uart_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_config_get(cfn_hal_uart_t *driver, cfn_hal_uart_config_t *config)
 {
     if (!driver || !config || !driver->config)
     {
@@ -274,8 +274,9 @@ static inline cfn_hal_error_code_t cfn_hal_uart_config_get(cfn_hal_uart_t *drive
  * @param user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t
-cfn_hal_uart_callback_register(cfn_hal_uart_t *driver, const cfn_hal_uart_callback_t callback, void *user_arg)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_callback_register(cfn_hal_uart_t               *driver,
+                                                                   const cfn_hal_uart_callback_t callback,
+                                                                   void                         *user_arg)
 {
     if (driver)
     {
@@ -292,7 +293,7 @@ cfn_hal_uart_callback_register(cfn_hal_uart_t *driver, const cfn_hal_uart_callba
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_uart_power_state_set(cfn_hal_uart_t *driver, cfn_hal_power_state_t state)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_power_state_set(cfn_hal_uart_t *driver, cfn_hal_power_state_t state)
 {
     if (!driver)
     {
@@ -307,7 +308,7 @@ static inline cfn_hal_error_code_t cfn_hal_uart_power_state_set(cfn_hal_uart_t *
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_uart_event_enable(cfn_hal_uart_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_event_enable(cfn_hal_uart_t *driver, uint32_t event_mask)
 {
     if (!driver)
     {
@@ -322,7 +323,7 @@ static inline cfn_hal_error_code_t cfn_hal_uart_event_enable(cfn_hal_uart_t *dri
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_uart_event_disable(cfn_hal_uart_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_event_disable(cfn_hal_uart_t *driver, uint32_t event_mask)
 {
     if (!driver)
     {
@@ -337,7 +338,7 @@ static inline cfn_hal_error_code_t cfn_hal_uart_event_disable(cfn_hal_uart_t *dr
  * @param event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_uart_event_get(cfn_hal_uart_t *driver, uint32_t *event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_event_get(cfn_hal_uart_t *driver, uint32_t *event_mask)
 {
     if (!driver)
     {
@@ -352,7 +353,7 @@ static inline cfn_hal_error_code_t cfn_hal_uart_event_get(cfn_hal_uart_t *driver
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_uart_error_enable(cfn_hal_uart_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_error_enable(cfn_hal_uart_t *driver, uint32_t error_mask)
 {
     if (!driver)
     {
@@ -367,7 +368,7 @@ static inline cfn_hal_error_code_t cfn_hal_uart_error_enable(cfn_hal_uart_t *dri
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_uart_error_disable(cfn_hal_uart_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_error_disable(cfn_hal_uart_t *driver, uint32_t error_mask)
 {
     if (!driver)
     {
@@ -382,7 +383,7 @@ static inline cfn_hal_error_code_t cfn_hal_uart_error_disable(cfn_hal_uart_t *dr
  * @param error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_uart_error_get(cfn_hal_uart_t *driver, uint32_t *error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_error_get(cfn_hal_uart_t *driver, uint32_t *error_mask)
 {
     if (!driver)
     {
@@ -400,7 +401,9 @@ static inline cfn_hal_error_code_t cfn_hal_uart_error_get(cfn_hal_uart_t *driver
  * @param nbr_of_bytes Number of bytes to transmit.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_uart_tx_irq(cfn_hal_uart_t *driver, const uint8_t *data, size_t nbr_of_bytes)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_tx_irq(cfn_hal_uart_t *driver,
+                                                        const uint8_t  *data,
+                                                        size_t          nbr_of_bytes)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_UART, tx_irq, driver, error, data, nbr_of_bytes);
@@ -412,7 +415,7 @@ static inline cfn_hal_error_code_t cfn_hal_uart_tx_irq(cfn_hal_uart_t *driver, c
  * @param driver Pointer to the UART driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_uart_tx_irq_abort(cfn_hal_uart_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_tx_irq_abort(cfn_hal_uart_t *driver)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_UART, tx_irq_abort, driver, error);
@@ -426,7 +429,7 @@ static inline cfn_hal_error_code_t cfn_hal_uart_tx_irq_abort(cfn_hal_uart_t *dri
  * @param nbr_of_bytes Number of bytes to receive.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_uart_rx_irq(cfn_hal_uart_t *driver, uint8_t *data, size_t nbr_of_bytes)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_rx_irq(cfn_hal_uart_t *driver, uint8_t *data, size_t nbr_of_bytes)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_UART, rx_irq, driver, error, data, nbr_of_bytes);
@@ -438,7 +441,7 @@ static inline cfn_hal_error_code_t cfn_hal_uart_rx_irq(cfn_hal_uart_t *driver, u
  * @param driver Pointer to the UART driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_uart_rx_irq_abort(cfn_hal_uart_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_rx_irq_abort(cfn_hal_uart_t *driver)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_UART, rx_irq_abort, driver, error);
@@ -453,8 +456,10 @@ static inline cfn_hal_error_code_t cfn_hal_uart_rx_irq_abort(cfn_hal_uart_t *dri
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t
-cfn_hal_uart_tx_polling(cfn_hal_uart_t *driver, const uint8_t *data, size_t nbr_of_bytes, uint32_t timeout)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_tx_polling(cfn_hal_uart_t *driver,
+                                                            const uint8_t  *data,
+                                                            size_t          nbr_of_bytes,
+                                                            uint32_t        timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
@@ -470,8 +475,10 @@ cfn_hal_uart_tx_polling(cfn_hal_uart_t *driver, const uint8_t *data, size_t nbr_
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t
-cfn_hal_uart_rx_polling(cfn_hal_uart_t *driver, uint8_t *data, size_t nbr_of_bytes, uint32_t timeout)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_rx_polling(cfn_hal_uart_t *driver,
+                                                            uint8_t        *data,
+                                                            size_t          nbr_of_bytes,
+                                                            uint32_t        timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
@@ -488,7 +495,7 @@ cfn_hal_uart_rx_polling(cfn_hal_uart_t *driver, uint8_t *data, size_t nbr_of_byt
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_uart_rx_to_idle(
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_rx_to_idle(
     cfn_hal_uart_t *driver, uint8_t *data, size_t max_bytes, size_t *received_bytes, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
@@ -504,7 +511,9 @@ static inline cfn_hal_error_code_t cfn_hal_uart_rx_to_idle(
  * @param nbr_of_bytes Number of bytes to transmit.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_uart_tx_dma(cfn_hal_uart_t *driver, const uint8_t *data, size_t nbr_of_bytes)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_tx_dma(cfn_hal_uart_t *driver,
+                                                        const uint8_t  *data,
+                                                        size_t          nbr_of_bytes)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_UART, tx_dma, driver, error, data, nbr_of_bytes);
@@ -518,7 +527,7 @@ static inline cfn_hal_error_code_t cfn_hal_uart_tx_dma(cfn_hal_uart_t *driver, c
  * @param nbr_of_bytes Number of bytes to receive.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_uart_rx_dma(cfn_hal_uart_t *driver, uint8_t *data, size_t nbr_of_bytes)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_rx_dma(cfn_hal_uart_t *driver, uint8_t *data, size_t nbr_of_bytes)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_UART, rx_dma, driver, error, data, nbr_of_bytes);

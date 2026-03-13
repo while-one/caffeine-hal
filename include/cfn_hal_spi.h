@@ -92,9 +92,9 @@ typedef enum
 typedef struct
 {
     void                      *instance;  /*!< Peripheral base instance */
-    cfn_hal_gpio_pin_driver_t *mosi;      /*!< MOSI pin driver mapping */
-    cfn_hal_gpio_pin_driver_t *miso;      /*!< MISO pin driver mapping */
-    cfn_hal_gpio_pin_driver_t *sck;       /*!< SCK pin driver mapping */
+    cfn_hal_gpio_pin_handle_t *mosi;      /*!< MOSI pin driver mapping */
+    cfn_hal_gpio_pin_handle_t *miso;      /*!< MISO pin driver mapping */
+    cfn_hal_gpio_pin_handle_t *sck;       /*!< SCK pin driver mapping */
     void                      *user_data; /*!< Peripheral instance user argument */
 } cfn_hal_spi_phy_t;
 
@@ -118,7 +118,7 @@ typedef struct
     const uint8_t             *tx_payload;   /*!< Outgoing data buffer */
     uint8_t                   *rx_payload;   /*!< Incoming data buffer */
     size_t                     nbr_of_bytes; /*!< Bytes to exchange */
-    cfn_hal_gpio_pin_driver_t *cs;           /*!< Target CS driver mapping if HAL controlled */
+    cfn_hal_gpio_pin_handle_t *cs;           /*!< Target CS driver mapping if HAL controlled */
 } cfn_hal_spi_transaction_t;
 
 typedef struct cfn_hal_spi_s     cfn_hal_spi_t;
@@ -168,7 +168,7 @@ CFN_HAL_CREATE_DRIVER_TYPE(spi, cfn_hal_spi_config_t, cfn_hal_spi_api_t, cfn_hal
  * @param driver Pointer to the SPI driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_spi_init(cfn_hal_spi_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_init(cfn_hal_spi_t *driver)
 {
     if (!driver)
     {
@@ -183,7 +183,7 @@ static inline cfn_hal_error_code_t cfn_hal_spi_init(cfn_hal_spi_t *driver)
  * @param driver Pointer to the SPI driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_spi_deinit(cfn_hal_spi_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_deinit(cfn_hal_spi_t *driver)
 {
     if (!driver)
     {
@@ -198,7 +198,7 @@ static inline cfn_hal_error_code_t cfn_hal_spi_deinit(cfn_hal_spi_t *driver)
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_spi_config_set(cfn_hal_spi_t *driver, const cfn_hal_spi_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_config_set(cfn_hal_spi_t *driver, const cfn_hal_spi_config_t *config)
 {
     if (driver)
     {
@@ -213,7 +213,7 @@ static inline cfn_hal_error_code_t cfn_hal_spi_config_set(cfn_hal_spi_t *driver,
  * @param config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_spi_config_get(cfn_hal_spi_t *driver, cfn_hal_spi_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_config_get(cfn_hal_spi_t *driver, cfn_hal_spi_config_t *config)
 {
     if (!driver || !config || !driver->config)
     {
@@ -230,8 +230,9 @@ static inline cfn_hal_error_code_t cfn_hal_spi_config_get(cfn_hal_spi_t *driver,
  * @param user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t
-cfn_hal_spi_callback_register(cfn_hal_spi_t *driver, const cfn_hal_spi_callback_t callback, void *user_arg)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_callback_register(cfn_hal_spi_t               *driver,
+                                                                  const cfn_hal_spi_callback_t callback,
+                                                                  void                        *user_arg)
 {
     if (driver)
     {
@@ -248,7 +249,7 @@ cfn_hal_spi_callback_register(cfn_hal_spi_t *driver, const cfn_hal_spi_callback_
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_spi_power_state_set(cfn_hal_spi_t *driver, cfn_hal_power_state_t state)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_power_state_set(cfn_hal_spi_t *driver, cfn_hal_power_state_t state)
 {
     if (!driver)
     {
@@ -263,7 +264,7 @@ static inline cfn_hal_error_code_t cfn_hal_spi_power_state_set(cfn_hal_spi_t *dr
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_spi_event_enable(cfn_hal_spi_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_event_enable(cfn_hal_spi_t *driver, uint32_t event_mask)
 {
     if (!driver)
     {
@@ -278,7 +279,7 @@ static inline cfn_hal_error_code_t cfn_hal_spi_event_enable(cfn_hal_spi_t *drive
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_spi_event_disable(cfn_hal_spi_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_event_disable(cfn_hal_spi_t *driver, uint32_t event_mask)
 {
     if (!driver)
     {
@@ -293,7 +294,7 @@ static inline cfn_hal_error_code_t cfn_hal_spi_event_disable(cfn_hal_spi_t *driv
  * @param event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_spi_event_get(cfn_hal_spi_t *driver, uint32_t *event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_event_get(cfn_hal_spi_t *driver, uint32_t *event_mask)
 {
     if (!driver)
     {
@@ -308,7 +309,7 @@ static inline cfn_hal_error_code_t cfn_hal_spi_event_get(cfn_hal_spi_t *driver, 
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_spi_error_enable(cfn_hal_spi_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_error_enable(cfn_hal_spi_t *driver, uint32_t error_mask)
 {
     if (!driver)
     {
@@ -323,7 +324,7 @@ static inline cfn_hal_error_code_t cfn_hal_spi_error_enable(cfn_hal_spi_t *drive
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_spi_error_disable(cfn_hal_spi_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_error_disable(cfn_hal_spi_t *driver, uint32_t error_mask)
 {
     if (!driver)
     {
@@ -338,7 +339,7 @@ static inline cfn_hal_error_code_t cfn_hal_spi_error_disable(cfn_hal_spi_t *driv
  * @param error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_spi_error_get(cfn_hal_spi_t *driver, uint32_t *error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_error_get(cfn_hal_spi_t *driver, uint32_t *error_mask)
 {
     if (!driver)
     {
@@ -355,7 +356,7 @@ static inline cfn_hal_error_code_t cfn_hal_spi_error_get(cfn_hal_spi_t *driver, 
  * @param xfr Pointer to the transaction configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_spi_xfr_irq(cfn_hal_spi_t *driver, cfn_hal_spi_transaction_t *xfr)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_xfr_irq(cfn_hal_spi_t *driver, cfn_hal_spi_transaction_t *xfr)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SPI, xfr_irq, driver, error, xfr);
@@ -367,7 +368,7 @@ static inline cfn_hal_error_code_t cfn_hal_spi_xfr_irq(cfn_hal_spi_t *driver, cf
  * @param driver Pointer to the SPI driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_spi_xfr_irq_abort(cfn_hal_spi_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_xfr_irq_abort(cfn_hal_spi_t *driver)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_SPI, xfr_irq_abort, driver, error);
@@ -381,8 +382,9 @@ static inline cfn_hal_error_code_t cfn_hal_spi_xfr_irq_abort(cfn_hal_spi_t *driv
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t
-cfn_hal_spi_xfr_polling(cfn_hal_spi_t *driver, cfn_hal_spi_transaction_t *xfr, uint32_t timeout)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_xfr_polling(cfn_hal_spi_t             *driver,
+                                                            cfn_hal_spi_transaction_t *xfr,
+                                                            uint32_t                   timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SPI, xfr_polling, driver, error, xfr, timeout);
@@ -395,7 +397,7 @@ cfn_hal_spi_xfr_polling(cfn_hal_spi_t *driver, cfn_hal_spi_transaction_t *xfr, u
  * @param xfr Pointer to the transaction configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_spi_xfr_dma(cfn_hal_spi_t *driver, cfn_hal_spi_transaction_t *xfr)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_xfr_dma(cfn_hal_spi_t *driver, cfn_hal_spi_transaction_t *xfr)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SPI, xfr_dma, driver, error, xfr);

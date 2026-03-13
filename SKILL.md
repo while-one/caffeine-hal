@@ -38,8 +38,11 @@ When contributing to, modifying, or generating code for Caffeine-HAL, you **must
     *   Enums: `cfn_hal_<peripheral>_event_t`, `cfn_hal_<peripheral>_error_t`
     *   Physical Mapping: `cfn_hal_<peripheral>_phy_t`
     *   Porting Member: `void *instance` (Except for GPIO which uses `void *port`).
-*   **GPIO Integration:** Use `cfn_hal_gpio_pin_driver_t` for any peripheral member that depends on a GPIO pin.
-*   **GPIO Constraints:** `cfn_hal_gpio_read` is strictly for single-pin reading. Using bitmasks with multiple bits set is prohibited and should be documented as such.
+*   **GPIO Integration:** Use `cfn_hal_gpio_pin_handle_t` for any peripheral member that depends on a GPIO pin.
+*   **GPIO Bitmasking:** GPIO pins are identified by `cfn_hal_gpio_pin_t` bitmasks. 
+*   **GPIO Port Controller:** The GPIO driver represents a physical PORT (e.g., GPIOA). It does not have a global configuration.
+*   **GPIO Pin Configuration:** Individual pins are configured using the `cfn_hal_gpio_pin_config` function with a configuration payload.
+*   **GPIO API Symmetry:** Pin-level operations (`pin_read`, `pin_write`, `pin_toggle`) must take a single pin. Port-level operations (`port_read`, `port_write`) take raw bitmasks and values.
 
 ### C. Concurrency & Asynchronous Design
 *   **Locking Policy:** Static inline functions should **not** call `CFN_HAL_LOCK` internally. Concurrency protection is the responsibility of the caller using the `CFN_HAL_WITH_LOCK` macro.

@@ -152,7 +152,7 @@ CFN_HAL_CREATE_DRIVER_TYPE(rtc, cfn_hal_rtc_config_t, cfn_hal_rtc_api_t, cfn_hal
  * @param driver Pointer to the RTC driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_rtc_init(cfn_hal_rtc_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_rtc_init(cfn_hal_rtc_t *driver)
 {
     if (!driver)
     {
@@ -167,7 +167,7 @@ static inline cfn_hal_error_code_t cfn_hal_rtc_init(cfn_hal_rtc_t *driver)
  * @param driver Pointer to the RTC driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_rtc_deinit(cfn_hal_rtc_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_rtc_deinit(cfn_hal_rtc_t *driver)
 {
     if (!driver)
     {
@@ -182,7 +182,7 @@ static inline cfn_hal_error_code_t cfn_hal_rtc_deinit(cfn_hal_rtc_t *driver)
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_rtc_config_set(cfn_hal_rtc_t *driver, const cfn_hal_rtc_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_rtc_config_set(cfn_hal_rtc_t *driver, const cfn_hal_rtc_config_t *config)
 {
     if (driver)
     {
@@ -197,7 +197,7 @@ static inline cfn_hal_error_code_t cfn_hal_rtc_config_set(cfn_hal_rtc_t *driver,
  * @param config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_rtc_config_get(cfn_hal_rtc_t *driver, cfn_hal_rtc_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_rtc_config_get(cfn_hal_rtc_t *driver, cfn_hal_rtc_config_t *config)
 {
     if (!driver || !config || !driver->config)
     {
@@ -214,8 +214,9 @@ static inline cfn_hal_error_code_t cfn_hal_rtc_config_get(cfn_hal_rtc_t *driver,
  * @param user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t
-cfn_hal_rtc_callback_register(cfn_hal_rtc_t *driver, const cfn_hal_rtc_callback_t callback, void *user_arg)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_rtc_callback_register(cfn_hal_rtc_t               *driver,
+                                                                  const cfn_hal_rtc_callback_t callback,
+                                                                  void                        *user_arg)
 {
     if (driver)
     {
@@ -232,7 +233,7 @@ cfn_hal_rtc_callback_register(cfn_hal_rtc_t *driver, const cfn_hal_rtc_callback_
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_rtc_power_state_set(cfn_hal_rtc_t *driver, cfn_hal_power_state_t state)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_rtc_power_state_set(cfn_hal_rtc_t *driver, cfn_hal_power_state_t state)
 {
     if (!driver)
     {
@@ -247,7 +248,7 @@ static inline cfn_hal_error_code_t cfn_hal_rtc_power_state_set(cfn_hal_rtc_t *dr
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_rtc_event_enable(cfn_hal_rtc_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_rtc_event_enable(cfn_hal_rtc_t *driver, uint32_t event_mask)
 {
     if (!driver)
     {
@@ -262,7 +263,7 @@ static inline cfn_hal_error_code_t cfn_hal_rtc_event_enable(cfn_hal_rtc_t *drive
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_rtc_event_disable(cfn_hal_rtc_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_rtc_event_disable(cfn_hal_rtc_t *driver, uint32_t event_mask)
 {
     if (!driver)
     {
@@ -277,7 +278,7 @@ static inline cfn_hal_error_code_t cfn_hal_rtc_event_disable(cfn_hal_rtc_t *driv
  * @param event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_rtc_event_get(cfn_hal_rtc_t *driver, uint32_t *event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_rtc_event_get(cfn_hal_rtc_t *driver, uint32_t *event_mask)
 {
     if (!driver)
     {
@@ -292,7 +293,7 @@ static inline cfn_hal_error_code_t cfn_hal_rtc_event_get(cfn_hal_rtc_t *driver, 
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_rtc_error_enable(cfn_hal_rtc_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_rtc_error_enable(cfn_hal_rtc_t *driver, uint32_t error_mask)
 {
     if (!driver)
     {
@@ -307,7 +308,7 @@ static inline cfn_hal_error_code_t cfn_hal_rtc_error_enable(cfn_hal_rtc_t *drive
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_rtc_error_disable(cfn_hal_rtc_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_rtc_error_disable(cfn_hal_rtc_t *driver, uint32_t error_mask)
 {
     if (!driver)
     {
@@ -322,7 +323,7 @@ static inline cfn_hal_error_code_t cfn_hal_rtc_error_disable(cfn_hal_rtc_t *driv
  * @param error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_rtc_error_get(cfn_hal_rtc_t *driver, uint32_t *error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_rtc_error_get(cfn_hal_rtc_t *driver, uint32_t *error_mask)
 {
     if (!driver)
     {
@@ -339,7 +340,7 @@ static inline cfn_hal_error_code_t cfn_hal_rtc_error_get(cfn_hal_rtc_t *driver, 
  * @param time Pointer to the structure containing the new time.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_rtc_set_time(cfn_hal_rtc_t *driver, cfn_hal_rtc_time_t *time)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_rtc_set_time(cfn_hal_rtc_t *driver, cfn_hal_rtc_time_t *time)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_RTC, set_time, driver, error, time);
@@ -352,7 +353,7 @@ static inline cfn_hal_error_code_t cfn_hal_rtc_set_time(cfn_hal_rtc_t *driver, c
  * @param time [out] Pointer to store the current time.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_rtc_get_time(cfn_hal_rtc_t *driver, cfn_hal_rtc_time_t *time)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_rtc_get_time(cfn_hal_rtc_t *driver, cfn_hal_rtc_time_t *time)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_RTC, get_time, driver, error, time);
@@ -366,7 +367,7 @@ static inline cfn_hal_error_code_t cfn_hal_rtc_get_time(cfn_hal_rtc_t *driver, c
  * @param time Pointer to the structure containing the alarm time.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_rtc_set_alarm(cfn_hal_rtc_t *driver, uint32_t id, cfn_hal_rtc_time_t *time)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_rtc_set_alarm(cfn_hal_rtc_t *driver, uint32_t id, cfn_hal_rtc_time_t *time)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_RTC, set_alarm, driver, error, id, time);
@@ -381,8 +382,10 @@ static inline cfn_hal_error_code_t cfn_hal_rtc_set_alarm(cfn_hal_rtc_t *driver, 
  * @param time [out] Pointer to store the configured alarm time.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t
-cfn_hal_rtc_get_alarm(cfn_hal_rtc_t *driver, uint32_t id, bool *elapsed, cfn_hal_rtc_time_t *time)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_rtc_get_alarm(cfn_hal_rtc_t      *driver,
+                                                          uint32_t            id,
+                                                          bool               *elapsed,
+                                                          cfn_hal_rtc_time_t *time)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_RTC, get_alarm, driver, error, id, elapsed, time);
@@ -395,7 +398,7 @@ cfn_hal_rtc_get_alarm(cfn_hal_rtc_t *driver, uint32_t id, bool *elapsed, cfn_hal
  * @param id Index of the alarm to stop.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_rtc_stop_alarm(cfn_hal_rtc_t *driver, uint32_t id)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_rtc_stop_alarm(cfn_hal_rtc_t *driver, uint32_t id)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_RTC, stop_alarm, driver, error, id);

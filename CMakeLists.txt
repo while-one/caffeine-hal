@@ -189,8 +189,10 @@ if(CLANG_TIDY)
         --config-file=${PROJECT_SOURCE_DIR}/config/coding/.clang-tidy
         --header-filter=.*
         ${ALL_HEADERS}
+        ${PROJECT_SOURCE_DIR}/tests/compliance.c
         --
         -I${PROJECT_SOURCE_DIR}/include
+        -std=c11
         COMMENT "Running clang-tidy static analysis..."
     )
     

@@ -109,7 +109,7 @@ TEST_F(AdcTest, CallbackRegister)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.callback_register =
-        [](cfn_hal_driver_t *b, const void *cb, void *arg) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+        [](cfn_hal_driver_t *b, cfn_hal_callback_t cb, void *arg) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_adc_callback_register(&driver, nullptr, nullptr), CFN_HAL_ERROR_OK);
 }

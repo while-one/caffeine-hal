@@ -80,12 +80,12 @@ typedef struct
  */
 typedef struct
 {
-    uint32_t card_type;      /*!< SDSC, SDHC, SDXC, etc. */
-    uint32_t card_version;   /*!< Hardware revision */
-    uint32_t speed_class;    /*!< Speed class */
-    uint32_t rel_card_addr;  /*!< Relative Card Address (RCA) */
-    uint32_t block_count;    /*!< Total capacity in blocks */
-    uint32_t block_size;     /*!< Block size in bytes (usually 512) */
+    uint32_t card_type;     /*!< SDSC, SDHC, SDXC, etc. */
+    uint32_t card_version;  /*!< Hardware revision */
+    uint32_t speed_class;   /*!< Speed class */
+    uint32_t rel_card_addr; /*!< Relative Card Address (RCA) */
+    uint32_t block_count;   /*!< Total capacity in blocks */
+    uint32_t block_size;    /*!< Block size in bytes (usually 512) */
     uint32_t log_block_count;
     uint32_t log_block_size;
 } cfn_hal_sdio_card_info_t;
@@ -145,7 +145,7 @@ CFN_HAL_VMT_CHECK(struct cfn_hal_sdio_api_s);
 CFN_HAL_CREATE_DRIVER_TYPE(
     sdio, cfn_hal_sdio_config_t, cfn_hal_sdio_api_t, cfn_hal_sdio_phy_t, cfn_hal_sdio_callback_t);
 
-#define CFN_HAL_SDIO_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                        \
+#define CFN_HAL_SDIO_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                         \
     CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_SDIO, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
@@ -155,7 +155,7 @@ CFN_HAL_CREATE_DRIVER_TYPE(
  * @param driver Pointer to the SDIO driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_sdio_init(cfn_hal_sdio_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_init(cfn_hal_sdio_t *driver)
 {
     if (!driver)
     {
@@ -170,7 +170,7 @@ static inline cfn_hal_error_code_t cfn_hal_sdio_init(cfn_hal_sdio_t *driver)
  * @param driver Pointer to the SDIO driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_sdio_deinit(cfn_hal_sdio_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_deinit(cfn_hal_sdio_t *driver)
 {
     if (!driver)
     {
@@ -185,7 +185,7 @@ static inline cfn_hal_error_code_t cfn_hal_sdio_deinit(cfn_hal_sdio_t *driver)
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_sdio_config_set(cfn_hal_sdio_t *driver, const cfn_hal_sdio_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_config_set(cfn_hal_sdio_t *driver, const cfn_hal_sdio_config_t *config)
 {
     if (driver)
     {
@@ -200,7 +200,7 @@ static inline cfn_hal_error_code_t cfn_hal_sdio_config_set(cfn_hal_sdio_t *drive
  * @param config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_sdio_config_get(cfn_hal_sdio_t *driver, cfn_hal_sdio_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_config_get(cfn_hal_sdio_t *driver, cfn_hal_sdio_config_t *config)
 {
     if (!driver || !config || !driver->config)
     {
@@ -217,8 +217,9 @@ static inline cfn_hal_error_code_t cfn_hal_sdio_config_get(cfn_hal_sdio_t *drive
  * @param user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t
-cfn_hal_sdio_callback_register(cfn_hal_sdio_t *driver, const cfn_hal_sdio_callback_t callback, void *user_arg)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_callback_register(cfn_hal_sdio_t               *driver,
+                                                                   const cfn_hal_sdio_callback_t callback,
+                                                                   void                         *user_arg)
 {
     if (driver)
     {
@@ -235,7 +236,7 @@ cfn_hal_sdio_callback_register(cfn_hal_sdio_t *driver, const cfn_hal_sdio_callba
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_sdio_power_state_set(cfn_hal_sdio_t *driver, cfn_hal_power_state_t state)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_power_state_set(cfn_hal_sdio_t *driver, cfn_hal_power_state_t state)
 {
     if (!driver)
     {
@@ -250,7 +251,7 @@ static inline cfn_hal_error_code_t cfn_hal_sdio_power_state_set(cfn_hal_sdio_t *
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_sdio_event_enable(cfn_hal_sdio_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_event_enable(cfn_hal_sdio_t *driver, uint32_t event_mask)
 {
     if (!driver)
     {
@@ -265,7 +266,7 @@ static inline cfn_hal_error_code_t cfn_hal_sdio_event_enable(cfn_hal_sdio_t *dri
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_sdio_event_disable(cfn_hal_sdio_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_event_disable(cfn_hal_sdio_t *driver, uint32_t event_mask)
 {
     if (!driver)
     {
@@ -280,7 +281,7 @@ static inline cfn_hal_error_code_t cfn_hal_sdio_event_disable(cfn_hal_sdio_t *dr
  * @param event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_sdio_event_get(cfn_hal_sdio_t *driver, uint32_t *event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_event_get(cfn_hal_sdio_t *driver, uint32_t *event_mask)
 {
     if (!driver)
     {
@@ -295,7 +296,7 @@ static inline cfn_hal_error_code_t cfn_hal_sdio_event_get(cfn_hal_sdio_t *driver
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_sdio_error_enable(cfn_hal_sdio_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_error_enable(cfn_hal_sdio_t *driver, uint32_t error_mask)
 {
     if (!driver)
     {
@@ -310,7 +311,7 @@ static inline cfn_hal_error_code_t cfn_hal_sdio_error_enable(cfn_hal_sdio_t *dri
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_sdio_error_disable(cfn_hal_sdio_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_error_disable(cfn_hal_sdio_t *driver, uint32_t error_mask)
 {
     if (!driver)
     {
@@ -325,7 +326,7 @@ static inline cfn_hal_error_code_t cfn_hal_sdio_error_disable(cfn_hal_sdio_t *dr
  * @param error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_sdio_error_get(cfn_hal_sdio_t *driver, uint32_t *error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_error_get(cfn_hal_sdio_t *driver, uint32_t *error_mask)
 {
     if (!driver)
     {
@@ -343,8 +344,9 @@ static inline cfn_hal_error_code_t cfn_hal_sdio_error_get(cfn_hal_sdio_t *driver
  * @param response [out] Pointer to store the card response.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t
-cfn_hal_sdio_send_command(cfn_hal_sdio_t *driver, const cfn_hal_sdio_cmd_t *cmd, uint32_t *response)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_send_command(cfn_hal_sdio_t           *driver,
+                                                              const cfn_hal_sdio_cmd_t *cmd,
+                                                              uint32_t                 *response)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SDIO, send_command, driver, error, cmd, response);
@@ -360,7 +362,7 @@ cfn_hal_sdio_send_command(cfn_hal_sdio_t *driver, const cfn_hal_sdio_cmd_t *cmd,
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_sdio_read_blocks(
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_read_blocks(
     cfn_hal_sdio_t *driver, uint8_t *buffer, uint32_t block_addr, uint32_t nbr_of_blocks, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
@@ -378,7 +380,7 @@ static inline cfn_hal_error_code_t cfn_hal_sdio_read_blocks(
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_sdio_write_blocks(
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_write_blocks(
     cfn_hal_sdio_t *driver, const uint8_t *data, uint32_t block_addr, uint32_t nbr_of_blocks, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
@@ -393,7 +395,7 @@ static inline cfn_hal_error_code_t cfn_hal_sdio_write_blocks(
  * @param info [out] Pointer to the card info structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_sdio_get_card_info(cfn_hal_sdio_t *driver, cfn_hal_sdio_card_info_t *info)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_get_card_info(cfn_hal_sdio_t *driver, cfn_hal_sdio_card_info_t *info)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SDIO, get_card_info, driver, error, info);
@@ -406,7 +408,7 @@ static inline cfn_hal_error_code_t cfn_hal_sdio_get_card_info(cfn_hal_sdio_t *dr
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_sdio_wait_card_ready(cfn_hal_sdio_t *driver, uint32_t timeout)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_wait_card_ready(cfn_hal_sdio_t *driver, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SDIO, wait_card_ready, driver, error, timeout);

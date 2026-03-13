@@ -114,7 +114,7 @@ TEST_F(UartTest, ConfigSetGet)
 TEST_F(UartTest, CallbackRegister)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.callback_register = [](cfn_hal_driver_t *b, const void *cb, void *arg) -> cfn_hal_error_code_t
+    api.base.callback_register = [](cfn_hal_driver_t *b, cfn_hal_callback_t cb, void *arg) -> cfn_hal_error_code_t
     {
         return CFN_HAL_ERROR_OK;
     };

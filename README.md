@@ -51,7 +51,7 @@ Every peripheral in Caffeine-HAL follows a standard container pattern:
 
 1.  **Generic Driver (`cfn_hal_xxx_t`):** Contains the base state (via `cfn_hal_driver_t`), configuration pointers, and VMT pointers.
 2.  **Hardware API (`cfn_hal_xxx_api_t`):** A structure of function pointers (Virtual Method Table) implemented by the specific hardware port.
-3.  **Physical Mapping (`cfn_hal_xxx_phy_t`):** Defines the hardware instance and pin mappings (using `cfn_hal_gpio_pin_driver_t`).
+3.  **Physical Mapping (`cfn_hal_xxx_phy_t`):** Defines the hardware instance and pin mappings (using `cfn_hal_gpio_pin_handle_t`).
 
 ---
 
@@ -100,6 +100,8 @@ cfn_hal_uart_config_t uart_cfg = {
 // 2. Setup the physical mapping
 cfn_hal_uart_phy_t uart_phy = {
     .instance = (void*)UART1_BASE, // Peripheral base address
+    .tx = &(cfn_hal_gpio_pin_handle_t){.port = &gpio_a, .pin = CFN_HAL_GPIO_PIN_9},
+    .rx = &(cfn_hal_gpio_pin_handle_t){.port = &gpio_a, .pin = CFN_HAL_GPIO_PIN_10},
 };
 
 // 3. Setup the driver instance using the static initializer macro (Recommended)

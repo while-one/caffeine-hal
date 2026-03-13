@@ -153,7 +153,7 @@ CFN_HAL_CREATE_DRIVER_TYPE(
  * @param driver Pointer to the QSPI driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_qspi_init(cfn_hal_qspi_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_init(cfn_hal_qspi_t *driver)
 {
     if (!driver)
     {
@@ -168,7 +168,7 @@ static inline cfn_hal_error_code_t cfn_hal_qspi_init(cfn_hal_qspi_t *driver)
  * @param driver Pointer to the QSPI driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_qspi_deinit(cfn_hal_qspi_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_deinit(cfn_hal_qspi_t *driver)
 {
     if (!driver)
     {
@@ -183,7 +183,7 @@ static inline cfn_hal_error_code_t cfn_hal_qspi_deinit(cfn_hal_qspi_t *driver)
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_qspi_config_set(cfn_hal_qspi_t *driver, const cfn_hal_qspi_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_config_set(cfn_hal_qspi_t *driver, const cfn_hal_qspi_config_t *config)
 {
     if (driver)
     {
@@ -198,7 +198,7 @@ static inline cfn_hal_error_code_t cfn_hal_qspi_config_set(cfn_hal_qspi_t *drive
  * @param config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_qspi_config_get(cfn_hal_qspi_t *driver, cfn_hal_qspi_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_config_get(cfn_hal_qspi_t *driver, cfn_hal_qspi_config_t *config)
 {
     if (!driver || !config || !driver->config)
     {
@@ -215,8 +215,9 @@ static inline cfn_hal_error_code_t cfn_hal_qspi_config_get(cfn_hal_qspi_t *drive
  * @param user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t
-cfn_hal_qspi_callback_register(cfn_hal_qspi_t *driver, const cfn_hal_qspi_callback_t callback, void *user_arg)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_callback_register(cfn_hal_qspi_t               *driver,
+                                                                   const cfn_hal_qspi_callback_t callback,
+                                                                   void                         *user_arg)
 {
     if (driver)
     {
@@ -233,7 +234,7 @@ cfn_hal_qspi_callback_register(cfn_hal_qspi_t *driver, const cfn_hal_qspi_callba
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_qspi_power_state_set(cfn_hal_qspi_t *driver, cfn_hal_power_state_t state)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_power_state_set(cfn_hal_qspi_t *driver, cfn_hal_power_state_t state)
 {
     if (!driver)
     {
@@ -248,7 +249,7 @@ static inline cfn_hal_error_code_t cfn_hal_qspi_power_state_set(cfn_hal_qspi_t *
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_qspi_event_enable(cfn_hal_qspi_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_event_enable(cfn_hal_qspi_t *driver, uint32_t event_mask)
 {
     if (!driver)
     {
@@ -263,7 +264,7 @@ static inline cfn_hal_error_code_t cfn_hal_qspi_event_enable(cfn_hal_qspi_t *dri
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_qspi_event_disable(cfn_hal_qspi_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_event_disable(cfn_hal_qspi_t *driver, uint32_t event_mask)
 {
     if (!driver)
     {
@@ -278,7 +279,7 @@ static inline cfn_hal_error_code_t cfn_hal_qspi_event_disable(cfn_hal_qspi_t *dr
  * @param event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_qspi_event_get(cfn_hal_qspi_t *driver, uint32_t *event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_event_get(cfn_hal_qspi_t *driver, uint32_t *event_mask)
 {
     if (!driver)
     {
@@ -293,7 +294,7 @@ static inline cfn_hal_error_code_t cfn_hal_qspi_event_get(cfn_hal_qspi_t *driver
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_qspi_error_enable(cfn_hal_qspi_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_error_enable(cfn_hal_qspi_t *driver, uint32_t error_mask)
 {
     if (!driver)
     {
@@ -308,7 +309,7 @@ static inline cfn_hal_error_code_t cfn_hal_qspi_error_enable(cfn_hal_qspi_t *dri
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_qspi_error_disable(cfn_hal_qspi_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_error_disable(cfn_hal_qspi_t *driver, uint32_t error_mask)
 {
     if (!driver)
     {
@@ -323,7 +324,7 @@ static inline cfn_hal_error_code_t cfn_hal_qspi_error_disable(cfn_hal_qspi_t *dr
  * @param error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_qspi_error_get(cfn_hal_qspi_t *driver, uint32_t *error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_error_get(cfn_hal_qspi_t *driver, uint32_t *error_mask)
 {
     if (!driver)
     {
@@ -341,8 +342,9 @@ static inline cfn_hal_error_code_t cfn_hal_qspi_error_get(cfn_hal_qspi_t *driver
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t
-cfn_hal_qspi_command(cfn_hal_qspi_t *driver, const cfn_hal_qspi_cmd_t *cmd, uint32_t timeout)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_command(cfn_hal_qspi_t           *driver,
+                                                         const cfn_hal_qspi_cmd_t *cmd,
+                                                         uint32_t                  timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_QSPI, command, driver, error, cmd, timeout);
@@ -356,7 +358,7 @@ cfn_hal_qspi_command(cfn_hal_qspi_t *driver, const cfn_hal_qspi_cmd_t *cmd, uint
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_qspi_transmit(cfn_hal_qspi_t *driver, const uint8_t *data, uint32_t timeout)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_transmit(cfn_hal_qspi_t *driver, const uint8_t *data, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_QSPI, transmit, driver, error, data, timeout);
@@ -370,7 +372,7 @@ static inline cfn_hal_error_code_t cfn_hal_qspi_transmit(cfn_hal_qspi_t *driver,
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_qspi_receive(cfn_hal_qspi_t *driver, uint8_t *data, uint32_t timeout)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_receive(cfn_hal_qspi_t *driver, uint8_t *data, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_QSPI, receive, driver, error, data, timeout);
@@ -383,8 +385,8 @@ static inline cfn_hal_error_code_t cfn_hal_qspi_receive(cfn_hal_qspi_t *driver, 
  * @param cmd Pointer to the read command configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_qspi_memory_mapped_enable(cfn_hal_qspi_t           *driver,
-                                                                     const cfn_hal_qspi_cmd_t *cmd)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_memory_mapped_enable(cfn_hal_qspi_t           *driver,
+                                                                      const cfn_hal_qspi_cmd_t *cmd)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_QSPI, memory_mapped_enable, driver, error, cmd);
@@ -400,7 +402,7 @@ static inline cfn_hal_error_code_t cfn_hal_qspi_memory_mapped_enable(cfn_hal_qsp
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_qspi_autopolling_enable(
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_autopolling_enable(
     cfn_hal_qspi_t *driver, const cfn_hal_qspi_cmd_t *cmd, uint32_t match, uint32_t mask, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;

@@ -35,8 +35,29 @@ extern "C"
 #include <stddef.h>
 #include "cfn_hal_types.h"
 
+/**
+ * @def CFN_HAL_USE_LOCK
+ * @brief Enable RTOS-aware thread safety for the HAL.
+ * 
+ * If set to 1, the HAL adds a 'lock_obj' opaque pointer to the base driver
+ * structure and enables the CFN_HAL_WITH_LOCK macro.
+ * 
+ * @note To use locking, the hardware port implementation MUST:
+ * 1. Implement the 'lock' and 'unlock' hooks in the VMT base layer.
+ * 2. Assign a valid RTOS mutex or semaphore to the 'lock_obj' member during 
+ *    the initialization phase (on_config INIT).
+ * 3. Handle timeout logic within the 'lock' VMT implementation.
+ */
 #ifndef CFN_HAL_USE_LOCK
 #define CFN_HAL_USE_LOCK 0
+#endif
+
+#ifndef CFN_HAL_INLINE
+/**
+ * @brief Macro for inlining HAL wrapper functions.
+ * Can be overridden with __attribute__((always_inline)) for performance-critical ports.
+ */
+#define CFN_HAL_INLINE static inline
 #endif
 
 /* Defines ----------------------------------------------------------*/
@@ -68,7 +89,7 @@ extern "C"
 
 /**
  * @brief Helper macro to initialize a peripheral driver structure.
- * 
+ *
  * @param type_code The FourCC peripheral type code.
  * @param api_ptr Pointer to the VMT implementation.
  * @param phy_ptr Pointer to the physical mapping.
@@ -76,12 +97,8 @@ extern "C"
  */
 #define CFN_HAL_DRIVER_INITIALIZER(type_code, api_ptr, phy_ptr, config_ptr)                                            \
     {                                                                                                                  \
-        .base = {.type = (type_code), .status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED, .vmt = (const void *) (api_ptr)},    \
-        .config      = (config_ptr),                                                                                   \
-        .api         = (api_ptr),                                                                                      \
-        .phy         = (phy_ptr),                                                                                      \
-        .cb          = NULL,                                                                                           \
-        .cb_user_arg = NULL                                                                                            \
+        .base = { .type = (type_code), .status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED, .vmt = (const void *) (api_ptr) }, \
+        .config = (config_ptr), .api = (api_ptr), .phy = (phy_ptr), .cb = NULL, .cb_user_arg = NULL                    \
     }
 
 #define CFN_HAL_CREATE_DRIVER_TYPE(prefix, config_type, api_type, phy_type, cb_type)                                   \
@@ -108,7 +125,7 @@ extern "C"
             else                                                                                                       \
             {                                                                                                          \
                 (result) = CFN_HAL_ERROR_NOT_SUPPORTED;                                                                \
-            }                                                                                                              \
+            }                                                                                                          \
         }                                                                                                              \
         else                                                                                                           \
         {                                                                                                              \
@@ -128,7 +145,7 @@ extern "C"
             else                                                                                                       \
             {                                                                                                          \
                 (result) = CFN_HAL_ERROR_NOT_SUPPORTED;                                                                \
-            }                                                                                                              \
+            }                                                                                                          \
         }                                                                                                              \
         else                                                                                                           \
         {                                                                                                              \
@@ -187,8 +204,14 @@ extern "C"
  * @param ... Additional arguments to pass to the function after the driver pointer.
  */
 #define CFN_HAL_WITH_LOCK(...)                                                                                         \
-    CFN_HAL_GET_LOCK_MACRO(__VA_ARGS__, CFN_HAL_WITH_LOCK_N, CFN_HAL_WITH_LOCK_N, CFN_HAL_WITH_LOCK_N,                  \
-                           CFN_HAL_WITH_LOCK_N, CFN_HAL_WITH_LOCK_N, CFN_HAL_WITH_LOCK_0)(__VA_ARGS__)
+    CFN_HAL_GET_LOCK_MACRO(__VA_ARGS__,                                                                                \
+                           CFN_HAL_WITH_LOCK_N,                                                                        \
+                           CFN_HAL_WITH_LOCK_N,                                                                        \
+                           CFN_HAL_WITH_LOCK_N,                                                                        \
+                           CFN_HAL_WITH_LOCK_N,                                                                        \
+                           CFN_HAL_WITH_LOCK_N,                                                                        \
+                           CFN_HAL_WITH_LOCK_0)                                                                        \
+    (__VA_ARGS__)
 #else
 #define CFN_HAL_LOCK(driver, timeout) (CFN_HAL_ERROR_OK)
 #define CFN_HAL_UNLOCK(driver)        (CFN_HAL_ERROR_OK)
@@ -225,9 +248,14 @@ extern "C"
  * @brief Helper macro to execute a driver function (Locking disabled).
  */
 #define CFN_HAL_WITH_LOCK(...)                                                                                         \
-    CFN_HAL_GET_LOCK_MACRO(__VA_ARGS__, CFN_HAL_WITH_LOCK_NO_LOCK_N, CFN_HAL_WITH_LOCK_NO_LOCK_N,                       \
-                           CFN_HAL_WITH_LOCK_NO_LOCK_N, CFN_HAL_WITH_LOCK_NO_LOCK_N, CFN_HAL_WITH_LOCK_NO_LOCK_N,        \
-                           CFN_HAL_WITH_LOCK_NO_LOCK_0)(__VA_ARGS__)
+    CFN_HAL_GET_LOCK_MACRO(__VA_ARGS__,                                                                                \
+                           CFN_HAL_WITH_LOCK_NO_LOCK_N,                                                                \
+                           CFN_HAL_WITH_LOCK_NO_LOCK_N,                                                                \
+                           CFN_HAL_WITH_LOCK_NO_LOCK_N,                                                                \
+                           CFN_HAL_WITH_LOCK_NO_LOCK_N,                                                                \
+                           CFN_HAL_WITH_LOCK_NO_LOCK_N,                                                                \
+                           CFN_HAL_WITH_LOCK_NO_LOCK_0)                                                                \
+    (__VA_ARGS__)
 #endif
 
 /* Types Enums ------------------------------------------------------*/
