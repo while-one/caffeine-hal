@@ -91,11 +91,11 @@ typedef enum
  */
 typedef struct
 {
-    void             *port;      /*!< Peripheral base register address */
-    cfn_hal_driver_t *mosi;      /*!< MOSI pin driver (GPIO) */
-    cfn_hal_driver_t *miso;      /*!< MISO pin driver (GPIO) */
-    cfn_hal_driver_t *sck;       /*!< SCK pin driver (GPIO) */
-    void             *user_data; /*!< Peripheral instance user argument */
+    void                      *port;      /*!< Peripheral base register address */
+    cfn_hal_gpio_pin_driver_t *mosi;      /*!< MOSI pin driver mapping */
+    cfn_hal_gpio_pin_driver_t *miso;      /*!< MISO pin driver mapping */
+    cfn_hal_gpio_pin_driver_t *sck;       /*!< SCK pin driver mapping */
+    void                      *user_data; /*!< Peripheral instance user argument */
 } cfn_hal_spi_phy_t;
 
 /**
@@ -115,10 +115,10 @@ typedef struct
  */
 typedef struct
 {
-    const uint8_t    *tx_payload;   /*!< Outgoing data buffer */
-    uint8_t          *rx_payload;   /*!< Incoming data buffer */
-    size_t            nbr_of_bytes; /*!< Bytes to exchange */
-    cfn_hal_driver_t *cs;           /*!< Target CS driver (GPIO) if HAL controlled */
+    const uint8_t             *tx_payload;   /*!< Outgoing data buffer */
+    uint8_t                   *rx_payload;   /*!< Incoming data buffer */
+    size_t                     nbr_of_bytes; /*!< Bytes to exchange */
+    cfn_hal_gpio_pin_driver_t *cs;           /*!< Target CS driver mapping if HAL controlled */
 } cfn_hal_spi_transaction_t;
 
 typedef struct cfn_hal_spi_s     cfn_hal_spi_t;

@@ -35,6 +35,7 @@ extern "C"
 #include "cfn_hal_types.h"
 #include "cfn_hal.h"
 #include "cfn_hal_base.h"
+#include "cfn_hal_gpio.h"
 
 /* Defines ----------------------------------------------------------*/
 
@@ -86,8 +87,10 @@ typedef struct
  */
 typedef struct
 {
-    void *port;     /*!< Peripheral base register address */
-    void *user_arg; /*!< Peripheral instance user argument */
+    void                      *port;     /*!< Peripheral base register address */
+    cfn_hal_gpio_pin_driver_t *tx;       /*!< TX pin driver mapping */
+    cfn_hal_gpio_pin_driver_t *rx;       /*!< RX pin driver mapping */
+    void                      *user_arg; /*!< Peripheral instance user argument */
 } cfn_hal_can_phy_t;
 
 /**

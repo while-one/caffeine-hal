@@ -64,9 +64,9 @@ typedef enum
 
 typedef struct
 {
-    void          *port;
-    cfn_hal_gpio_t pin;
-    void          *user_arg;
+    void                      *instance;
+    cfn_hal_gpio_pin_driver_t *gpio;
+    void                      *user_arg;
 } cfn_hal_adc_phy_t;
 
 typedef struct

@@ -142,7 +142,7 @@ typedef struct cfn_hal_driver_s
     cfn_hal_error_code_t (*on_config)(struct cfn_hal_driver_s *base, void *user_arg, bool is_init);
     void       *on_config_arg;
     void       *dep;
-    void       *_ext;
+    void       *ext;
     const void *vmt;
 } cfn_hal_driver_t;
 /* Functions prototypes ---------------------------------------------*/

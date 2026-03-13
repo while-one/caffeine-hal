@@ -128,15 +128,15 @@ typedef enum
  */
 typedef struct
 {
-    void             *port;      /*!< Peripheral base register address */
-    cfn_hal_driver_t *tx;        /*!< TX pin driver (GPIO) */
-    cfn_hal_driver_t *rx;        /*!< RX pin driver (GPIO) */
-    cfn_hal_driver_t *cts;       /*!< CTS pin driver (GPIO) */
-    cfn_hal_driver_t *rts;       /*!< RTS pin driver (GPIO) */
-    cfn_hal_driver_t *dtr;       /*!< DTR pin driver (GPIO) */
-    cfn_hal_driver_t *dcd;       /*!< DCD pin driver (GPIO) */
-    cfn_hal_driver_t *de;        /*!< RS-485 DE pin driver (GPIO) */
-    void             *user_data; /*!< Peripheral instance user argument */
+    void                      *port;      /*!< Peripheral base register address */
+    cfn_hal_gpio_pin_driver_t *tx;        /*!< TX pin driver mapping */
+    cfn_hal_gpio_pin_driver_t *rx;        /*!< RX pin driver mapping */
+    cfn_hal_gpio_pin_driver_t *cts;       /*!< CTS pin driver mapping */
+    cfn_hal_gpio_pin_driver_t *rts;       /*!< RTS pin driver mapping */
+    cfn_hal_gpio_pin_driver_t *dtr;       /*!< DTR pin driver mapping */
+    cfn_hal_gpio_pin_driver_t *dcd;       /*!< DCD pin driver mapping */
+    cfn_hal_gpio_pin_driver_t *de;        /*!< RS-485 DE pin driver mapping */
+    void                      *user_data; /*!< Peripheral instance user argument */
 } cfn_hal_uart_phy_t;
 
 /**

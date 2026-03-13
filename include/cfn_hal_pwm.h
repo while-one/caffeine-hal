@@ -77,10 +77,10 @@ typedef enum
  */
 typedef struct
 {
-    void          *timer_instance; /*!< Base timer/peripheral register address */
-    uint32_t       channel;        /*!< PWM output channel index */
-    cfn_hal_gpio_t pin;            /*!< PWM output pin mapping */
-    void          *user_arg;       /*!< Peripheral instance user argument */
+    void                      *timer_instance; /*!< Base timer/peripheral register address */
+    uint32_t                   channel;        /*!< PWM output channel index */
+    cfn_hal_gpio_pin_driver_t *pin;            /*!< PWM output pin mapping */
+    void                      *user_arg;       /*!< Peripheral instance user argument */
 } cfn_hal_pwm_phy_t;
 
 /**
