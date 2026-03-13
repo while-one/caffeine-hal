@@ -68,7 +68,7 @@ typedef enum
  */
 typedef struct
 {
-    void                      *port;     /*!< Peripheral base register address */
+    void                      *instance; /*!< Peripheral base instance */
     uint32_t                   channel;  /*!< Target DAC channel index */
     cfn_hal_gpio_pin_driver_t *pin;      /*!< Analog output pin mapping */
     void                      *user_arg; /*!< Peripheral instance user argument */

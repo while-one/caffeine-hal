@@ -72,7 +72,7 @@ typedef struct
  */
 typedef struct
 {
-    void *port;     /*!< Controller base register address */
+    void *instance; /*!< Peripheral base instance */
     void *user_arg; /*!< Peripheral instance user argument */
 } cfn_hal_irq_phy_t;
 

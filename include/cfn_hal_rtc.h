@@ -94,7 +94,7 @@ typedef struct tm cfn_hal_rtc_time_t;
  */
 typedef struct
 {
-    void *port;     /*!< Peripheral base register address */
+    void *instance; /*!< Peripheral base instance */
     void *user_arg; /*!< Peripheral instance user argument */
 } cfn_hal_rtc_phy_t;
 

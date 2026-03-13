@@ -64,9 +64,10 @@ typedef enum
 
 typedef struct
 {
-    void                      *instance;
-    cfn_hal_gpio_pin_driver_t *gpio;
-    void                      *user_arg;
+    void                      *instance; /*!< Peripheral base instance */
+    uint32_t                   channel;  /*!< ADC channel index */
+    cfn_hal_gpio_pin_driver_t *gpio;     /*!< Analog input pin mapping */
+    void                      *user_arg; /*!< Peripheral instance user argument */
 } cfn_hal_adc_phy_t;
 
 typedef struct

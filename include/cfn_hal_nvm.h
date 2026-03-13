@@ -76,7 +76,7 @@ typedef struct
  */
 typedef struct
 {
-    void *port;     /*!< Flash controller base register address */
+    void *instance; /*!< Peripheral base instance */
     void *user_arg; /*!< Peripheral instance user argument */
 } cfn_hal_nvm_phy_t;
 

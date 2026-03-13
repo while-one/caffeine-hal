@@ -78,7 +78,7 @@ typedef struct
  */
 typedef struct
 {
-    void *port;     /*!< USB controller base register address */
+    void *instance; /*!< Peripheral base instance */
     void *user_arg; /*!< Peripheral instance user argument */
 } cfn_hal_usb_phy_t;
 

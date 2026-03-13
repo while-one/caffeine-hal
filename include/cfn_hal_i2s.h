@@ -78,7 +78,7 @@ typedef struct
  */
 typedef struct
 {
-    void *port;     /*!< I2S peripheral base register address */
+    void *instance; /*!< Peripheral base instance */
     void *user_arg; /*!< Peripheral instance user argument */
 } cfn_hal_i2s_phy_t;
 

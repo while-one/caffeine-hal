@@ -84,7 +84,7 @@ typedef enum
  */
 typedef struct
 {
-    void *port;     /*!< Watchdog peripheral base address */
+    void *instance; /*!< Peripheral base instance */
     void *user_arg; /*!< Peripheral instance user argument */
 } cfn_hal_wdt_phy_t;
 

@@ -87,7 +87,7 @@ typedef struct
  */
 typedef struct
 {
-    void *port;     /*!< DMA controller base register address */
+    void *instance; /*!< Peripheral base instance */
     void *user_arg; /*!< Channel or stream specific user argument */
 } cfn_hal_dma_phy_t;
 

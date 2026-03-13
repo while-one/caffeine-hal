@@ -81,7 +81,7 @@ typedef struct
  */
 typedef struct
 {
-    void *port;     /*!< Timer peripheral base register address */
+    void *instance; /*!< Peripheral base instance */
     void *user_arg; /*!< Peripheral instance user argument */
 } cfn_hal_timer_phy_t;
 

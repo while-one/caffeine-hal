@@ -21,7 +21,7 @@ typedef struct cfn_hal_comp_config_s
 
 typedef struct
 {
-    void *port;
+    void *instance; /*!< Peripheral base instance */
     void *user_arg;
 } cfn_hal_comp_phy_t;
 

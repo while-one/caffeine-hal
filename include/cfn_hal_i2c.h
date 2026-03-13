@@ -92,7 +92,7 @@ typedef enum
  */
 typedef struct
 {
-    void                      *port;     /*!< Peripheral base register address */
+    void                      *instance; /*!< Peripheral base instance */
     cfn_hal_gpio_pin_driver_t *sda;      /*!< Serial Data pin mapping */
     cfn_hal_gpio_pin_driver_t *scl;      /*!< Serial Clock pin mapping */
     cfn_hal_gpio_pin_driver_t *irq;      /*!< Optional external IRQ pin */

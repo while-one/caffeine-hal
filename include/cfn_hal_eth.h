@@ -79,7 +79,7 @@ typedef struct
  */
 typedef struct
 {
-    void *port;     /*!< Ethernet controller base register address */
+    void *instance; /*!< Peripheral base instance */
     void *user_arg; /*!< Peripheral instance user argument */
 } cfn_hal_eth_phy_t;
 
