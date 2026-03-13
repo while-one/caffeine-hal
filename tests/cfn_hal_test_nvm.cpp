@@ -37,10 +37,10 @@ class NvmTest : public ::testing::Test
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
-        driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_NVM;
+        driver.base.type = CFN_HAL_PERIPHERAL_TYPE_NVM;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
-        driver.base.vmt    = (const void *)&api;
-        driver.api         = &api;
+        driver.base.vmt = (const struct cfn_hal_api_base_s *) &api;
+        driver.api = &api;
     }
 };
 
@@ -68,10 +68,9 @@ TEST_F(NvmTest, UnimplementedApiReturnsNotSupported)
 
 TEST_F(NvmTest, OnConfigFailureAbortsInit)
 {
-    driver.base.on_config = [](cfn_hal_driver_t *b, void *user_arg, cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_FAIL;
-    };
+    driver.base.on_config = [](cfn_hal_driver_t      *b,
+                               void                  *user_arg,
+                               cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_FAIL; };
     EXPECT_EQ(cfn_hal_nvm_init(&driver), CFN_HAL_ERROR_FAIL);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
 }
@@ -80,10 +79,7 @@ TEST_F(NvmTest, OnConfigFailureAbortsInit)
 
 TEST_F(NvmTest, InitSuccess)
 {
-    api.base.init = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.base.init = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_nvm_init(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_INITIALIZED);
 }
@@ -91,10 +87,7 @@ TEST_F(NvmTest, InitSuccess)
 TEST_F(NvmTest, DeinitSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.deinit    = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.base.deinit = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_nvm_deinit(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
 }
@@ -103,9 +96,7 @@ TEST_F(NvmTest, ConfigSetSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.config_set = [](cfn_hal_driver_t *b, const void *config) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
     cfn_hal_nvm_config_t config{};
     EXPECT_EQ(cfn_hal_nvm_config_set(&driver, &config), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.config, &config);
@@ -124,9 +115,7 @@ TEST_F(NvmTest, CallbackRegisterSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.callback_register = [](cfn_hal_driver_t *b, cfn_hal_callback_t cb, void *arg) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
     cfn_hal_nvm_callback_t callback = [](cfn_hal_nvm_t *d, uint32_t ev, uint32_t err, void *arg) {};
     EXPECT_EQ(cfn_hal_nvm_callback_register(&driver, callback, nullptr), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.cb, callback);
@@ -136,23 +125,16 @@ TEST_F(NvmTest, PowerStateSetSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.power_state_set = [](cfn_hal_driver_t *b, cfn_hal_power_state_t state) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_nvm_power_state_set(&driver, CFN_HAL_POWER_STATE_ON), CFN_HAL_ERROR_OK);
 }
 
 TEST_F(NvmTest, EventEnableDisableSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.event_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.base.event_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     api.base.event_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_nvm_event_enable(&driver, CFN_HAL_NVM_EVENT_WRITE_COMPLETE), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_nvm_event_disable(&driver, CFN_HAL_NVM_EVENT_WRITE_COMPLETE), CFN_HAL_ERROR_OK);
 }
@@ -173,14 +155,9 @@ TEST_F(NvmTest, EventGetSuccess)
 TEST_F(NvmTest, ErrorEnableDisableSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.error_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.base.error_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     api.base.error_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_nvm_error_enable(&driver, CFN_HAL_NVM_ERROR_GENERAL), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_nvm_error_disable(&driver, CFN_HAL_NVM_ERROR_GENERAL), CFN_HAL_ERROR_OK);
 }
@@ -204,9 +181,7 @@ TEST_F(NvmTest, ReadSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.read = [](cfn_hal_nvm_t *d, uint32_t addr, uint8_t *buffer, size_t size) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
     uint8_t buffer[10];
     EXPECT_EQ(cfn_hal_nvm_read(&driver, 0x08000000, buffer, 10), CFN_HAL_ERROR_OK);
 }
@@ -215,9 +190,7 @@ TEST_F(NvmTest, WriteSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.write = [](cfn_hal_nvm_t *d, uint32_t addr, const uint8_t *data, size_t size) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
     uint8_t data[10] = { 0 };
     EXPECT_EQ(cfn_hal_nvm_write(&driver, 0x08000000, data, 10), CFN_HAL_ERROR_OK);
 }
@@ -225,20 +198,14 @@ TEST_F(NvmTest, WriteSuccess)
 TEST_F(NvmTest, EraseSectorSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.erase_sector = [](cfn_hal_nvm_t *d, uint32_t sector_addr) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.erase_sector = [](cfn_hal_nvm_t *d, uint32_t sector_addr) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_nvm_erase_sector(&driver, 0x08000000), CFN_HAL_ERROR_OK);
 }
 
 TEST_F(NvmTest, EraseChipSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.erase_chip = [](cfn_hal_nvm_t *d) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.erase_chip = [](cfn_hal_nvm_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_nvm_erase_chip(&driver), CFN_HAL_ERROR_OK);
 }
 
@@ -258,10 +225,7 @@ TEST_F(NvmTest, GetInfoSuccess)
 TEST_F(NvmTest, WithLockMacroWorks)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
-    api.base.init = [](cfn_hal_driver_t *d) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.base.init = [](cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     cfn_hal_error_code_t result;
     CFN_HAL_WITH_LOCK(&driver, 100, result, cfn_hal_nvm_init);
     EXPECT_EQ(result, CFN_HAL_ERROR_OK);

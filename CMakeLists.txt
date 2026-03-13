@@ -28,34 +28,8 @@ target_compile_features(${PROJECT_NAME} INTERFACE c_std_11)
 
 # --- Modern Header Management (CMake 3.23+) ---
 # Gather all headers for target definition and tooling
-#file(GLOB_RECURSE PROJECT_ALL_HEADERS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/*.h")
-set(PROJECT_ALL_HEADERS
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_types.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_base.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_comp.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_adc.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_gpio.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_can.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_clock.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_crypto.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_dac.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_dma.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_eth.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_i2c.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_i2s.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_irq.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_nvm.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_pwm.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_qspi.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_rtc.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_sdio.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_spi.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_timer.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_uart.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_usb.h
-        ${PROJECT_SOURCE_DIR}/include/cfn_hal_wdt.h
-)
+file(GLOB PROJECT_ALL_HEADERS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/*.h")
+
 # We use FILE_SET to define public headers. This automatically:
 # 1. Handles include directories for both build and install.
 # 2. Ensures IDEs like CLion index the headers for syntax highlighting.

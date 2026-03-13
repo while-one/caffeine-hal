@@ -29,7 +29,7 @@
 
 class UsbTest : public ::testing::Test
 {
-protected:
+  protected:
     cfn_hal_usb_t     driver{};
     cfn_hal_usb_api_t api{};
 
@@ -37,10 +37,10 @@ protected:
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
-        driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_USB;
+        driver.base.type = CFN_HAL_PERIPHERAL_TYPE_USB;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
-        driver.api         = &api;
-        driver.base.vmt    = (const void *)&api;
+        driver.api = &api;
+        driver.base.vmt = (const struct cfn_hal_api_base_s *) &api;
     }
 };
 
@@ -68,10 +68,9 @@ TEST_F(UsbTest, UnimplementedApiReturnsNotSupported)
 
 TEST_F(UsbTest, OnConfigFailureAbortsInit)
 {
-    driver.base.on_config = [](cfn_hal_driver_t *b, void *user_arg, cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_FAIL;
-    };
+    driver.base.on_config = [](cfn_hal_driver_t      *b,
+                               void                  *user_arg,
+                               cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_FAIL; };
     EXPECT_EQ(cfn_hal_usb_init(&driver), CFN_HAL_ERROR_FAIL);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
 }
@@ -80,10 +79,7 @@ TEST_F(UsbTest, OnConfigFailureAbortsInit)
 
 TEST_F(UsbTest, InitSuccess)
 {
-    api.base.init = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.base.init = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_usb_init(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_INITIALIZED);
 }
@@ -91,10 +87,7 @@ TEST_F(UsbTest, InitSuccess)
 TEST_F(UsbTest, DeinitSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.deinit    = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.base.deinit = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_usb_deinit(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
 }
@@ -103,21 +96,19 @@ TEST_F(UsbTest, DeinitSuccess)
 
 TEST_F(UsbTest, ConfigSetGet)
 {
-    cfn_hal_usb_config_t config = { .user_config = (void*)0x1234 };
+    cfn_hal_usb_config_t config = { .user_config = (void *) 0x1234 };
     cfn_hal_usb_config_t read_config{};
 
     EXPECT_EQ(cfn_hal_usb_config_set(&driver, &config), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_usb_config_get(&driver, &read_config), CFN_HAL_ERROR_OK);
-    EXPECT_EQ(read_config.user_config, (void*)0x1234);
+    EXPECT_EQ(read_config.user_config, (void *) 0x1234);
 }
 
 TEST_F(UsbTest, CallbackRegister)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.callback_register = [](cfn_hal_driver_t *b, cfn_hal_callback_t cb, void *arg) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_usb_callback_register(&driver, nullptr, nullptr), CFN_HAL_ERROR_OK);
 }
@@ -127,14 +118,8 @@ TEST_F(UsbTest, CallbackRegister)
 TEST_F(UsbTest, StartStopSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.start = [](cfn_hal_usb_t *d) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
-    api.stop = [](cfn_hal_usb_t *d) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.start = [](cfn_hal_usb_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.stop = [](cfn_hal_usb_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_usb_start(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_usb_stop(&driver), CFN_HAL_ERROR_OK);
@@ -143,10 +128,7 @@ TEST_F(UsbTest, StartStopSuccess)
 TEST_F(UsbTest, SetAddressSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.set_address = [](cfn_hal_usb_t *d, uint8_t addr) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.set_address = [](cfn_hal_usb_t *d, uint8_t addr) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_usb_set_address(&driver, 0x5A), CFN_HAL_ERROR_OK);
 }
@@ -155,13 +137,8 @@ TEST_F(UsbTest, EpOpenCloseSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.ep_open = [](cfn_hal_usb_t *d, uint8_t addr, cfn_hal_usb_ep_type_t type, uint16_t mps) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
-    api.ep_close = [](cfn_hal_usb_t *d, uint8_t addr) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
+    api.ep_close = [](cfn_hal_usb_t *d, uint8_t addr) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_usb_ep_open(&driver, 0x01, CFN_HAL_USB_EP_TYPE_BULK, 64), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_usb_ep_close(&driver, 0x01), CFN_HAL_ERROR_OK);
@@ -171,13 +148,9 @@ TEST_F(UsbTest, EpTransmitReceiveSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.ep_transmit = [](cfn_hal_usb_t *d, uint8_t addr, const uint8_t *data, size_t len) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
     api.ep_receive = [](cfn_hal_usb_t *d, uint8_t addr, uint8_t *data, size_t len) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
 
     uint8_t buf[8];
     EXPECT_EQ(cfn_hal_usb_ep_transmit(&driver, 0x81, buf, 8), CFN_HAL_ERROR_OK);
@@ -187,10 +160,7 @@ TEST_F(UsbTest, EpTransmitReceiveSuccess)
 TEST_F(UsbTest, EpStallSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.ep_stall = [](cfn_hal_usb_t *d, uint8_t addr, bool stall) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.ep_stall = [](cfn_hal_usb_t *d, uint8_t addr, bool stall) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_usb_ep_stall(&driver, 0x01, true), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_usb_ep_stall(&driver, 0x01, false), CFN_HAL_ERROR_OK);
@@ -199,14 +169,9 @@ TEST_F(UsbTest, EpStallSuccess)
 TEST_F(UsbTest, EventEnableDisable)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.event_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.base.event_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     api.base.event_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_usb_event_enable(&driver, CFN_HAL_USB_EVENT_RESET), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_usb_event_disable(&driver, CFN_HAL_USB_EVENT_RESET), CFN_HAL_ERROR_OK);
@@ -215,14 +180,9 @@ TEST_F(UsbTest, EventEnableDisable)
 TEST_F(UsbTest, ErrorEnableDisable)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.error_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.base.error_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     api.base.error_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_usb_error_enable(&driver, CFN_HAL_USB_ERROR_GENERAL), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_usb_error_disable(&driver, CFN_HAL_USB_ERROR_GENERAL), CFN_HAL_ERROR_OK);
@@ -231,10 +191,7 @@ TEST_F(UsbTest, ErrorEnableDisable)
 TEST_F(UsbTest, WithLockMacroWorks)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.start = [](cfn_hal_usb_t *d) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.start = [](cfn_hal_usb_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     cfn_hal_error_code_t result;
     CFN_HAL_WITH_LOCK(&driver, 100, result, cfn_hal_usb_start);
     EXPECT_EQ(result, CFN_HAL_ERROR_OK);

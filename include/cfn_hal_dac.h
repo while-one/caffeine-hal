@@ -130,7 +130,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dac_init(cfn_hal_dac_t *driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    driver->base.vmt = (const void *) driver->api;
+    driver->base.vmt = (const struct cfn_hal_api_base_s *) driver->api;
     return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DAC);
 }
 

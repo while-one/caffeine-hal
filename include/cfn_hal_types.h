@@ -86,6 +86,8 @@ typedef enum cfn_hal_error_codes
 
 typedef uint32_t cfn_hal_peripheral_type_t;
 
+struct cfn_hal_api_base_s;
+
 /**
  * @brief Generic function pointer for HAL callbacks.
  * Used as a standard-compliant carrier in the base layer.
@@ -98,6 +100,8 @@ typedef uint32_t cfn_hal_peripheral_type_t;
 typedef void (*cfn_hal_callback_t)(void);
 
 // Macro to pack 4 characters into a 32-bit integer (FourCC)
+// Note: This packs in Little-Endian order (a is LSB), ensuring 
+// debug readability in memory dumps on Little-Endian systems (e.g., ARM).
 #define CFN_HAL_MAKE_TYPE(a, b, c, d)                                                                                  \
     (((uint32_t) (a)) | ((uint32_t) (b) << 8) | ((uint32_t) (c) << 16) | ((uint32_t) (d) << 24))
 
@@ -180,7 +184,7 @@ typedef struct cfn_hal_driver_s
     void *dependency; /*!< Pointer to an optional peripheral dependency (e.g., DMA handle or parent bus) */
     void *extension;  /*!< Pointer to an optional driver extension or private implementation state */
 
-    const void *vmt; /*!< Pointer to the peripheral-specific Virtual Method Table (API) */
+    const struct cfn_hal_api_base_s *vmt; /*!< Pointer to the peripheral-specific Virtual Method Table (API) */
 } cfn_hal_driver_t;
 /* Functions prototypes ---------------------------------------------*/
 

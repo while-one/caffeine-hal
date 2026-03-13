@@ -113,7 +113,7 @@ typedef struct cfn_hal_i2c_config_s
  */
 typedef struct
 {
-    uint8_t        slave_address;   /*!< 7-bit or 10-bit target address */
+    uint16_t       slave_address;   /*!< 7-bit or 10-bit target address */
     const uint8_t *tx_payload;      /*!< Buffer for outgoing data */
     size_t         nbr_of_tx_bytes; /*!< Bytes to transmit */
     uint8_t       *rx_payload;      /*!< Buffer for incoming data */
@@ -127,7 +127,7 @@ typedef struct
 {
     uint16_t dev_addr;      /*!< Target device address */
     uint16_t mem_addr;      /*!< Internal memory address */
-    uint16_t mem_addr_size; /*!< Size of memory address in bytes (1 or 2) */
+    uint8_t  mem_addr_size; /*!< Size of memory address in bytes (1 or 2) */
     uint8_t *data;          /*!< Data buffer for read or write */
     size_t   size;          /*!< Bytes to transfer */
 } cfn_hal_i2c_mem_transaction_t;
@@ -189,7 +189,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_init(cfn_hal_i2c_t *driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    driver->base.vmt = (const void *) driver->api;
+    driver->base.vmt = (const struct cfn_hal_api_base_s *) driver->api;
     return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C);
 }
 

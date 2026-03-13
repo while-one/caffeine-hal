@@ -8,8 +8,8 @@ Its core philosophy is to provide a consistent, polymorphic interface across dif
 ### Core Architecture
 *   **Header-Defined Interface (`INTERFACE`):** The entire generic HAL is defined in header files (`include/cfn_hal_*.h`) as `static inline` wrappers around function pointers.
 *   **Base Driver (`cfn_hal_base.h`):** All peripherals inherit from a common base logic. Standard operations like `init`, `deinit`, `config_set`, `callback_register`, and `power_state_set` are handled by centralized base functions.
-*   **VMT Pattern:** Every peripheral (e.g., `cfn_hal_uart_t`) contains a generic `cfn_hal_driver_t` base struct and a pointer to an API struct (e.g., `cfn_hal_uart_api_t`). Hardware-specific C files implement these API structures.
-*   **VMT Safety:** To prevent memory corruption, the `cfn_hal_api_base_t` MUST be the first member of every peripheral-specific API struct. This is enforced at compile-time via the `CFN_HAL_VMT_CHECK` macro.
+*   **VMT Pattern:** Every peripheral (e.g., `cfn_hal_uart_t`) contains a generic `cfn_hal_driver_t` base struct and a pointer to an API struct (e.g., `cfn_hal_uart_api_t`). The `vmt` member in the base struct is strictly typed as `const struct cfn_hal_api_base_s *` for compiler-enforced safety. Hardware-specific C files implement these API structures.
+*   **VMT Safety:** To prevent memory corruption, the `cfn_hal_api_base_t` MUST be the first member of every peripheral-specific API struct. This is enforced at compile-time via the `CFN_HAL_VMT_CHECK` macro and at initialization via type-checking.
 *   **Board-Level Hook (`on_config`):** The `cfn_hal_driver_t` base struct contains an `on_config` callback. The generic `_init` and `_deinit` wrappers automatically call this hook before/after touching hardware registers. 
 *   **Error Preservation:** The `cfn_hal_base_init` logic ensures that the primary initialization error code from the hardware-specific driver is preserved and returned even if the board-level rollback (DEINIT phase) fails.
 
@@ -70,4 +70,4 @@ When contributing to, modifying, or generating code for Caffeine-HAL, you **must
 
 ## 4. CMake & Build System
 *   **Target Type:** Caffeine-HAL is an `INTERFACE` target.
-*   **Header Registry:** New headers must be added to the `PROJECT_ALL_HEADERS` list in `CMakeLists.txt`.
+*   **Header Discovery:** Headers in `include/*.h` are automatically discovered via `file(GLOB ... CONFIGURE_DEPENDS)`. No manual registry is required.

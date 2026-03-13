@@ -37,10 +37,10 @@ class PwmTest : public ::testing::Test
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
-        driver.base.vmt    = (const void *)&api;
+        driver.base.vmt = (const struct cfn_hal_api_base_s *) &api;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
-        driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_PWM;
-        driver.api         = &api;
+        driver.base.type = CFN_HAL_PERIPHERAL_TYPE_PWM;
+        driver.api = &api;
     }
 };
 
@@ -67,9 +67,7 @@ TEST_F(PwmTest, UnimplementedApiReturnsNotSupported)
 TEST_F(PwmTest, OnConfigFailureAbortsInit)
 {
     driver.base.on_config = [](cfn_hal_driver_t *b, void *arg, cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t
-    {
-        return (phase == CFN_HAL_CONFIG_PHASE_INIT) ? CFN_HAL_ERROR_FAIL : CFN_HAL_ERROR_OK;
-    };
+    { return (phase == CFN_HAL_CONFIG_PHASE_INIT) ? CFN_HAL_ERROR_FAIL : CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_pwm_init(&driver), CFN_HAL_ERROR_FAIL);
 }
 
@@ -94,7 +92,7 @@ TEST_F(PwmTest, DeinitSuccess)
 
 TEST_F(PwmTest, ConfigSetGet)
 {
-    cfn_hal_pwm_config_t config = {1000, 50, CFN_HAL_PWM_CONFIG_POLARITY_NORMAL, nullptr};
+    cfn_hal_pwm_config_t config = { 1000, 50, CFN_HAL_PWM_CONFIG_POLARITY_NORMAL, nullptr };
     cfn_hal_pwm_config_t readback = {};
 
     EXPECT_EQ(cfn_hal_pwm_config_set(&driver, &config), CFN_HAL_ERROR_OK);
@@ -138,7 +136,8 @@ TEST_F(PwmTest, SetFrequencyAndDuty)
 TEST_F(PwmTest, EventEnableDisable)
 {
     api.base.event_enable = [](cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    api.base.event_disable = [](cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.event_disable = [](cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t
+    { return CFN_HAL_ERROR_OK; };
     api.base.event_get = [](cfn_hal_driver_t *d, uint32_t *mask) -> cfn_hal_error_code_t
     {
         *mask = CFN_HAL_PWM_EVENT_PERIOD_MATCH;
@@ -157,7 +156,8 @@ TEST_F(PwmTest, EventEnableDisable)
 TEST_F(PwmTest, ErrorEnableDisable)
 {
     api.base.error_enable = [](cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    api.base.error_disable = [](cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.error_disable = [](cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t
+    { return CFN_HAL_ERROR_OK; };
     api.base.error_get = [](cfn_hal_driver_t *d, uint32_t *mask) -> cfn_hal_error_code_t
     {
         *mask = CFN_HAL_PWM_ERROR_FAULT;

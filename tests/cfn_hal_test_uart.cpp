@@ -29,7 +29,7 @@
 
 class UartTest : public ::testing::Test
 {
-protected:
+  protected:
     cfn_hal_uart_t     driver{};
     cfn_hal_uart_api_t api{};
 
@@ -37,10 +37,10 @@ protected:
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
-        driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_UART;
+        driver.base.type = CFN_HAL_PERIPHERAL_TYPE_UART;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
-        driver.api         = &api;
-        driver.base.vmt    = (const void *)&api;
+        driver.api = &api;
+        driver.base.vmt = (const struct cfn_hal_api_base_s *) &api;
     }
 };
 
@@ -68,10 +68,9 @@ TEST_F(UartTest, UnimplementedApiReturnsNotSupported)
 
 TEST_F(UartTest, OnConfigFailureAbortsInit)
 {
-    driver.base.on_config = [](cfn_hal_driver_t *b, void *user_arg, cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_FAIL;
-    };
+    driver.base.on_config = [](cfn_hal_driver_t      *b,
+                               void                  *user_arg,
+                               cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_FAIL; };
     EXPECT_EQ(cfn_hal_uart_init(&driver), CFN_HAL_ERROR_FAIL);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
 }
@@ -80,10 +79,7 @@ TEST_F(UartTest, OnConfigFailureAbortsInit)
 
 TEST_F(UartTest, InitSuccess)
 {
-    api.base.init = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.base.init = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_uart_init(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_INITIALIZED);
 }
@@ -91,10 +87,7 @@ TEST_F(UartTest, InitSuccess)
 TEST_F(UartTest, DeinitSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.deinit    = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.base.deinit = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_uart_deinit(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
 }
@@ -115,9 +108,7 @@ TEST_F(UartTest, CallbackRegister)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.callback_register = [](cfn_hal_driver_t *b, cfn_hal_callback_t cb, void *arg) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_uart_callback_register(&driver, nullptr, nullptr), CFN_HAL_ERROR_OK);
 }
@@ -128,15 +119,11 @@ TEST_F(UartTest, TxRxPollingSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.tx_polling = [](cfn_hal_uart_t *d, const uint8_t *data, size_t len, uint32_t t) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
     api.rx_polling = [](cfn_hal_uart_t *d, uint8_t *data, size_t len, uint32_t t) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
 
-    uint8_t buf[4] = {1, 2, 3, 4};
+    uint8_t buf[4] = { 1, 2, 3, 4 };
     EXPECT_EQ(cfn_hal_uart_tx_polling(&driver, buf, 4, 100), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_uart_rx_polling(&driver, buf, 4, 100), CFN_HAL_ERROR_OK);
 }
@@ -145,15 +132,10 @@ TEST_F(UartTest, TxRxIrqSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.tx_irq = [](cfn_hal_uart_t *d, const uint8_t *data, size_t len) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
-    api.rx_irq = [](cfn_hal_uart_t *d, uint8_t *data, size_t len) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
+    api.rx_irq = [](cfn_hal_uart_t *d, uint8_t *data, size_t len) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
-    uint8_t buf[4] = {1, 2, 3, 4};
+    uint8_t buf[4] = { 1, 2, 3, 4 };
     EXPECT_EQ(cfn_hal_uart_tx_irq(&driver, buf, 4), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_uart_rx_irq(&driver, buf, 4), CFN_HAL_ERROR_OK);
 }
@@ -161,14 +143,8 @@ TEST_F(UartTest, TxRxIrqSuccess)
 TEST_F(UartTest, TxRxIrqAbortSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.tx_irq_abort = [](cfn_hal_uart_t *d) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
-    api.rx_irq_abort = [](cfn_hal_uart_t *d) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.tx_irq_abort = [](cfn_hal_uart_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.rx_irq_abort = [](cfn_hal_uart_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_uart_tx_irq_abort(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_uart_rx_irq_abort(&driver), CFN_HAL_ERROR_OK);
@@ -177,14 +153,15 @@ TEST_F(UartTest, TxRxIrqAbortSuccess)
 TEST_F(UartTest, RxToIdleSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.rx_to_idle = [](cfn_hal_uart_t *d, uint8_t *data, size_t max, size_t *received, uint32_t t) -> cfn_hal_error_code_t
+    api.rx_to_idle =
+        [](cfn_hal_uart_t *d, uint8_t *data, size_t max, size_t *received, uint32_t t) -> cfn_hal_error_code_t
     {
         *received = 10;
         return CFN_HAL_ERROR_OK;
     };
 
     uint8_t buf[32];
-    size_t received = 0;
+    size_t  received = 0;
     EXPECT_EQ(cfn_hal_uart_rx_to_idle(&driver, buf, 32, &received, 100), CFN_HAL_ERROR_OK);
     EXPECT_EQ(received, 10);
 }
@@ -193,15 +170,10 @@ TEST_F(UartTest, TxRxDmaSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.tx_dma = [](cfn_hal_uart_t *d, const uint8_t *data, size_t len) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
-    api.rx_dma = [](cfn_hal_uart_t *d, uint8_t *data, size_t len) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
+    api.rx_dma = [](cfn_hal_uart_t *d, uint8_t *data, size_t len) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
-    uint8_t buf[4] = {1, 2, 3, 4};
+    uint8_t buf[4] = { 1, 2, 3, 4 };
     EXPECT_EQ(cfn_hal_uart_tx_dma(&driver, buf, 4), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_uart_rx_dma(&driver, buf, 4), CFN_HAL_ERROR_OK);
 }
@@ -209,14 +181,9 @@ TEST_F(UartTest, TxRxDmaSuccess)
 TEST_F(UartTest, EventEnableDisable)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.event_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.base.event_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     api.base.event_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_uart_event_enable(&driver, CFN_HAL_UART_EVENT_TX_COMPLETE), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_uart_event_disable(&driver, CFN_HAL_UART_EVENT_TX_COMPLETE), CFN_HAL_ERROR_OK);
@@ -225,14 +192,9 @@ TEST_F(UartTest, EventEnableDisable)
 TEST_F(UartTest, ErrorEnableDisable)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.error_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.base.error_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     api.base.error_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_uart_error_enable(&driver, CFN_HAL_UART_ERROR_FRAMING), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_uart_error_disable(&driver, CFN_HAL_UART_ERROR_FRAMING), CFN_HAL_ERROR_OK);
@@ -242,11 +204,9 @@ TEST_F(UartTest, WithLockMacroWorks)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.tx_polling = [](cfn_hal_uart_t *d, const uint8_t *data, size_t len, uint32_t t) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
     cfn_hal_error_code_t result;
-    uint8_t buf[1] = {0};
+    uint8_t              buf[1] = { 0 };
     CFN_HAL_WITH_LOCK(&driver, 100, result, cfn_hal_uart_tx_polling, buf, 1, 100);
     EXPECT_EQ(result, CFN_HAL_ERROR_OK);
 }

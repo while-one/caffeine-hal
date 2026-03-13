@@ -37,10 +37,10 @@ class CryptoTest : public ::testing::Test
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
-        driver.base.vmt    = (const void *)&api;
-        driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_CRYPTO;
+        driver.base.vmt = (const struct cfn_hal_api_base_s *) &api;
+        driver.base.type = CFN_HAL_PERIPHERAL_TYPE_CRYPTO;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
-        driver.api         = &api;
+        driver.api = &api;
     }
 };
 
@@ -68,10 +68,9 @@ TEST_F(CryptoTest, UnimplementedApiReturnsNotSupported)
 
 TEST_F(CryptoTest, OnConfigFailureAbortsInit)
 {
-    driver.base.on_config = [](cfn_hal_driver_t *b, void *user_arg, cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_FAIL;
-    };
+    driver.base.on_config = [](cfn_hal_driver_t      *b,
+                               void                  *user_arg,
+                               cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_FAIL; };
     EXPECT_EQ(cfn_hal_crypto_init(&driver), CFN_HAL_ERROR_FAIL);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
 }
@@ -80,10 +79,7 @@ TEST_F(CryptoTest, OnConfigFailureAbortsInit)
 
 TEST_F(CryptoTest, InitSuccess)
 {
-    api.base.init = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.base.init = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_crypto_init(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_INITIALIZED);
 }
@@ -91,10 +87,7 @@ TEST_F(CryptoTest, InitSuccess)
 TEST_F(CryptoTest, DeinitSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.deinit    = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.base.deinit = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_crypto_deinit(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
 }
@@ -114,11 +107,8 @@ TEST_F(CryptoTest, ConfigSetGet)
 TEST_F(CryptoTest, CallbackRegister)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.callback_register =
-        [](cfn_hal_driver_t *b, cfn_hal_callback_t cb, void *arg) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.base.callback_register = [](cfn_hal_driver_t *b, cfn_hal_callback_t cb, void *arg) -> cfn_hal_error_code_t
+    { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_crypto_callback_register(&driver, nullptr, nullptr), CFN_HAL_ERROR_OK);
 }
@@ -128,16 +118,12 @@ TEST_F(CryptoTest, CallbackRegister)
 TEST_F(CryptoTest, EncryptDecryptSuccess)
 {
     api.encrypt = [](cfn_hal_crypto_t *d, const uint8_t *in, uint8_t *out, size_t s) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
     api.decrypt = [](cfn_hal_crypto_t *d, const uint8_t *in, uint8_t *out, size_t s) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
 
-    uint8_t in[16] = {0};
-    uint8_t out[16] = {0};
+    uint8_t in[16] = { 0 };
+    uint8_t out[16] = { 0 };
     EXPECT_EQ(cfn_hal_crypto_encrypt(&driver, in, out, 16), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_crypto_decrypt(&driver, in, out, 16), CFN_HAL_ERROR_OK);
 }
@@ -145,16 +131,11 @@ TEST_F(CryptoTest, EncryptDecryptSuccess)
 TEST_F(CryptoTest, HashSuccess)
 {
     api.hash_update = [](cfn_hal_crypto_t *d, const uint8_t *data, size_t s) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
-    api.hash_finish = [](cfn_hal_crypto_t *d, uint8_t *hash) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
+    api.hash_finish = [](cfn_hal_crypto_t *d, uint8_t *hash) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
-    uint8_t data[16] = {0};
-    uint8_t hash[32] = {0};
+    uint8_t data[16] = { 0 };
+    uint8_t hash[32] = { 0 };
     EXPECT_EQ(cfn_hal_crypto_hash_update(&driver, data, 16), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_crypto_hash_finish(&driver, hash), CFN_HAL_ERROR_OK);
 }
@@ -162,9 +143,7 @@ TEST_F(CryptoTest, HashSuccess)
 TEST_F(CryptoTest, RandomSuccess)
 {
     api.generate_random = [](cfn_hal_crypto_t *d, uint8_t *buf, size_t s) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
     uint8_t buf[16];
     EXPECT_EQ(cfn_hal_crypto_generate_random(&driver, buf, 16), CFN_HAL_ERROR_OK);
 }
@@ -172,26 +151,17 @@ TEST_F(CryptoTest, RandomSuccess)
 TEST_F(CryptoTest, SetKeySuccess)
 {
     api.set_key = [](cfn_hal_crypto_t *d, const uint8_t *key, size_t s) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
-    uint8_t key[16] = {0};
+    { return CFN_HAL_ERROR_OK; };
+    uint8_t key[16] = { 0 };
     EXPECT_EQ(cfn_hal_crypto_set_key(&driver, key, 16), CFN_HAL_ERROR_OK);
 }
 
 TEST_F(CryptoTest, EventEnableDisable)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.event_enable =
-        [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
-    api.base.event_disable =
-        [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.base.event_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.event_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
+    { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_crypto_event_enable(&driver, CFN_HAL_CRYPTO_EVENT_OP_COMPLETE), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_crypto_event_disable(&driver, CFN_HAL_CRYPTO_EVENT_OP_COMPLETE), CFN_HAL_ERROR_OK);
@@ -200,16 +170,9 @@ TEST_F(CryptoTest, EventEnableDisable)
 TEST_F(CryptoTest, ErrorEnableDisable)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.error_enable =
-        [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
-    api.base.error_disable =
-        [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.base.error_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.error_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
+    { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_crypto_error_enable(&driver, CFN_HAL_CRYPTO_ERROR_AUTH), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_crypto_error_disable(&driver, CFN_HAL_CRYPTO_ERROR_AUTH), CFN_HAL_ERROR_OK);
@@ -217,10 +180,7 @@ TEST_F(CryptoTest, ErrorEnableDisable)
 
 TEST_F(CryptoTest, WithLockMacroWorks)
 {
-    api.set_key = [](cfn_hal_crypto_t *d, const uint8_t *k, size_t s)
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.set_key = [](cfn_hal_crypto_t *d, const uint8_t *k, size_t s) { return CFN_HAL_ERROR_OK; };
     cfn_hal_error_code_t result;
     uint8_t              key[16];
     CFN_HAL_WITH_LOCK(&driver, 100, result, cfn_hal_crypto_set_key, key, 16);

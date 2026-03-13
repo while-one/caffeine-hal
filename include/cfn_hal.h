@@ -38,13 +38,13 @@ extern "C"
 /**
  * @def CFN_HAL_USE_LOCK
  * @brief Enable RTOS-aware thread safety for the HAL.
- * 
+ *
  * If set to 1, the HAL adds a 'lock_obj' opaque pointer to the base driver
  * structure and enables the CFN_HAL_WITH_LOCK macro.
- * 
+ *
  * @note To use locking, the hardware port implementation MUST:
  * 1. Implement the 'lock' and 'unlock' hooks in the VMT base layer.
- * 2. Assign a valid RTOS mutex or semaphore to the 'lock_obj' member during 
+ * 2. Assign a valid RTOS mutex or semaphore to the 'lock_obj' member during
  *    the initialization phase (on_config INIT).
  * 3. Handle timeout logic within the 'lock' VMT implementation.
  */
@@ -60,8 +60,7 @@ extern "C"
 #define CFN_HAL_INLINE static inline
 #endif
 
-/* Defines ----------------------------------------------------------*/
-// #define CFN_HAL_CAFFEINE_VERSION CAFFEINE_HAL_VERSION /*!< Managed by the build system */
+/* Defines ----------------------------------------------------------*/// #define CFN_HAL_CAFFEINE_VERSION CAFFEINE_HAL_VERSION /*!< Managed by the build system */
 #define CFN_HAL_MAX_DELAY (UINT32_MAX)
 
 /* Macro ------------------------------------------------------------*/
@@ -97,7 +96,9 @@ extern "C"
  */
 #define CFN_HAL_DRIVER_INITIALIZER(type_code, api_ptr, phy_ptr, config_ptr)                                            \
     {                                                                                                                  \
-        .base = { .type = (type_code), .status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED, .vmt = (const void *) (api_ptr) }, \
+        .base = { .type = (type_code),                                                                                 \
+                  .status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED,                                                         \
+                  .vmt = (const struct cfn_hal_api_base_s *) (api_ptr) },                                              \
         .config = (config_ptr), .api = (api_ptr), .phy = (phy_ptr), .cb = NULL, .cb_user_arg = NULL                    \
     }
 

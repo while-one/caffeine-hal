@@ -41,7 +41,7 @@ extern "C"
  * @brief Base API structure for all peripheral drivers.
  * Every peripheral-specific API struct MUST have this as its first member.
  */
-typedef struct
+typedef struct cfn_hal_api_base_s
 {
     cfn_hal_error_code_t (*init)(cfn_hal_driver_t *base);
     cfn_hal_error_code_t (*deinit)(cfn_hal_driver_t *base);
@@ -116,7 +116,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_init(cfn_hal_driver_t *base, cf
     /* Hardware-specific Peripheral Initialization (Phase B)
      * We cast the generic VMT to the base API type to access the init hook.
      */
-    const cfn_hal_api_base_t *api = (const cfn_hal_api_base_t *) base->vmt;
+    const cfn_hal_api_base_t *api = base->vmt;
     if (api->init)
     {
         error = api->init(base);
@@ -170,7 +170,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_deinit(cfn_hal_driver_t *base, 
     /* Hardware-specific Peripheral Deinitialization (Phase A)
      * We trigger the VMT deinit first while the clocks/pins are still active.
      */
-    const cfn_hal_api_base_t *api = (const cfn_hal_api_base_t *) base->vmt;
+    const cfn_hal_api_base_t *api = base->vmt;
     if (api->deinit)
     {
         error = api->deinit(base);
@@ -219,7 +219,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_config_set(cfn_hal_driver_t    
      */
     if (base->status == CFN_HAL_DRIVER_STATUS_INITIALIZED)
     {
-        const cfn_hal_api_base_t *api = (const cfn_hal_api_base_t *) base->vmt;
+        const cfn_hal_api_base_t *api = base->vmt;
         if (api && api->config_set)
         {
             error = api->config_set(base, config);
@@ -268,7 +268,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_callback_register(cfn_hal_drive
      */
     if (base->status == CFN_HAL_DRIVER_STATUS_INITIALIZED)
     {
-        const cfn_hal_api_base_t *api = (const cfn_hal_api_base_t *) base->vmt;
+        const cfn_hal_api_base_t *api = base->vmt;
 
         if (api && api->callback_register)
         {
@@ -312,7 +312,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_power_state_set(cfn_hal_driver_t    
      */
     if (base->status == CFN_HAL_DRIVER_STATUS_INITIALIZED)
     {
-        const cfn_hal_api_base_t *api = (const cfn_hal_api_base_t *) base->vmt;
+        const cfn_hal_api_base_t *api = base->vmt;
 
         if (api && api->power_state_set)
         {
@@ -381,7 +381,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_event_enable(cfn_hal_driver_t  
 
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
 
-    const cfn_hal_api_base_t *api = (const cfn_hal_api_base_t *) base->vmt;
+    const cfn_hal_api_base_t *api = base->vmt;
     if (api->event_enable)
     {
         error = api->event_enable(base, event_mask);
@@ -423,7 +423,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_event_disable(cfn_hal_driver_t 
 
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
 
-    const cfn_hal_api_base_t *api = (const cfn_hal_api_base_t *) base->vmt;
+    const cfn_hal_api_base_t *api = base->vmt;
     if (api->event_disable)
     {
         error = api->event_disable(base, event_mask);
@@ -465,7 +465,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_event_get(cfn_hal_driver_t     
 
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
 
-    const cfn_hal_api_base_t *api = (const cfn_hal_api_base_t *) base->vmt;
+    const cfn_hal_api_base_t *api = base->vmt;
     if (api->event_get)
     {
         error = api->event_get(base, event_mask);
@@ -506,7 +506,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_error_enable(cfn_hal_driver_t  
 
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
 
-    const cfn_hal_api_base_t *api = (const cfn_hal_api_base_t *) base->vmt;
+    const cfn_hal_api_base_t *api = base->vmt;
     if (api->error_enable)
     {
         error = api->error_enable(base, error_mask);
@@ -547,7 +547,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_error_disable(cfn_hal_driver_t 
 
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
 
-    const cfn_hal_api_base_t *api = (const cfn_hal_api_base_t *) base->vmt;
+    const cfn_hal_api_base_t *api = base->vmt;
     if (api->error_disable)
     {
         error = api->error_disable(base, error_mask);
@@ -588,7 +588,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_error_get(cfn_hal_driver_t     
 
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
 
-    const cfn_hal_api_base_t *api = (const cfn_hal_api_base_t *) base->vmt;
+    const cfn_hal_api_base_t *api = base->vmt;
     if (api->error_get)
     {
         error = api->error_get(base, error_mask);
@@ -615,7 +615,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_lock(cfn_hal_driver_t *base, ui
         return CFN_HAL_ERROR_BAD_PARAM;
     }
 
-    const cfn_hal_api_base_t *api = (const cfn_hal_api_base_t *) base->vmt;
+    const cfn_hal_api_base_t *api = base->vmt;
     if (!api->lock)
     {
         return CFN_HAL_ERROR_OK; /* Safe bare-metal fallback */
@@ -636,7 +636,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_unlock(cfn_hal_driver_t *base)
         return CFN_HAL_ERROR_BAD_PARAM;
     }
 
-    const cfn_hal_api_base_t *api = (const cfn_hal_api_base_t *) base->vmt;
+    const cfn_hal_api_base_t *api = base->vmt;
     if (!api->unlock)
     {
         return CFN_HAL_ERROR_OK; /* Safe bare-metal fallback */

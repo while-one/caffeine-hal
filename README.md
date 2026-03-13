@@ -99,13 +99,13 @@ cfn_hal_uart_config_t uart_cfg = {
 
 // 2. Setup the physical mapping
 cfn_hal_uart_phy_t uart_phy = {
-    .instance = (void*)UART1_BASE, // Peripheral base address
-    .tx = &(cfn_hal_gpio_pin_handle_t){.port = &gpio_a, .pin = CFN_HAL_GPIO_PIN_9},
-    .rx = &(cfn_hal_gpio_pin_handle_t){.port = &gpio_a, .pin = CFN_HAL_GPIO_PIN_10},
+    .instance = (void*)VENDOR_UART1_BASE, // Peripheral base address
+    .tx = &(cfn_hal_gpio_pin_handle_t){.port = &vendor_gpio_port_a, .pin = CFN_HAL_GPIO_PIN_9},
+    .rx = &(cfn_hal_gpio_pin_handle_t){.port = &vendor_gpio_port_a, .pin = CFN_HAL_GPIO_PIN_10},
 };
 
 // 3. Setup the driver instance using the static initializer macro (Recommended)
-cfn_hal_uart_t my_uart = CFN_HAL_UART_INITIALIZER(&stm32_uart_vmt_impl, &uart_phy, &uart_cfg);
+cfn_hal_uart_t my_uart = CFN_HAL_UART_INITIALIZER(&vendor_uart_api_impl, &uart_phy, &uart_cfg);
 
 // 4. Initialize and use
 if (cfn_hal_uart_init(&my_uart) == CFN_HAL_ERROR_OK) {

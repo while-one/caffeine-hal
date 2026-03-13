@@ -37,10 +37,10 @@ class RtcTest : public ::testing::Test
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
-        driver.base.vmt    = (const void *)&api;
+        driver.base.vmt = (const struct cfn_hal_api_base_s *) &api;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
-        driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_RTC;
-        driver.api         = &api;
+        driver.base.type = CFN_HAL_PERIPHERAL_TYPE_RTC;
+        driver.api = &api;
     }
 };
 
@@ -66,9 +66,7 @@ TEST_F(RtcTest, UnimplementedApiReturnsNotSupported)
 TEST_F(RtcTest, OnConfigFailureAbortsInit)
 {
     driver.base.on_config = [](cfn_hal_driver_t *b, void *arg, cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t
-    {
-        return (phase == CFN_HAL_CONFIG_PHASE_INIT) ? CFN_HAL_ERROR_FAIL : CFN_HAL_ERROR_OK;
-    };
+    { return (phase == CFN_HAL_CONFIG_PHASE_INIT) ? CFN_HAL_ERROR_FAIL : CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_rtc_init(&driver), CFN_HAL_ERROR_FAIL);
 }
 
@@ -105,9 +103,7 @@ TEST_F(RtcTest, SetGetTime)
 TEST_F(RtcTest, AlarmManagement)
 {
     api.set_alarm = [](cfn_hal_rtc_t *d, uint32_t id, cfn_hal_rtc_time_t *time) -> cfn_hal_error_code_t
-    {
-        return CFN_HAL_ERROR_OK;
-    };
+    { return CFN_HAL_ERROR_OK; };
     api.get_alarm = [](cfn_hal_rtc_t *d, uint32_t id, bool *elapsed, cfn_hal_rtc_time_t *time) -> cfn_hal_error_code_t
     {
         *elapsed = true;
@@ -130,7 +126,8 @@ TEST_F(RtcTest, AlarmManagement)
 TEST_F(RtcTest, EventEnableDisable)
 {
     api.base.event_enable = [](cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    api.base.event_disable = [](cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.event_disable = [](cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t
+    { return CFN_HAL_ERROR_OK; };
 
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     EXPECT_EQ(cfn_hal_rtc_event_enable(&driver, CFN_HAL_RTC_EVENT_ALARM), CFN_HAL_ERROR_OK);
