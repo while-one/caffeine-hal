@@ -32,211 +32,329 @@ extern "C"
 #endif
 
 /* Includes ---------------------------------------------------------*/
+#include "cfn_hal_types.h"
 #include "cfn_hal.h"
+#include "cfn_hal_base.h"
+
+/* Defines ----------------------------------------------------------*/
 
 /* Types Enums ------------------------------------------------------*/
+
+/**
+ * @brief CAN nominal event flags.
+ */
 typedef enum
 {
-    CFN_HAL_CAN_INTERRUPT_TX_COMPLETE,
-    CFN_HAL_CAN_INTERRUPT_RX_READY,
-    CFN_HAL_CAN_INTERRUPT_BUS_OFF,
-    CFN_HAL_CAN_INTERRUPT_ERROR,
-} cfn_hal_can_interrupts_t;
+    CFN_HAL_CAN_EVENT_NONE = 0,
+    CFN_HAL_CAN_EVENT_TX_COMPLETE = CFN_HAL_BIT(0), /*!< Transmission complete */
+    CFN_HAL_CAN_EVENT_RX_READY = CFN_HAL_BIT(1),    /*!< Message received and ready */
+} cfn_hal_can_event_t;
+
+/**
+ * @brief CAN exception error flags.
+ */
+typedef enum
+{
+    CFN_HAL_CAN_ERROR_NONE = 0,
+    CFN_HAL_CAN_ERROR_BUS_OFF = CFN_HAL_BIT(0), /*!< CAN bus-off state detected */
+    CFN_HAL_CAN_ERROR_GENERAL = CFN_HAL_BIT(1), /*!< General CAN hardware error */
+} cfn_hal_can_error_t;
 
 /* Types Structs ----------------------------------------------------*/
+
+/**
+ * @brief CAN message structure.
+ */
 typedef struct
 {
-    uint32_t id;
-    uint8_t  dlc;
-    uint8_t  data[8];
+    uint32_t id;      /*!< Standard or Extended identifier */
+    uint8_t  dlc;     /*!< Data Length Code */
+    uint8_t  data[8]; /*!< Message payload */
 } cfn_hal_can_msg_t;
 
+/**
+ * @brief CAN configuration structure.
+ */
 typedef struct
 {
-    uint32_t baudrate;
-    void    *custom;
+    uint32_t baudrate; /*!< Target baudrate in bps */
+    void    *custom;   /*!< Vendor-specific custom configuration */
 } cfn_hal_can_config_t;
 
+/**
+ * @brief CAN hardware physical mapping.
+ */
 typedef struct
 {
-    void *port;
-    void *user_arg;
+    void *port;     /*!< Peripheral base register address */
+    void *user_arg; /*!< Peripheral instance user argument */
 } cfn_hal_can_phy_t;
 
+/**
+ * @brief CAN filter configuration.
+ */
 typedef struct
 {
-    uint32_t filter_id;
-    uint32_t filter_mask;
+    uint32_t filter_id;   /*!< Filter identifier */
+    uint32_t filter_mask; /*!< Filter mask */
 } cfn_hal_can_filter_t;
 
-typedef struct cfn_hal_can_s cfn_hal_can_t;
-
-typedef void (*cfn_hal_can_callback_t)(
-    cfn_hal_can_t *driver, cfn_hal_can_interrupts_t interrupt, cfn_hal_can_msg_t *msg, void *user_arg);
-
+typedef struct cfn_hal_can_s     cfn_hal_can_t;
 typedef struct cfn_hal_can_api_s cfn_hal_can_api_t;
 
 /**
- * @brief Virtual Method Table (VMT) for the peripheral.
- * Hardware-specific implementations must populate these function pointers.
- * Functions can be set to NULL if not implemented.
+ * @brief CAN callback signature.
+ * @param driver Pointer to the CAN driver instance.
+ * @param event_mask Mask of triggered nominal events.
+ * @param error_mask Mask of triggered exception errors.
+ * @param msg Pointer to the received message (only for RX_READY event).
+ * @param user_arg User-defined argument passed during registration.
+ */
+typedef void (*cfn_hal_can_callback_t)(
+    cfn_hal_can_t *driver, uint32_t event_mask, uint32_t error_mask, cfn_hal_can_msg_t *msg, void *user_arg);
+
+/**
+ * @brief CAN Virtual Method Table (VMT).
  */
 struct cfn_hal_can_api_s
 {
-    cfn_hal_error_code_t (*cfn_hal_can_init)(cfn_hal_can_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_can_deinit)(cfn_hal_can_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_can_transmit)(cfn_hal_can_t *driver, const cfn_hal_can_msg_t *msg, uint32_t timeout);
-    cfn_hal_error_code_t (*cfn_hal_can_receive)(cfn_hal_can_t *driver, cfn_hal_can_msg_t *msg, uint32_t timeout);
-    cfn_hal_error_code_t (*cfn_hal_can_add_filter)(cfn_hal_can_t *driver, const cfn_hal_can_filter_t *filter);
-    cfn_hal_error_code_t (*cfn_hal_can_register_cb)(cfn_hal_can_t *driver, cfn_hal_can_callback_t cb, void *user_arg);
-    cfn_hal_error_code_t (*cfn_hal_can_cfg_irq_enable)(cfn_hal_can_t *driver, cfn_hal_can_interrupts_t irq);
-    cfn_hal_error_code_t (*cfn_hal_can_cfg_irq_disable)(cfn_hal_can_t *driver, cfn_hal_can_interrupts_t irq);
+    cfn_hal_api_base_t base;
+
+    /* CAN Specific Extensions */
+    cfn_hal_error_code_t (*transmit)(cfn_hal_can_t *driver, const cfn_hal_can_msg_t *msg, uint32_t timeout);
+    cfn_hal_error_code_t (*receive)(cfn_hal_can_t *driver, cfn_hal_can_msg_t *msg, uint32_t timeout);
+    cfn_hal_error_code_t (*add_filter)(cfn_hal_can_t *driver, const cfn_hal_can_filter_t *filter);
 };
 
-/**
- * @brief Generated driver structure for can.
- *
- * This macro expands to the following structure:
- * \code{c}
- * struct cfn_hal_can_s {
- *     cfn_hal_driver_t       base;
- *     const cfn_hal_can_config_t *config;
- *     const cfn_hal_can_api_t    *api;
- *     const cfn_hal_can_phy_t    *phy;
- *     cfn_hal_can_callback_t            cb;
- *     void              *cb_user_arg;
- * };
- * typedef struct cfn_hal_can_s cfn_hal_can_t;
- * \endcode
- */
 CFN_HAL_CREATE_DRIVER_TYPE(can, cfn_hal_can_config_t, cfn_hal_can_api_t, cfn_hal_can_phy_t, cfn_hal_can_callback_t);
 
-/* Functions inline  ---------------------------------------------*/
+/* Functions inline ------------------------------------------------- */
 
 /**
- * @brief cfn_hal_can_init implementation.
- * @param driver Pointer to the peripheral driver instance.
+ * @brief Initializes the CAN driver.
+ * @param driver Pointer to the CAN driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_can_init(cfn_hal_can_t *driver)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    if (driver && driver->base.on_config)
+    if (!driver)
     {
-        error = driver->base.on_config(&driver->base, DRIVER_CONFIG_INIT);
-        if (error != CFN_HAL_ERROR_OK)
-        {
-            return error;
-        }
+        return CFN_HAL_ERROR_BAD_PARAM;
     }
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_CAN, cfn_hal_can_init, driver, error);
-    if (error == CFN_HAL_ERROR_OK && driver)
-    {
-        driver->base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    }
-    return error;
+    driver->base.vmt = (const void *) driver->api;
+    return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CAN);
 }
 
 /**
- * @brief cfn_hal_can_deinit implementation.
- * @param driver Pointer to the peripheral driver instance.
+ * @brief Deinitializes the CAN driver.
+ * @param driver Pointer to the CAN driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_can_deinit(cfn_hal_can_t *driver)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_CAN, cfn_hal_can_deinit, driver, error);
-    if (error == CFN_HAL_ERROR_OK && driver)
+    if (!driver)
     {
-        driver->base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
+        return CFN_HAL_ERROR_BAD_PARAM;
     }
-    if (driver && driver->base.on_config)
-    {
-        driver->base.on_config(&driver->base, DRIVER_CONFIG_DEINIT);
-    }
-    return error;
+    return cfn_hal_base_deinit(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CAN);
 }
 
 /**
- * @brief cfn_hal_can_transmit implementation.
- * @param driver Pointer to the peripheral driver instance.
+ * @brief Sets the CAN configuration.
+ * @param driver Pointer to the CAN driver instance.
+ * @param config Pointer to the configuration structure.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_can_config_set(cfn_hal_can_t *driver, const cfn_hal_can_config_t *config)
+{
+    if (driver)
+    {
+        driver->config = config;
+    }
+    return cfn_hal_base_config_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CAN, (const void *) config);
+}
+
+/**
+ * @brief Gets the current CAN configuration.
+ * @param driver Pointer to the CAN driver instance.
+ * @param config [out] Pointer to store the configuration.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_can_config_get(cfn_hal_can_t *driver, cfn_hal_can_config_t *config)
+{
+    if (!driver || !config || !driver->config)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    *config = *(driver->config);
+    return CFN_HAL_ERROR_OK;
+}
+
+/**
+ * @brief Registers a callback for CAN events and errors.
+ * @param driver Pointer to the CAN driver instance.
+ * @param CALLBACK The callback function to register.
+ * @param user_arg User-defined argument passed to the callback.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t
+cfn_hal_can_callback_register(cfn_hal_can_t *driver, const cfn_hal_can_callback_t CALLBACK, void *user_arg)
+{
+    if (driver)
+    {
+        driver->cb = CALLBACK;
+        driver->cb_user_arg = user_arg;
+    }
+    return cfn_hal_base_callback_register(
+        &driver->base, CFN_HAL_PERIPHERAL_TYPE_CAN, (const void *) CALLBACK, user_arg);
+}
+
+/**
+ * @brief Sets the CAN power state.
+ * @param driver Pointer to the CAN driver instance.
+ * @param state Target power state.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_can_power_state_set(cfn_hal_can_t *driver, cfn_hal_power_state_t state)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_power_state_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CAN, state);
+}
+
+/**
+ * @brief Enables one or more CAN nominal events.
+ * @param driver Pointer to the CAN driver instance.
+ * @param event_mask Mask of events to enable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_can_event_enable(cfn_hal_can_t *driver, uint32_t event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CAN, event_mask);
+}
+
+/**
+ * @brief Disables one or more CAN nominal events.
+ * @param driver Pointer to the CAN driver instance.
+ * @param event_mask Mask of events to disable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_can_event_disable(cfn_hal_can_t *driver, uint32_t event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CAN, event_mask);
+}
+
+/**
+ * @brief Retrieves the current CAN nominal event status.
+ * @param driver Pointer to the CAN driver instance.
+ * @param event_mask [out] Pointer to store the event mask.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_can_event_get(cfn_hal_can_t *driver, uint32_t *event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CAN, event_mask);
+}
+
+/**
+ * @brief Enables one or more CAN exception errors.
+ * @param driver Pointer to the CAN driver instance.
+ * @param error_mask Mask of errors to enable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_can_error_enable(cfn_hal_can_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CAN, error_mask);
+}
+
+/**
+ * @brief Disables one or more CAN exception errors.
+ * @param driver Pointer to the CAN driver instance.
+ * @param error_mask Mask of errors to disable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_can_error_disable(cfn_hal_can_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CAN, error_mask);
+}
+
+/**
+ * @brief Retrieves the current CAN exception error status.
+ * @param driver Pointer to the CAN driver instance.
+ * @param error_mask [out] Pointer to store the error mask.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_can_error_get(cfn_hal_can_t *driver, uint32_t *error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CAN, error_mask);
+}
+
+/* CAN Specific Functions ------------------------------------------- */
+
+/**
+ * @brief Transmits a CAN message (blocking).
+ * @param driver Pointer to the CAN driver instance.
  * @param msg Pointer to the message structure to be transmitted.
- * @param timeout Timeout duration.
+ * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t
 cfn_hal_can_transmit(cfn_hal_can_t *driver, const cfn_hal_can_msg_t *msg, uint32_t timeout)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CAN, cfn_hal_can_transmit, driver, error, msg, timeout);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CAN, transmit, driver, error, msg, timeout);
     return error;
 }
 
 /**
- * @brief cfn_hal_can_receive implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param msg Pointer to the message structure to store received data.
- * @param timeout Timeout duration.
+ * @brief Receives a CAN message (blocking).
+ * @param driver Pointer to the CAN driver instance.
+ * @param msg [out] Pointer to the message structure to store received data.
+ * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_can_receive(cfn_hal_can_t *driver, cfn_hal_can_msg_t *msg, uint32_t timeout)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CAN, cfn_hal_can_receive, driver, error, msg, timeout);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CAN, receive, driver, error, msg, timeout);
     return error;
 }
 
 /**
- * @brief cfn_hal_can_add_filter implementation.
- * @param driver Pointer to the peripheral driver instance.
+ * @brief Adds a message filter to the CAN peripheral.
+ * @param driver Pointer to the CAN driver instance.
  * @param filter Pointer to the filter configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_can_add_filter(cfn_hal_can_t *driver, const cfn_hal_can_filter_t *filter)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CAN, cfn_hal_can_add_filter, driver, error, filter);
-    return error;
-}
-
-/**
- * @brief cfn_hal_can_register_cb implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param cb Callback function to register.
- * @param user_arg User-defined argument passed to the callback.
- * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
- */
-static inline cfn_hal_error_code_t
-cfn_hal_can_register_cb(cfn_hal_can_t *driver, cfn_hal_can_callback_t cb, void *user_arg)
-{
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CAN, cfn_hal_can_register_cb, driver, error, cb, user_arg);
-    return error;
-}
-
-/**
- * @brief cfn_hal_can_cfg_irq_enable implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param irq Interrupt type or event identifier.
- * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
- */
-static inline cfn_hal_error_code_t cfn_hal_can_cfg_irq_enable(cfn_hal_can_t *driver, cfn_hal_can_interrupts_t irq)
-{
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CAN, cfn_hal_can_cfg_irq_enable, driver, error, irq);
-    return error;
-}
-
-/**
- * @brief cfn_hal_can_cfg_irq_disable implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param irq Interrupt type or event identifier.
- * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
- */
-static inline cfn_hal_error_code_t cfn_hal_can_cfg_irq_disable(cfn_hal_can_t *driver, cfn_hal_can_interrupts_t irq)
-{
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CAN, cfn_hal_can_cfg_irq_disable, driver, error, irq);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CAN, add_filter, driver, error, filter);
     return error;
 }
 

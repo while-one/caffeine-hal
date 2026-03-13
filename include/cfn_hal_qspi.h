@@ -31,52 +31,269 @@ extern "C"
 {
 #endif
 
+/* Includes ---------------------------------------------------------*/
 #include "cfn_hal_types.h"
 #include "cfn_hal.h"
+#include "cfn_hal_base.h"
 
+/* Defines ----------------------------------------------------------*/
+
+/* Types Enums ------------------------------------------------------*/
+
+/**
+ * @brief QSPI nominal event flags.
+ */
+typedef enum
+{
+    CFN_HAL_QSPI_EVENT_NONE = 0,
+    CFN_HAL_QSPI_EVENT_TX_COMPLETE = CFN_HAL_BIT(0), /*!< Data transmission finished */
+    CFN_HAL_QSPI_EVENT_RX_READY = CFN_HAL_BIT(1),    /*!< Data reception finished */
+    CFN_HAL_QSPI_EVENT_CMD_DONE = CFN_HAL_BIT(2),    /*!< Command phase complete */
+} cfn_hal_qspi_event_t;
+
+/**
+ * @brief QSPI exception error flags.
+ */
+typedef enum
+{
+    CFN_HAL_QSPI_ERROR_NONE = 0,
+    CFN_HAL_QSPI_ERROR_TIMEOUT = CFN_HAL_BIT(0), /*!< Peripheral or memory timeout */
+    CFN_HAL_QSPI_ERROR_GENERAL = CFN_HAL_BIT(1), /*!< General hardware error */
+} cfn_hal_qspi_error_t;
+
+/* Types Structs ----------------------------------------------------*/
+
+/**
+ * @brief QSPI configuration structure.
+ */
 typedef struct
 {
-    void *user_config;
+    uint32_t clock_prescaler; /*!< SPI clock division factor */
+    uint32_t flash_size;      /*!< Memory size in bytes */
+    void    *custom;          /*!< Vendor-specific custom configuration */
 } cfn_hal_qspi_config_t;
 
+/**
+ * @brief QSPI hardware physical mapping.
+ */
 typedef struct
 {
-    void *port;
-    void *user_arg;
+    void *port;     /*!< QSPI controller base register address */
+    void *user_arg; /*!< Peripheral instance user argument */
 } cfn_hal_qspi_phy_t;
 
 typedef struct cfn_hal_qspi_s     cfn_hal_qspi_t;
 typedef struct cfn_hal_qspi_api_s cfn_hal_qspi_api_t;
 
-struct cfn_hal_qspi_api_s
-{
-    cfn_hal_error_code_t (*cfn_hal_qspi_init)(cfn_hal_qspi_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_qspi_deinit)(cfn_hal_qspi_t *driver);
-};
+/**
+ * @brief QSPI callback signature.
+ * @param driver Pointer to the QSPI driver instance.
+ * @param event_mask Mask of triggered nominal events.
+ * @param error_mask Mask of triggered exception errors.
+ * @param user_arg User-defined argument passed during registration.
+ */
+typedef void (*cfn_hal_qspi_callback_t)(cfn_hal_qspi_t *driver,
+                                        uint32_t        event_mask,
+                                        uint32_t        error_mask,
+                                        void           *user_arg);
 
 /**
- * @brief Generated driver structure for qspi.
- * This macro expands to define `struct cfn_hal_qspi_s` and the typedef `cfn_hal_qspi_t`.
+ * @brief QSPI Virtual Method Table (VMT).
  */
-CFN_HAL_CREATE_DRIVER_TYPE(qspi, cfn_hal_qspi_config_t, cfn_hal_qspi_api_t, cfn_hal_qspi_phy_t, void *);
+struct cfn_hal_qspi_api_s
+{
+    cfn_hal_api_base_t base;
 
+    /* QSPI Specific Extensions can be added here (e.g., send command, map memory) */
+};
+
+CFN_HAL_CREATE_DRIVER_TYPE(
+    qspi, cfn_hal_qspi_config_t, cfn_hal_qspi_api_t, cfn_hal_qspi_phy_t, cfn_hal_qspi_callback_t);
+
+/* Functions inline ------------------------------------------------- */
+
+/**
+ * @brief Initializes the QSPI driver.
+ * @param driver Pointer to the QSPI driver instance.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
 static inline cfn_hal_error_code_t cfn_hal_qspi_init(cfn_hal_qspi_t *driver)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    if (driver && driver->base.on_config)
+    if (!driver)
     {
-        error = driver->base.on_config(&driver->base, DRIVER_CONFIG_INIT);
-        if (error != CFN_HAL_ERROR_OK)
-        {
-            return error;
-        }
+        return CFN_HAL_ERROR_BAD_PARAM;
     }
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_QSPI, cfn_hal_qspi_init, driver, error);
-    if (error == CFN_HAL_ERROR_OK && driver)
+    driver->base.vmt = (const void *) driver->api;
+    return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI);
+}
+
+/**
+ * @brief Deinitializes the QSPI driver.
+ * @param driver Pointer to the QSPI driver instance.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_qspi_deinit(cfn_hal_qspi_t *driver)
+{
+    if (!driver)
     {
-        driver->base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+        return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return error;
+    return cfn_hal_base_deinit(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI);
+}
+
+/**
+ * @brief Sets the QSPI configuration.
+ * @param driver Pointer to the QSPI driver instance.
+ * @param config Pointer to the configuration structure.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_qspi_config_set(cfn_hal_qspi_t *driver, const cfn_hal_qspi_config_t *config)
+{
+    if (driver)
+    {
+        driver->config = config;
+    }
+    return cfn_hal_base_config_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI, (const void *) config);
+}
+
+/**
+ * @brief Gets the current QSPI configuration.
+ * @param driver Pointer to the QSPI driver instance.
+ * @param config [out] Pointer to store the configuration.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_qspi_config_get(cfn_hal_qspi_t *driver, cfn_hal_qspi_config_t *config)
+{
+    if (!driver || !config || !driver->config)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    *config = *(driver->config);
+    return CFN_HAL_ERROR_OK;
+}
+
+/**
+ * @brief Registers a callback for QSPI events and errors.
+ * @param driver Pointer to the QSPI driver instance.
+ * @param CALLBACK The callback function to register.
+ * @param user_arg User-defined argument passed to the callback.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t
+cfn_hal_qspi_callback_register(cfn_hal_qspi_t *driver, const cfn_hal_qspi_callback_t CALLBACK, void *user_arg)
+{
+    if (driver)
+    {
+        driver->cb = CALLBACK;
+        driver->cb_user_arg = user_arg;
+    }
+    return cfn_hal_base_callback_register(
+        &driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI, (const void *) CALLBACK, user_arg);
+}
+
+/**
+ * @brief Sets the QSPI power state.
+ * @param driver Pointer to the QSPI driver instance.
+ * @param state Target power state.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_qspi_power_state_set(cfn_hal_qspi_t *driver, cfn_hal_power_state_t state)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_power_state_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI, state);
+}
+
+/**
+ * @brief Enables one or more QSPI nominal events.
+ * @param driver Pointer to the QSPI driver instance.
+ * @param event_mask Mask of events to enable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_qspi_event_enable(cfn_hal_qspi_t *driver, uint32_t event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI, event_mask);
+}
+
+/**
+ * @brief Disables one or more QSPI nominal events.
+ * @param driver Pointer to the QSPI driver instance.
+ * @param event_mask Mask of events to disable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_qspi_event_disable(cfn_hal_qspi_t *driver, uint32_t event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI, event_mask);
+}
+
+/**
+ * @brief Retrieves the current QSPI nominal event status.
+ * @param driver Pointer to the QSPI driver instance.
+ * @param event_mask [out] Pointer to store the event mask.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_qspi_event_get(cfn_hal_qspi_t *driver, uint32_t *event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI, event_mask);
+}
+
+/**
+ * @brief Enables one or more QSPI exception errors.
+ * @param driver Pointer to the QSPI driver instance.
+ * @param error_mask Mask of errors to enable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_qspi_error_enable(cfn_hal_qspi_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI, error_mask);
+}
+
+/**
+ * @brief Disables one or more QSPI exception errors.
+ * @param driver Pointer to the QSPI driver instance.
+ * @param error_mask Mask of errors to disable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_qspi_error_disable(cfn_hal_qspi_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI, error_mask);
+}
+
+/**
+ * @brief Retrieves the current QSPI exception error status.
+ * @param driver Pointer to the QSPI driver instance.
+ * @param error_mask [out] Pointer to store the error mask.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_qspi_error_get(cfn_hal_qspi_t *driver, uint32_t *error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI, error_mask);
 }
 
 #ifdef __cplusplus

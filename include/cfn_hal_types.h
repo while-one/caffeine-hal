@@ -128,24 +128,24 @@ typedef enum
     CFN_HAL_POWER_STATE_OFF        /*!< Physically unpowered or fully disabled */
 } cfn_hal_power_state_t;
 
-/* Functions prototypes ---------------------------------------------*/
 typedef struct cfn_hal_driver_s
 {
     cfn_hal_peripheral_type_t type;
     cfn_hal_driver_status_t   status;
+    cfn_hal_power_state_t     power_state;
 
-    cfn_hal_power_state_t power_state;
-    cfn_hal_error_code_t (*set_power_state)(struct cfn_hal_driver_s *base, cfn_hal_power_state_t state);
-
-    /* Concurrency / RTOS Management */
+#if (CFN_HAL_USE_LOCK == 1)
     void *lock_obj;
     cfn_hal_error_code_t (*lock)(struct cfn_hal_driver_s *base, uint32_t timeout);
     cfn_hal_error_code_t (*unlock)(struct cfn_hal_driver_s *base);
-
-    cfn_hal_error_code_t (*on_config)(struct cfn_hal_driver_s *base, bool is_init);
-    void *dep;
-    void *_ext;
+#endif
+    cfn_hal_error_code_t (*on_config)(struct cfn_hal_driver_s *base, void *user_arg, bool is_init);
+    void       *on_config_arg;
+    void       *dep;
+    void       *_ext;
+    const void *vmt;
 } cfn_hal_driver_t;
+/* Functions prototypes ---------------------------------------------*/
 
 #ifdef __cplusplus
 }

@@ -1,25 +1,4 @@
 /**
- * Copyright (c) 2026 Hisham Moussa Daou <https://www.whileone.me>
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- * @file cfn_hal_comp.h
  * @brief Comparator HAL API.
  */
 
@@ -33,8 +12,9 @@ extern "C"
 
 #include "cfn_hal_types.h"
 #include "cfn_hal.h"
+#include "cfn_hal_base.h"
 
-typedef struct
+typedef struct cfn_hal_comp_config_s
 {
     void *user_config;
 } cfn_hal_comp_config_t;
@@ -45,37 +25,154 @@ typedef struct
     void *user_arg;
 } cfn_hal_comp_phy_t;
 
+typedef enum
+{
+    CFN_HAL_EVENT_NONE = 0,
+} cfn_hal_comp_event_t;
+
 typedef struct cfn_hal_comp_s     cfn_hal_comp_t;
 typedef struct cfn_hal_comp_api_s cfn_hal_comp_api_t;
 
+typedef void (*cfn_hal_comp_callback_t)(cfn_hal_comp_t *driver, void *user_arg);
+
 struct cfn_hal_comp_api_s
 {
-    cfn_hal_error_code_t (*cfn_hal_comp_init)(cfn_hal_comp_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_comp_deinit)(cfn_hal_comp_t *driver);
+    cfn_hal_api_base_t base;
+    /* Peripheral specific extensions can go here if needed */
 };
 
-/**
- * @brief Generated driver structure for comp.
- * This macro expands to define `struct cfn_hal_comp_s` and the typedef `cfn_hal_comp_t`.
- */
-CFN_HAL_CREATE_DRIVER_TYPE(comp, cfn_hal_comp_config_t, cfn_hal_comp_api_t, cfn_hal_comp_phy_t, void *);
+CFN_HAL_CREATE_DRIVER_TYPE(
+    comp, cfn_hal_comp_config_t, cfn_hal_comp_api_t, cfn_hal_comp_phy_t, cfn_hal_comp_callback_t);
 
+/* Functions inline ------------------------------------------------- */
 static inline cfn_hal_error_code_t cfn_hal_comp_init(cfn_hal_comp_t *driver)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    if (driver && driver->base.on_config)
+    if (!driver)
     {
-        error = driver->base.on_config(&driver->base, DRIVER_CONFIG_INIT);
-        if (error != CFN_HAL_ERROR_OK)
-        {
-            return error;
-        }
+        return CFN_HAL_ERROR_BAD_PARAM;
     }
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_COMP, cfn_hal_comp_init, driver, error);
-    if (error == CFN_HAL_ERROR_OK && driver)
+    driver->base.vmt = (const void *) driver->api;
+    return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_COMP);
+}
+
+static inline cfn_hal_error_code_t cfn_hal_comp_deinit(cfn_hal_comp_t *driver)
+{
+    if (!driver)
     {
-        driver->base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+        return CFN_HAL_ERROR_BAD_PARAM;
     }
+
+    return cfn_hal_base_deinit(&driver->base, CFN_HAL_PERIPHERAL_TYPE_COMP);
+}
+
+static inline cfn_hal_error_code_t cfn_hal_comp_config_set(cfn_hal_comp_t *driver, const cfn_hal_comp_config_t *config)
+{
+    if (driver)
+    {
+        driver->config = config;
+    }
+
+    return cfn_hal_base_config_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_COMP, (const void *) config);
+}
+
+static inline cfn_hal_error_code_t cfn_hal_comp_config_get(cfn_hal_comp_t *driver, cfn_hal_comp_config_t *config)
+{
+    if (!driver || !config || !driver->config)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    *config = *(driver->config);
+
+    return CFN_HAL_ERROR_OK;
+}
+
+static inline cfn_hal_error_code_t
+cfn_hal_comp_callback_register(cfn_hal_comp_t *driver, const cfn_hal_comp_callback_t CALLBACK, void *user_arg)
+{
+    if (driver)
+    {
+        driver->cb = CALLBACK;
+        driver->cb_user_arg = user_arg;
+    }
+
+    return cfn_hal_base_callback_register(&driver->base, CFN_HAL_PERIPHERAL_TYPE_COMP, (void *) CALLBACK, user_arg);
+}
+
+static inline cfn_hal_error_code_t cfn_hal_comp_power_state_set(cfn_hal_comp_t *driver, cfn_hal_power_state_t state)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_BAD_PARAM;
+
+    if (driver)
+    {
+        error = cfn_hal_power_state_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_COMP, state);
+    }
+
+    return error;
+}
+
+static inline cfn_hal_error_code_t cfn_hal_comp_event_enable(cfn_hal_comp_t *driver, uint32_t event_mask)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_BAD_PARAM;
+    if (driver)
+    {
+        error = cfn_hal_base_event_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_COMP, event_mask);
+    }
+
+    return error;
+}
+
+static inline cfn_hal_error_code_t cfn_hal_comp_event_disable(cfn_hal_comp_t *driver, uint32_t event_mask)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_BAD_PARAM;
+    if (driver)
+    {
+        error = cfn_hal_base_event_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_COMP, event_mask);
+    }
+
+    return error;
+}
+
+static inline cfn_hal_error_code_t cfn_hal_comp_event_get(cfn_hal_comp_t *driver, uint32_t *event_mask)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_BAD_PARAM;
+    if (driver)
+    {
+        error = cfn_hal_base_event_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_COMP, event_mask);
+    }
+
+    return error;
+}
+
+static inline cfn_hal_error_code_t cfn_hal_comp_error_enable(cfn_hal_comp_t *driver, uint32_t error_mask)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_BAD_PARAM;
+    if (driver)
+    {
+        error = cfn_hal_base_error_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_COMP, error_mask);
+    }
+
+    return error;
+}
+
+static inline cfn_hal_error_code_t cfn_hal_comp_error_disable(cfn_hal_comp_t *driver, uint32_t error_mask)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_BAD_PARAM;
+    if (driver)
+    {
+        error = cfn_hal_base_error_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_COMP, error_mask);
+    }
+
+    return error;
+}
+
+static inline cfn_hal_error_code_t cfn_hal_comp_error_get(cfn_hal_comp_t *driver, uint32_t *error_mask)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_BAD_PARAM;
+    if (driver)
+    {
+        error = cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_COMP, error_mask);
+    }
+
     return error;
 }
 

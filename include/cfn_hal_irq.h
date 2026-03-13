@@ -31,100 +31,343 @@ extern "C"
 {
 #endif
 
+/* Includes ---------------------------------------------------------*/
 #include "cfn_hal_types.h"
 #include "cfn_hal.h"
+#include "cfn_hal_base.h"
 
+/* Defines ----------------------------------------------------------*/
+
+/* Types Enums ------------------------------------------------------*/
+
+/**
+ * @brief IRQ nominal event flags.
+ */
+typedef enum
+{
+    CFN_HAL_IRQ_EVENT_NONE = 0,
+} cfn_hal_irq_event_t;
+
+/**
+ * @brief IRQ exception error flags.
+ */
+typedef enum
+{
+    CFN_HAL_IRQ_ERROR_NONE = 0,
+    CFN_HAL_IRQ_ERROR_GENERAL = CFN_HAL_BIT(0), /*!< Controller fault or access error */
+} cfn_hal_irq_error_t;
+
+/* Types Structs ----------------------------------------------------*/
+
+/**
+ * @brief IRQ configuration structure.
+ */
 typedef struct
 {
-    void *user_config;
+    void *user_config; /*!< Vendor-specific controller configuration */
 } cfn_hal_irq_config_t;
 
+/**
+ * @brief IRQ hardware physical mapping.
+ */
 typedef struct
 {
-    void *port;
-    void *user_arg;
+    void *port;     /*!< Controller base register address */
+    void *user_arg; /*!< Peripheral instance user argument */
 } cfn_hal_irq_phy_t;
 
 typedef struct cfn_hal_irq_s     cfn_hal_irq_t;
 typedef struct cfn_hal_irq_api_s cfn_hal_irq_api_t;
 
-struct cfn_hal_irq_api_s
-{
-    cfn_hal_error_code_t (*cfn_hal_irq_init)(cfn_hal_irq_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_irq_deinit)(cfn_hal_irq_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_irq_global_enable)(cfn_hal_irq_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_irq_global_disable)(cfn_hal_irq_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_irq_enable_vector)(cfn_hal_irq_t *driver, uint32_t irq_id);
-    cfn_hal_error_code_t (*cfn_hal_irq_disable_vector)(cfn_hal_irq_t *driver, uint32_t irq_id);
-    cfn_hal_error_code_t (*cfn_hal_irq_set_priority)(cfn_hal_irq_t *driver, uint32_t irq_id, uint32_t priority);
-    cfn_hal_error_code_t (*cfn_hal_irq_clear_pending)(cfn_hal_irq_t *driver, uint32_t irq_id);
-};
+/**
+ * @brief IRQ callback signature.
+ * @param driver Pointer to the IRQ driver instance.
+ * @param event_mask Mask of triggered nominal events.
+ * @param error_mask Mask of triggered exception errors.
+ * @param user_arg User-defined argument passed during registration.
+ */
+typedef void (*cfn_hal_irq_callback_t)(cfn_hal_irq_t *driver, uint32_t event_mask, uint32_t error_mask, void *user_arg);
 
 /**
- * @brief Generated driver structure for irq.
- * This macro expands to define `struct cfn_hal_irq_s` and the typedef `cfn_hal_irq_t`.
+ * @brief IRQ Virtual Method Table (VMT).
  */
-CFN_HAL_CREATE_DRIVER_TYPE(irq, cfn_hal_irq_config_t, cfn_hal_irq_api_t, cfn_hal_irq_phy_t, void *);
+struct cfn_hal_irq_api_s
+{
+    cfn_hal_api_base_t base;
 
+    /* IRQ Specific Extensions */
+    cfn_hal_error_code_t (*global_enable)(cfn_hal_irq_t *driver);
+    cfn_hal_error_code_t (*global_disable)(cfn_hal_irq_t *driver);
+    cfn_hal_error_code_t (*enable_vector)(cfn_hal_irq_t *driver, uint32_t irq_id);
+    cfn_hal_error_code_t (*disable_vector)(cfn_hal_irq_t *driver, uint32_t irq_id);
+    cfn_hal_error_code_t (*set_priority)(cfn_hal_irq_t *driver, uint32_t irq_id, uint32_t priority);
+    cfn_hal_error_code_t (*clear_pending)(cfn_hal_irq_t *driver, uint32_t irq_id);
+};
+
+CFN_HAL_CREATE_DRIVER_TYPE(irq, cfn_hal_irq_config_t, cfn_hal_irq_api_t, cfn_hal_irq_phy_t, cfn_hal_irq_callback_t);
+
+/* Functions inline ------------------------------------------------- */
+
+/**
+ * @brief Initializes the IRQ controller driver.
+ * @param driver Pointer to the IRQ driver instance.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
 static inline cfn_hal_error_code_t cfn_hal_irq_init(cfn_hal_irq_t *driver)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    if (driver && driver->base.on_config)
+    if (!driver)
     {
-        error = driver->base.on_config(&driver->base, DRIVER_CONFIG_INIT);
-        if (error != CFN_HAL_ERROR_OK)
-        {
-            return error;
-        }
+        return CFN_HAL_ERROR_BAD_PARAM;
     }
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_IRQ, cfn_hal_irq_init, driver, error);
-    if (error == CFN_HAL_ERROR_OK && driver)
-    {
-        driver->base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    }
-    return error;
+    driver->base.vmt = (const void *) driver->api;
+    return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_IRQ);
 }
 
+/**
+ * @brief Deinitializes the IRQ controller driver.
+ * @param driver Pointer to the IRQ driver instance.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_irq_deinit(cfn_hal_irq_t *driver)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_deinit(&driver->base, CFN_HAL_PERIPHERAL_TYPE_IRQ);
+}
+
+/**
+ * @brief Sets the IRQ configuration.
+ * @param driver Pointer to the IRQ driver instance.
+ * @param config Pointer to the configuration structure.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_irq_config_set(cfn_hal_irq_t *driver, const cfn_hal_irq_config_t *config)
+{
+    if (driver)
+    {
+        driver->config = config;
+    }
+    return cfn_hal_base_config_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_IRQ, (const void *) config);
+}
+
+/**
+ * @brief Gets the current IRQ configuration.
+ * @param driver Pointer to the IRQ driver instance.
+ * @param config [out] Pointer to store the configuration.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_irq_config_get(cfn_hal_irq_t *driver, cfn_hal_irq_config_t *config)
+{
+    if (!driver || !config || !driver->config)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    *config = *(driver->config);
+    return CFN_HAL_ERROR_OK;
+}
+
+/**
+ * @brief Registers a callback for IRQ events and errors.
+ * @param driver Pointer to the IRQ driver instance.
+ * @param CALLBACK The callback function to register.
+ * @param user_arg User-defined argument passed to the callback.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t
+cfn_hal_irq_callback_register(cfn_hal_irq_t *driver, const cfn_hal_irq_callback_t CALLBACK, void *user_arg)
+{
+    if (driver)
+    {
+        driver->cb = CALLBACK;
+        driver->cb_user_arg = user_arg;
+    }
+    return cfn_hal_base_callback_register(
+        &driver->base, CFN_HAL_PERIPHERAL_TYPE_IRQ, (const void *) CALLBACK, user_arg);
+}
+
+/**
+ * @brief Sets the IRQ power state.
+ * @param driver Pointer to the IRQ driver instance.
+ * @param state Target power state.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_irq_power_state_set(cfn_hal_irq_t *driver, cfn_hal_power_state_t state)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_power_state_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_IRQ, state);
+}
+
+/**
+ * @brief Enables one or more IRQ nominal events.
+ * @param driver Pointer to the IRQ driver instance.
+ * @param event_mask Mask of events to enable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_irq_event_enable(cfn_hal_irq_t *driver, uint32_t event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_IRQ, event_mask);
+}
+
+/**
+ * @brief Disables one or more IRQ nominal events.
+ * @param driver Pointer to the IRQ driver instance.
+ * @param event_mask Mask of events to disable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_irq_event_disable(cfn_hal_irq_t *driver, uint32_t event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_IRQ, event_mask);
+}
+
+/**
+ * @brief Retrieves the current IRQ nominal event status.
+ * @param driver Pointer to the IRQ driver instance.
+ * @param event_mask [out] Pointer to store the event mask.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_irq_event_get(cfn_hal_irq_t *driver, uint32_t *event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_IRQ, event_mask);
+}
+
+/**
+ * @brief Enables one or more IRQ exception errors.
+ * @param driver Pointer to the IRQ driver instance.
+ * @param error_mask Mask of errors to enable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_irq_error_enable(cfn_hal_irq_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_IRQ, error_mask);
+}
+
+/**
+ * @brief Disables one or more IRQ exception errors.
+ * @param driver Pointer to the IRQ driver instance.
+ * @param error_mask Mask of errors to disable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_irq_error_disable(cfn_hal_irq_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_IRQ, error_mask);
+}
+
+/**
+ * @brief Retrieves the current IRQ exception error status.
+ * @param driver Pointer to the IRQ driver instance.
+ * @param error_mask [out] Pointer to store the error mask.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_irq_error_get(cfn_hal_irq_t *driver, uint32_t *error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_IRQ, error_mask);
+}
+
+/* IRQ Specific Functions ------------------------------------------- */
+
+/**
+ * @brief Enables interrupts globally at the processor level.
+ * @param driver Pointer to the IRQ driver instance.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
 static inline cfn_hal_error_code_t cfn_hal_irq_global_enable(cfn_hal_irq_t *driver)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_IRQ, cfn_hal_irq_global_enable, driver, error);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_IRQ, global_enable, driver, error);
     return error;
 }
 
+/**
+ * @brief Disables interrupts globally at the processor level.
+ * @param driver Pointer to the IRQ driver instance.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
 static inline cfn_hal_error_code_t cfn_hal_irq_global_disable(cfn_hal_irq_t *driver)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_IRQ, cfn_hal_irq_global_disable, driver, error);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_IRQ, global_disable, driver, error);
     return error;
 }
 
+/**
+ * @brief Enables a specific interrupt vector.
+ * @param driver Pointer to the IRQ driver instance.
+ * @param irq_id Numeric identifier of the target interrupt.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
 static inline cfn_hal_error_code_t cfn_hal_irq_enable_vector(cfn_hal_irq_t *driver, uint32_t irq_id)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_IRQ, cfn_hal_irq_enable_vector, driver, error, irq_id);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_IRQ, enable_vector, driver, error, irq_id);
     return error;
 }
 
+/**
+ * @brief Disables a specific interrupt vector.
+ * @param driver Pointer to the IRQ driver instance.
+ * @param irq_id Numeric identifier of the target interrupt.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
 static inline cfn_hal_error_code_t cfn_hal_irq_disable_vector(cfn_hal_irq_t *driver, uint32_t irq_id)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_IRQ, cfn_hal_irq_disable_vector, driver, error, irq_id);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_IRQ, disable_vector, driver, error, irq_id);
     return error;
 }
 
+/**
+ * @brief Sets the priority level for a specific interrupt vector.
+ * @param driver Pointer to the IRQ driver instance.
+ * @param irq_id Numeric identifier of the target interrupt.
+ * @param priority Target priority level (architecture dependent).
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
 static inline cfn_hal_error_code_t cfn_hal_irq_set_priority(cfn_hal_irq_t *driver, uint32_t irq_id, uint32_t priority)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
-        CFN_HAL_PERIPHERAL_TYPE_IRQ, cfn_hal_irq_set_priority, driver, error, irq_id, priority);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_IRQ, set_priority, driver, error, irq_id, priority);
     return error;
 }
 
+/**
+ * @brief Clears the pending status of a specific interrupt vector.
+ * @param driver Pointer to the IRQ driver instance.
+ * @param irq_id Numeric identifier of the target interrupt.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
 static inline cfn_hal_error_code_t cfn_hal_irq_clear_pending(cfn_hal_irq_t *driver, uint32_t irq_id)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_IRQ, cfn_hal_irq_clear_pending, driver, error, irq_id);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_IRQ, clear_pending, driver, error, irq_id);
     return error;
 }
 

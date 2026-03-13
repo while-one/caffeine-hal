@@ -34,211 +34,321 @@ extern "C"
 /* Includes ---------------------------------------------------------*/
 #include "cfn_hal_types.h"
 #include "cfn_hal.h"
+#include "cfn_hal_base.h"
 #include "cfn_hal_gpio.h"
 
+/* Defines ----------------------------------------------------------*/
+
 /* Types Enums ------------------------------------------------------*/
+
+/**
+ * @brief DAC nominal event flags.
+ */
 typedef enum
 {
-    CFN_HAL_DAC_INTERRUPT_UNDERRUN,
-    CFN_HAL_DAC_INTERRUPT_DMA_HALF,
-    CFN_HAL_DAC_INTERRUPT_DMA_COMPLETE
-} cfn_hal_dac_interrupts_t;
+    CFN_HAL_DAC_EVENT_NONE = 0,
+    CFN_HAL_DAC_EVENT_DMA_HALF = CFN_HAL_BIT(0),     /*!< DMA half transfer complete */
+    CFN_HAL_DAC_EVENT_DMA_COMPLETE = CFN_HAL_BIT(1), /*!< DMA transfer complete */
+} cfn_hal_dac_event_t;
+
+/**
+ * @brief DAC exception error flags.
+ */
+typedef enum
+{
+    CFN_HAL_DAC_ERROR_NONE = 0,
+    CFN_HAL_DAC_ERROR_UNDERRUN = CFN_HAL_BIT(0), /*!< Output buffer underrun */
+    CFN_HAL_DAC_ERROR_GENERAL = CFN_HAL_BIT(1),  /*!< General hardware error */
+} cfn_hal_dac_error_t;
 
 /* Types Structs ----------------------------------------------------*/
+
+/**
+ * @brief DAC hardware physical mapping.
+ */
 typedef struct
 {
-    void          *port;
-    uint32_t       channel;
-    cfn_hal_gpio_t pin;
-    void          *user_arg;
+    void          *port;     /*!< Peripheral base register address */
+    uint32_t       channel;  /*!< Target DAC channel index */
+    cfn_hal_gpio_t pin;      /*!< Analog output pin mapping */
+    void          *user_arg; /*!< Peripheral instance user argument */
 } cfn_hal_dac_phy_t;
 
+/**
+ * @brief DAC configuration structure.
+ */
 typedef struct
 {
-    uint32_t resolution;
-    uint32_t alignment;
-    void    *custom;
+    uint32_t resolution; /*!< DAC resolution in bits */
+    uint32_t alignment;  /*!< Data alignment (Left/Right) */
+    void    *custom;     /*!< Vendor-specific custom configuration */
 } cfn_hal_dac_config_t;
 
-typedef struct cfn_hal_dac_s cfn_hal_dac_t;
-
-typedef void (*cfn_hal_dac_callback_t)(cfn_hal_dac_t *driver, cfn_hal_dac_interrupts_t interrupt, void *user_arg);
-
+typedef struct cfn_hal_dac_s     cfn_hal_dac_t;
 typedef struct cfn_hal_dac_api_s cfn_hal_dac_api_t;
 
 /**
- * @brief Virtual Method Table (VMT) for the peripheral.
- * Hardware-specific implementations must populate these function pointers.
- * Functions can be set to NULL if not implemented.
+ * @brief DAC callback signature.
+ * @param driver Pointer to the DAC driver instance.
+ * @param event_mask Mask of triggered nominal events.
+ * @param error_mask Mask of triggered exception errors.
+ * @param user_arg User-defined argument passed during registration.
+ */
+typedef void (*cfn_hal_dac_callback_t)(cfn_hal_dac_t *driver, uint32_t event_mask, uint32_t error_mask, void *user_arg);
+
+/**
+ * @brief DAC Virtual Method Table (VMT).
  */
 struct cfn_hal_dac_api_s
 {
-    cfn_hal_error_code_t (*cfn_hal_dac_init)(cfn_hal_dac_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_dac_deinit)(cfn_hal_dac_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_dac_set_value)(cfn_hal_dac_t *driver, uint32_t value);
-    cfn_hal_error_code_t (*cfn_hal_dac_start)(cfn_hal_dac_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_dac_stop)(cfn_hal_dac_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_dac_register_cb)(cfn_hal_dac_t *driver, cfn_hal_dac_callback_t cb, void *user_arg);
-    cfn_hal_error_code_t (*cfn_hal_dac_cfg_irq_enable)(cfn_hal_dac_t *driver, cfn_hal_dac_interrupts_t irq);
-    cfn_hal_error_code_t (*cfn_hal_dac_cfg_irq_disable)(cfn_hal_dac_t *driver, cfn_hal_dac_interrupts_t irq);
-    cfn_hal_error_code_t (*cfn_hal_dac_write_dma)(cfn_hal_dac_t *driver, const uint32_t *data, size_t nbr_of_samples);
+    cfn_hal_api_base_t base;
+
+    /* DAC Specific Extensions */
+    cfn_hal_error_code_t (*set_value)(cfn_hal_dac_t *driver, uint32_t value);
+    cfn_hal_error_code_t (*start)(cfn_hal_dac_t *driver);
+    cfn_hal_error_code_t (*stop)(cfn_hal_dac_t *driver);
+    cfn_hal_error_code_t (*write_dma)(cfn_hal_dac_t *driver, const uint32_t *data, size_t nbr_of_samples);
 };
 
-/**
- * @brief Generated driver structure for dac.
- *
- * This macro expands to the following structure:
- * \code{c}
- * struct cfn_hal_dac_s {
- *     cfn_hal_driver_t       base;
- *     const cfn_hal_dac_config_t *config;
- *     const cfn_hal_dac_api_t    *api;
- *     const cfn_hal_dac_phy_t    *phy;
- *     cfn_hal_dac_callback_t            cb;
- *     void              *cb_user_arg;
- * };
- * typedef struct cfn_hal_dac_s cfn_hal_dac_t;
- * \endcode
- */
 CFN_HAL_CREATE_DRIVER_TYPE(dac, cfn_hal_dac_config_t, cfn_hal_dac_api_t, cfn_hal_dac_phy_t, cfn_hal_dac_callback_t);
 
-/* Functions inline  ---------------------------------------------*/
+/* Functions inline ------------------------------------------------- */
 
 /**
- * @brief cfn_hal_dac_init implementation.
- * @param driver Pointer to the peripheral driver instance.
+ * @brief Initializes the DAC driver.
+ * @param driver Pointer to the DAC driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_dac_init(cfn_hal_dac_t *driver)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    if (driver && driver->base.on_config)
+    if (!driver)
     {
-        error = driver->base.on_config(&driver->base, DRIVER_CONFIG_INIT);
-        if (error != CFN_HAL_ERROR_OK)
-        {
-            return error;
-        }
+        return CFN_HAL_ERROR_BAD_PARAM;
     }
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_DAC, cfn_hal_dac_init, driver, error);
-    if (error == CFN_HAL_ERROR_OK && driver)
-    {
-        driver->base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    }
-    return error;
+    driver->base.vmt = (const void *) driver->api;
+    return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DAC);
 }
 
 /**
- * @brief cfn_hal_dac_set_value implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param value The digital value to convert.
+ * @brief Deinitializes the DAC driver.
+ * @param driver Pointer to the DAC driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_dac_set_value(cfn_hal_dac_t *driver, uint32_t value)
+static inline cfn_hal_error_code_t cfn_hal_dac_deinit(cfn_hal_dac_t *driver)
 {
-    cfn_hal_error_code_t error = CFN_HAL_LOCK(driver, CFN_HAL_MAX_DELAY);
-    if (error != CFN_HAL_ERROR_OK)
+    if (!driver)
     {
-        return error;
+        return CFN_HAL_ERROR_BAD_PARAM;
     }
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_DAC, cfn_hal_dac_set_value, driver, error, value);
-    CFN_HAL_UNLOCK(driver);
-    return error;
+    return cfn_hal_base_deinit(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DAC);
 }
 
 /**
- * @brief cfn_hal_dac_start implementation.
- * @param driver Pointer to the peripheral driver instance.
+ * @brief Sets the DAC configuration.
+ * @param driver Pointer to the DAC driver instance.
+ * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_dac_start(cfn_hal_dac_t *driver)
+static inline cfn_hal_error_code_t cfn_hal_dac_config_set(cfn_hal_dac_t *driver, const cfn_hal_dac_config_t *config)
 {
-    cfn_hal_error_code_t error = CFN_HAL_LOCK(driver, CFN_HAL_MAX_DELAY);
-    if (error != CFN_HAL_ERROR_OK)
+    if (driver)
     {
-        return error;
+        driver->config = config;
     }
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_DAC, cfn_hal_dac_start, driver, error);
-    CFN_HAL_UNLOCK(driver);
-    return error;
+    return cfn_hal_base_config_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DAC, (const void *) config);
 }
 
 /**
- * @brief cfn_hal_dac_stop implementation.
- * @param driver Pointer to the peripheral driver instance.
+ * @brief Gets the current DAC configuration.
+ * @param driver Pointer to the DAC driver instance.
+ * @param config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_dac_stop(cfn_hal_dac_t *driver)
+static inline cfn_hal_error_code_t cfn_hal_dac_config_get(cfn_hal_dac_t *driver, cfn_hal_dac_config_t *config)
 {
-    cfn_hal_error_code_t error = CFN_HAL_LOCK(driver, CFN_HAL_MAX_DELAY);
-    if (error != CFN_HAL_ERROR_OK)
+    if (!driver || !config || !driver->config)
     {
-        return error;
+        return CFN_HAL_ERROR_BAD_PARAM;
     }
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_DAC, cfn_hal_dac_stop, driver, error);
-    CFN_HAL_UNLOCK(driver);
-    return error;
+    *config = *(driver->config);
+    return CFN_HAL_ERROR_OK;
 }
 
 /**
- * @brief cfn_hal_dac_register_cb implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param cb Callback function to register.
+ * @brief Registers a callback for DAC events and errors.
+ * @param driver Pointer to the DAC driver instance.
+ * @param CALLBACK The callback function to register.
  * @param user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t
-cfn_hal_dac_register_cb(cfn_hal_dac_t *driver, cfn_hal_dac_callback_t cb, void *user_arg)
+cfn_hal_dac_callback_register(cfn_hal_dac_t *driver, const cfn_hal_dac_callback_t CALLBACK, void *user_arg)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_DAC, cfn_hal_dac_register_cb, driver, error, cb, user_arg);
-    return error;
+    if (driver)
+    {
+        driver->cb = CALLBACK;
+        driver->cb_user_arg = user_arg;
+    }
+    return cfn_hal_base_callback_register(
+        &driver->base, CFN_HAL_PERIPHERAL_TYPE_DAC, (const void *) CALLBACK, user_arg);
 }
 
 /**
- * @brief cfn_hal_dac_cfg_irq_enable implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param irq Interrupt type or event identifier.
+ * @brief Sets the DAC power state.
+ * @param driver Pointer to the DAC driver instance.
+ * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_dac_cfg_irq_enable(cfn_hal_dac_t *driver, cfn_hal_dac_interrupts_t irq)
+static inline cfn_hal_error_code_t cfn_hal_dac_power_state_set(cfn_hal_dac_t *driver, cfn_hal_power_state_t state)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_DAC, cfn_hal_dac_cfg_irq_enable, driver, error, irq);
-    return error;
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_power_state_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DAC, state);
 }
 
 /**
- * @brief cfn_hal_dac_cfg_irq_disable implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param irq Interrupt type or event identifier.
+ * @brief Enables one or more DAC nominal events.
+ * @param driver Pointer to the DAC driver instance.
+ * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_dac_cfg_irq_disable(cfn_hal_dac_t *driver, cfn_hal_dac_interrupts_t irq)
+static inline cfn_hal_error_code_t cfn_hal_dac_event_enable(cfn_hal_dac_t *driver, uint32_t event_mask)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_DAC, cfn_hal_dac_cfg_irq_disable, driver, error, irq);
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DAC, event_mask);
+}
+
+/**
+ * @brief Disables one or more DAC nominal events.
+ * @param driver Pointer to the DAC driver instance.
+ * @param event_mask Mask of events to disable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_dac_event_disable(cfn_hal_dac_t *driver, uint32_t event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DAC, event_mask);
+}
+
+/**
+ * @brief Retrieves the current DAC nominal event status.
+ * @param driver Pointer to the DAC driver instance.
+ * @param event_mask [out] Pointer to store the event mask.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_dac_event_get(cfn_hal_dac_t *driver, uint32_t *event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DAC, event_mask);
+}
+
+/**
+ * @brief Enables one or more DAC exception errors.
+ * @param driver Pointer to the DAC driver instance.
+ * @param error_mask Mask of errors to enable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_dac_error_enable(cfn_hal_dac_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DAC, error_mask);
+}
+
+/**
+ * @brief Disables one or more DAC exception errors.
+ * @param driver Pointer to the DAC driver instance.
+ * @param error_mask Mask of errors to disable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_dac_error_disable(cfn_hal_dac_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DAC, error_mask);
+}
+
+/**
+ * @brief Retrieves the current DAC exception error status.
+ * @param driver Pointer to the DAC driver instance.
+ * @param error_mask [out] Pointer to store the error mask.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_dac_error_get(cfn_hal_dac_t *driver, uint32_t *error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DAC, error_mask);
+}
+
+/* DAC Specific Functions ------------------------------------------- */
+
+/**
+ * @brief Sets a static output value for the DAC.
+ * @param driver Pointer to the DAC driver instance.
+ * @param value The digital value to convert to analog.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_dac_set_value(cfn_hal_dac_t *driver, uint32_t value)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_DAC, set_value, driver, error, value);
     return error;
 }
 
 /**
- * @brief cfn_hal_dac_write_dma implementation.
- * @param driver Pointer to the peripheral driver instance.
+ * @brief Starts DAC conversion (e.g., enables output).
+ * @param driver Pointer to the DAC driver instance.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_dac_start(cfn_hal_dac_t *driver)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_DAC, start, driver, error);
+    return error;
+}
+
+/**
+ * @brief Stops DAC conversion (e.g., disables output).
+ * @param driver Pointer to the DAC driver instance.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_dac_stop(cfn_hal_dac_t *driver)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_DAC, stop, driver, error);
+    return error;
+}
+
+/**
+ * @brief Starts continuous DAC output using DMA.
+ * @param driver Pointer to the DAC driver instance.
  * @param data Pointer to the buffer containing samples to write.
- * @param nbr_of_samples Number of samples to write.
+ * @param nbr_of_samples Number of samples to output.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t
 cfn_hal_dac_write_dma(cfn_hal_dac_t *driver, const uint32_t *data, size_t nbr_of_samples)
 {
-    cfn_hal_error_code_t error = CFN_HAL_LOCK(driver, CFN_HAL_MAX_DELAY);
-    if (error != CFN_HAL_ERROR_OK)
-    {
-        return error;
-    }
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
-        CFN_HAL_PERIPHERAL_TYPE_DAC, cfn_hal_dac_write_dma, driver, error, data, nbr_of_samples);
-    CFN_HAL_UNLOCK(driver);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_DAC, write_dma, driver, error, data, nbr_of_samples);
     return error;
 }
 

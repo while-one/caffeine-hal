@@ -35,6 +35,10 @@ extern "C"
 #include <stddef.h>
 #include "cfn_hal_types.h"
 
+#ifndef CFN_HAL_USE_LOCK
+#define CFN_HAL_USE_LOCK 0
+#endif
+
 /* Defines ----------------------------------------------------------*/
 // #define CFN_HAL_CAFFEINE_VERSION CAFFEINE_HAL_VERSION /*!< Managed by the build system */
 #define CFN_HAL_MAX_DELAY (UINT32_MAX)
@@ -50,7 +54,6 @@ extern "C"
 #define CFN_HAL_INTERNAL_CONCAT(x, y) x##y                             /*!< Internal concat, not to be used */
 #define CFN_HAL_CONCAT(x, y)          CFN_HAL_INTERNAL_CONCAT(x, y)    /*!< Actual concat, can be called           */
 #define CFN_HAL_UNUSED(x)             (void) (x)
-
 /**
  * @brief Core Hardware Abstraction Layer definitions and macros.
  *
@@ -66,7 +69,7 @@ extern "C"
  * @param type Peripheral prefix (e.g. cfn_hal_uart_t, cfn_hal_spi_t, cfn_hal_gpio_t).
  * @return Typed pointer to the peripheral driver structure.
  */
-#define CFN_HAL_GET_DRIVER(ptr, type) CFN_HAL_CONTAINER_OF(ptr, type, base)
+#define CFN_HAL_GET_DRIVER_FROM_BASE(ptr, type) CFN_HAL_CONTAINER_OF(ptr, type, base)
 /**
  * @brief Core Hardware Abstraction Layer definitions and macros.
  *
@@ -124,97 +127,61 @@ extern "C"
             (result) = CFN_HAL_ERROR_BAD_PARAM;                                                                        \
         }                                                                                                              \
     } while (0)
+
+#if (CFN_HAL_USE_LOCK == 1)
+#define CFN_HAL_LOCK(driver, timeout) cfn_hal_driver_lock(&(driver)->base, timeout)
+#define CFN_HAL_UNLOCK(driver)        cfn_hal_driver_unlock(&(driver)->base)
+
+/**
+ * @brief Helper macro to execute a driver function with a concurrency lock.
+ * @param driver Pointer to the peripheral driver instance.
+ * @param timeout Lock acquisition timeout in milliseconds.
+ * @param result Variable to store the return code (cfn_hal_error_code_t).
+ * @param function The driver function to call.
+ * @param ... Additional arguments to pass to the function after the driver pointer.
+ */
+#define CFN_HAL_WITH_LOCK(driver, timeout, result, function, ...)                                                      \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        if ((driver) != NULL)                                                                                          \
+        {                                                                                                              \
+            (result) = cfn_hal_driver_lock(&(driver)->base, (timeout));                                                \
+            if ((result) == CFN_HAL_ERROR_OK)                                                                          \
+            {                                                                                                          \
+                (result) = function((driver), ##__VA_ARGS__);                                                          \
+                (void) cfn_hal_driver_unlock(&(driver)->base);                                                         \
+            }                                                                                                          \
+        }                                                                                                              \
+        else                                                                                                           \
+        {                                                                                                              \
+            (result) = CFN_HAL_ERROR_BAD_PARAM;                                                                        \
+        }                                                                                                              \
+    } while (0)
+#else
+#define CFN_HAL_LOCK(driver, timeout) (CFN_HAL_ERROR_OK)
+#define CFN_HAL_UNLOCK(driver)        (CFN_HAL_ERROR_OK)
+
+/**
+ * @brief Helper macro to execute a driver function (Locking disabled).
+ */
+#define CFN_HAL_WITH_LOCK(driver, timeout, result, function, ...)                                                      \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        (void) (timeout);                                                                                              \
+        if ((driver) != NULL)                                                                                          \
+        {                                                                                                              \
+            (result) = function((driver), ##__VA_ARGS__);                                                              \
+        }                                                                                                              \
+        else                                                                                                           \
+        {                                                                                                              \
+            (result) = CFN_HAL_ERROR_BAD_PARAM;                                                                        \
+        }                                                                                                              \
+    } while (0)
+#endif
+
 /* Types Enums ------------------------------------------------------*/
 /* Types Structs ----------------------------------------------------*/
 /* Functions prototypes ---------------------------------------------*/
-
-/**
- * @brief Generic Power Management state transition function.
- * @param base Pointer to the base driver struct (use &driver->base).
- * @param state The target power state.
- * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
- */
-static inline cfn_hal_error_code_t cfn_hal_pm_set_state(cfn_hal_driver_t *base, cfn_hal_power_state_t state)
-{
-    if (!base)
-    {
-        return CFN_HAL_ERROR_BAD_PARAM;
-    }
-
-    if (base->power_state == state)
-    {
-        return CFN_HAL_ERROR_OK;
-    }
-
-    if (!base->set_power_state)
-    {
-        return CFN_HAL_ERROR_NOT_SUPPORTED;
-    }
-
-    cfn_hal_error_code_t err = base->set_power_state(base, state);
-    if (err == CFN_HAL_ERROR_OK)
-    {
-        base->power_state = state;
-    }
-
-    return err;
-}
-
-/**
- * @brief Helper macro to easily set the power state of any specific driver.
- * Usage: CFN_HAL_PM_SET_POWER(&my_gpio, CFN_HAL_POWER_STATE_OFF);
- */
-#define CFN_HAL_PM_SET_POWER(driver_ptr, state) cfn_hal_pm_set_state(&(driver_ptr)->base, state)
-
-/**
- * @brief Generic Concurrency Lock.
- * @param base Pointer to the base driver struct.
- * @param timeout Timeout duration in milliseconds.
- * @return CFN_HAL_ERROR_OK on success, CFN_HAL_ERROR_TIMING_TIMEOUT on timeout, or
- * OK instantly if no lock provided.
- */
-static inline cfn_hal_error_code_t cfn_hal_driver_lock(cfn_hal_driver_t *base, uint32_t timeout)
-{
-    if (!base)
-    {
-        return CFN_HAL_ERROR_BAD_PARAM;
-    }
-    if (!base->lock)
-    {
-        return CFN_HAL_ERROR_OK; /* Safe bare-metal fallback */
-    }
-    return base->lock(base, timeout);
-}
-
-/**
- * @brief Generic Concurrency Unlock.
- * @param base Pointer to the base driver struct.
- * @return CFN_HAL_ERROR_OK on success.
- */
-static inline cfn_hal_error_code_t cfn_hal_driver_unlock(cfn_hal_driver_t *base)
-{
-    if (!base)
-    {
-        return CFN_HAL_ERROR_BAD_PARAM;
-    }
-    if (!base->unlock)
-    {
-        return CFN_HAL_ERROR_OK; /* Safe bare-metal fallback */
-    }
-    return base->unlock(base);
-}
-
-#ifndef CFN_HAL_USE_LOCK
-#define CFN_HAL_USE_LOCK 1
-#endif
-
-#if (CFN_HAL_USE_LOCK == 1)
-#define CFN_HAL_LOCK(driver_ptr, timeout) cfn_hal_driver_lock(&(driver_ptr)->base, timeout)
-#define CFN_HAL_UNLOCK(driver_ptr)        cfn_hal_driver_unlock(&(driver_ptr)->base)
-#else
-#define CFN_HAL_LOCK(driver_ptr, timeout) (CFN_HAL_ERROR_OK)
-#define CFN_HAL_UNLOCK(driver_ptr)        (CFN_HAL_ERROR_OK)
-#endif
 
 #ifdef __cplusplus
 }

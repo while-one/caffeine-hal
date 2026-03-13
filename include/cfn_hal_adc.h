@@ -30,21 +30,38 @@
 extern "C"
 {
 #endif
+
 /* Includes ---------------------------------------------------------*/
 #include "cfn_hal_types.h"
 #include "cfn_hal.h"
+#include "cfn_hal_base.h"
 #include "cfn_hal_gpio.h"
+
 /* Defines ----------------------------------------------------------*/
-/* Macro ------------------------------------------------------------*/
+
 /* Types Enums ------------------------------------------------------*/
+
+/**
+ * @brief ADC nominal event flags.
+ */
 typedef enum
 {
-    CFN_HAL_ADC_INTERRUPT_EOC,
-    CFN_HAL_ADC_INTERRUPT_OVR,
-    CFN_HAL_ADC_INTERRUPT_ERROR
-} cfn_hal_adc_interrupts_t;
+    CFN_HAL_ADC_EVENT_NONE = 0,
+    CFN_HAL_ADC_EVENT_EOC = CFN_HAL_BIT(0), /*!< End of Conversion */
+} cfn_hal_adc_event_t;
+
+/**
+ * @brief ADC exception error flags.
+ */
+typedef enum
+{
+    CFN_HAL_ADC_ERROR_NONE = 0,
+    CFN_HAL_ADC_ERROR_OVERRUN = CFN_HAL_BIT(0), /*!< Data Overrun */
+    CFN_HAL_ADC_ERROR_GENERAL = CFN_HAL_BIT(1), /*!< General Hardware Error */
+} cfn_hal_adc_error_t;
 
 /* Types Structs ----------------------------------------------------*/
+
 typedef struct
 {
     void          *port;
@@ -59,186 +76,273 @@ typedef struct
     void    *custom;
 } cfn_hal_adc_config_t;
 
-typedef struct cfn_hal_adc_s cfn_hal_adc_t;
-
-typedef void (*cfn_hal_adc_callback_t)(
-    cfn_hal_adc_t *driver, cfn_hal_adc_interrupts_t interrupt, uint32_t value, void *user_arg);
-
+typedef struct cfn_hal_adc_s     cfn_hal_adc_t;
 typedef struct cfn_hal_adc_api_s cfn_hal_adc_api_t;
 
 /**
- * @brief Virtual Method Table (VMT) for the peripheral.
- * Hardware-specific implementations must populate these function pointers.
- * Functions can be set to NULL if not implemented.
+ * @brief ADC callback signature.
+ * @param driver Pointer to the ADC driver instance.
+ * @param event_mask Mask of triggered nominal events.
+ * @param error_mask Mask of triggered exception errors.
+ * @param value Last conversion result (if applicable).
+ * @param user_arg User-defined argument passed during registration.
+ */
+typedef void (*cfn_hal_adc_callback_t)(
+    cfn_hal_adc_t *driver, uint32_t event_mask, uint32_t error_mask, uint32_t value, void *user_arg);
+
+/**
+ * @brief ADC Virtual Method Table (VMT).
  */
 struct cfn_hal_adc_api_s
 {
-    cfn_hal_error_code_t (*cfn_hal_adc_init)(cfn_hal_adc_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_adc_deinit)(cfn_hal_adc_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_adc_read)(cfn_hal_adc_t *driver, uint32_t *value, uint32_t timeout);
-    cfn_hal_error_code_t (*cfn_hal_adc_start)(cfn_hal_adc_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_adc_stop)(cfn_hal_adc_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_adc_register_cb)(cfn_hal_adc_t *driver, cfn_hal_adc_callback_t cb, void *user_arg);
-    cfn_hal_error_code_t (*cfn_hal_adc_cfg_irq_enable)(cfn_hal_adc_t *driver, cfn_hal_adc_interrupts_t irq);
-    cfn_hal_error_code_t (*cfn_hal_adc_cfg_irq_disable)(cfn_hal_adc_t *driver, cfn_hal_adc_interrupts_t irq);
-    cfn_hal_error_code_t (*cfn_hal_adc_read_dma)(cfn_hal_adc_t *driver, uint32_t *data, size_t nbr_of_samples);
+    cfn_hal_api_base_t base;
+
+    /* ADC Specific Extensions */
+    cfn_hal_error_code_t (*read)(cfn_hal_adc_t *driver, uint32_t *value, uint32_t timeout);
+    cfn_hal_error_code_t (*start)(cfn_hal_adc_t *driver);
+    cfn_hal_error_code_t (*stop)(cfn_hal_adc_t *driver);
+    cfn_hal_error_code_t (*read_dma)(cfn_hal_adc_t *driver, uint32_t *data, size_t nbr_of_samples);
 };
 
-/**
- * @brief Generated driver structure for adc.
- *
- * This macro expands to the following structure:
- * \code{c}
- * struct cfn_hal_adc_s {
- *     cfn_hal_driver_t       base;
- *     const cfn_hal_adc_config_t *config;
- *     const cfn_hal_adc_api_t    *api;
- *     const cfn_hal_adc_phy_t    *phy;
- *     cfn_hal_adc_callback_t            cb;
- *     void              *cb_user_arg;
- * };
- * typedef struct cfn_hal_adc_s cfn_hal_adc_t;
- * \endcode
- */
 CFN_HAL_CREATE_DRIVER_TYPE(adc, cfn_hal_adc_config_t, cfn_hal_adc_api_t, cfn_hal_adc_phy_t, cfn_hal_adc_callback_t);
 
-/* Functions prototypes ---------------------------------------------*/
+/* Functions inline ------------------------------------------------- */
+
 /**
- * @brief cfn_hal_adc_init implementation.
- * @param driver Pointer to the peripheral driver instance.
+ * @brief Initializes the ADC driver.
+ * @param driver Pointer to the ADC driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_adc_init(cfn_hal_adc_t *driver)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    if (driver && driver->base.on_config)
+    if (!driver)
     {
-        error = driver->base.on_config(&driver->base, DRIVER_CONFIG_INIT);
-        if (error != CFN_HAL_ERROR_OK)
-        {
-            return error;
-        }
+        return CFN_HAL_ERROR_BAD_PARAM;
     }
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_ADC, cfn_hal_adc_init, driver, error);
-    if (error == CFN_HAL_ERROR_OK && driver)
-    {
-        driver->base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    }
-    return error;
+    driver->base.vmt = (const void *) driver->api;
+    return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ADC);
 }
 
 /**
- * @brief cfn_hal_adc_read implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param value Pointer to store the read state, or the state value to
- * write.
+ * @brief Deinitializes the ADC driver.
+ * @param driver Pointer to the ADC driver instance.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_adc_deinit(cfn_hal_adc_t *driver)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_deinit(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ADC);
+}
+
+/**
+ * @brief Sets the ADC configuration.
+ * @param driver Pointer to the ADC driver instance.
+ * @param config Pointer to the configuration structure.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_adc_config_set(cfn_hal_adc_t *driver, const cfn_hal_adc_config_t *config)
+{
+    if (driver)
+    {
+        driver->config = config;
+    }
+    return cfn_hal_base_config_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ADC, (const void *) config);
+}
+
+/**
+ * @brief Gets the current ADC configuration.
+ * @param driver Pointer to the ADC driver instance.
+ * @param config [out] Pointer to store the configuration.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_adc_config_get(cfn_hal_adc_t *driver, cfn_hal_adc_config_t *config)
+{
+    if (!driver || !config || !driver->config)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    *config = *(driver->config);
+    return CFN_HAL_ERROR_OK;
+}
+
+/**
+ * @brief Registers a callback for ADC events and errors.
+ * @param driver Pointer to the ADC driver instance.
+ * @param callback The callback function to register.
+ * @param user_arg User-defined argument passed to the callback.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t
+cfn_hal_adc_callback_register(cfn_hal_adc_t *driver, const cfn_hal_adc_callback_t CALLBACK, void *user_arg)
+{
+    if (driver)
+    {
+        driver->cb = CALLBACK;
+        driver->cb_user_arg = user_arg;
+    }
+    return cfn_hal_base_callback_register(
+        &driver->base, CFN_HAL_PERIPHERAL_TYPE_ADC, (const void *) CALLBACK, user_arg);
+}
+
+/**
+ * @brief Sets the ADC power state.
+ * @param driver Pointer to the ADC driver instance.
+ * @param state Target power state.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_adc_power_state_set(cfn_hal_adc_t *driver, cfn_hal_power_state_t state)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_power_state_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ADC, state);
+}
+
+/**
+ * @brief Enables one or more ADC nominal events.
+ * @param driver Pointer to the ADC driver instance.
+ * @param event_mask Mask of events to enable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_adc_event_enable(cfn_hal_adc_t *driver, uint32_t event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ADC, event_mask);
+}
+
+/**
+ * @brief Disables one or more ADC nominal events.
+ * @param driver Pointer to the ADC driver instance.
+ * @param event_mask Mask of events to disable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_adc_event_disable(cfn_hal_adc_t *driver, uint32_t event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ADC, event_mask);
+}
+
+/**
+ * @brief Retrieves the current ADC nominal event status.
+ * @param driver Pointer to the ADC driver instance.
+ * @param event_mask [out] Pointer to store the event mask.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_adc_event_get(cfn_hal_adc_t *driver, uint32_t *event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ADC, event_mask);
+}
+
+/**
+ * @brief Enables one or more ADC exception errors.
+ * @param driver Pointer to the ADC driver instance.
+ * @param error_mask Mask of errors to enable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_adc_error_enable(cfn_hal_adc_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ADC, error_mask);
+}
+
+/**
+ * @brief Disables one or more ADC exception errors.
+ * @param driver Pointer to the ADC driver instance.
+ * @param error_mask Mask of errors to disable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_adc_error_disable(cfn_hal_adc_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ADC, error_mask);
+}
+
+/**
+ * @brief Retrieves the current ADC exception error status.
+ * @param driver Pointer to the ADC driver instance.
+ * @param error_mask [out] Pointer to store the error mask.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_adc_error_get(cfn_hal_adc_t *driver, uint32_t *error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ADC, error_mask);
+}
+
+/* ADC Specific Functions ------------------------------------------- */
+
+/**
+ * @brief Reads a single ADC value (polling).
+ * @param driver Pointer to the ADC driver instance.
+ * @param value [out] Pointer to store the read value.
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_adc_read(cfn_hal_adc_t *driver, uint32_t *value, uint32_t timeout)
 {
-    cfn_hal_error_code_t error = CFN_HAL_LOCK(driver, CFN_HAL_MAX_DELAY);
-    if (error != CFN_HAL_ERROR_OK)
-    {
-        return error;
-    }
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_ADC, cfn_hal_adc_read, driver, error, value, timeout);
-    CFN_HAL_UNLOCK(driver);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_ADC, read, driver, error, value, timeout);
     return error;
 }
 
 /**
- * @brief cfn_hal_adc_start implementation.
- * @param driver Pointer to the peripheral driver instance.
+ * @brief Starts continuous ADC conversion.
+ * @param driver Pointer to the ADC driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_adc_start(cfn_hal_adc_t *driver)
 {
-    cfn_hal_error_code_t error = CFN_HAL_LOCK(driver, CFN_HAL_MAX_DELAY);
-    if (error != CFN_HAL_ERROR_OK)
-    {
-        return error;
-    }
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_ADC, cfn_hal_adc_start, driver, error);
-    CFN_HAL_UNLOCK(driver);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_ADC, start, driver, error);
     return error;
 }
 
 /**
- * @brief cfn_hal_adc_stop implementation.
- * @param driver Pointer to the peripheral driver instance.
+ * @brief Stops continuous ADC conversion.
+ * @param driver Pointer to the ADC driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_adc_stop(cfn_hal_adc_t *driver)
 {
-    cfn_hal_error_code_t error = CFN_HAL_LOCK(driver, CFN_HAL_MAX_DELAY);
-    if (error != CFN_HAL_ERROR_OK)
-    {
-        return error;
-    }
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_ADC, cfn_hal_adc_stop, driver, error);
-    CFN_HAL_UNLOCK(driver);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_ADC, stop, driver, error);
     return error;
 }
 
 /**
- * @brief cfn_hal_adc_register_cb implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param cb Callback function to register.
- * @param user_arg User-defined argument passed to the callback.
- * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
- */
-static inline cfn_hal_error_code_t
-cfn_hal_adc_register_cb(cfn_hal_adc_t *driver, cfn_hal_adc_callback_t cb, void *user_arg)
-{
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_ADC, cfn_hal_adc_register_cb, driver, error, cb, user_arg);
-    return error;
-}
-
-/**
- * @brief cfn_hal_adc_cfg_irq_enable implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param irq Interrupt type or event identifier.
- * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
- */
-static inline cfn_hal_error_code_t cfn_hal_adc_cfg_irq_enable(cfn_hal_adc_t *driver, cfn_hal_adc_interrupts_t irq)
-{
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_ADC, cfn_hal_adc_cfg_irq_enable, driver, error, irq);
-    return error;
-}
-
-/**
- * @brief cfn_hal_adc_cfg_irq_disable implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param irq Interrupt type or event identifier.
- * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
- */
-static inline cfn_hal_error_code_t cfn_hal_adc_cfg_irq_disable(cfn_hal_adc_t *driver, cfn_hal_adc_interrupts_t irq)
-{
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_ADC, cfn_hal_adc_cfg_irq_disable, driver, error, irq);
-    return error;
-}
-
-/**
- * @brief cfn_hal_adc_read_dma implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param data Pointer to the buffer where samples will be stored.
+ * @brief Reads multiple ADC values using DMA.
+ * @param driver Pointer to the ADC driver instance.
+ * @param data [out] Pointer to the buffer where samples will be stored.
  * @param nbr_of_samples Number of samples to read.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_adc_read_dma(cfn_hal_adc_t *driver, uint32_t *data, size_t nbr_of_samples)
 {
-    cfn_hal_error_code_t error = CFN_HAL_LOCK(driver, CFN_HAL_MAX_DELAY);
-    if (error != CFN_HAL_ERROR_OK)
-    {
-        return error;
-    }
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
-        CFN_HAL_PERIPHERAL_TYPE_ADC, cfn_hal_adc_read_dma, driver, error, data, nbr_of_samples);
-    CFN_HAL_UNLOCK(driver);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_ADC, read_dma, driver, error, data, nbr_of_samples);
     return error;
 }
 

@@ -30,370 +30,370 @@
 extern "C"
 {
 #endif
+
 /* Includes ---------------------------------------------------------*/
 #include "cfn_hal_types.h"
 #include "cfn_hal.h"
+#include "cfn_hal_base.h"
+#include "cfn_hal_gpio.h"
+
 /* Defines ----------------------------------------------------------*/
-/* Macro ------------------------------------------------------------*/
+
 /* Types Enums ------------------------------------------------------*/
-typedef enum
-{
-    CFN_HAL_SPI_INTERRUPT_TX_COMPLETE,
-    CFN_HAL_SPI_INTERRUPT_RX_READY,
-
-    CFN_HAL_SPI_INTERRUPT_ERROR_FRAMING,
-    CFN_HAL_SPI_INTERRUPT_ERROR_OVERRUN,
-    CFN_HAL_SPI_INTERRUPT_ERROR_CRC,
-} cfn_hal_spi_interrupts_t;
-
-typedef enum
-{
-    CFN_HAL_SPI_CFG_FMT_POL0_PHA0,
-    CFN_HAL_SPI_CFG_FMT_POL0_PHA1,
-    CFN_HAL_SPI_CFG_FMT_POL1_PHA0,
-    CFN_HAL_SPI_CFG_FMT_POL1_PHA1,
-} cfn_hal_spi_cfg_format_t;
-
-typedef enum
-{
-    CFN_HAL_SPI_CFG_CS_USER_CONTROLLED,
-    CFN_HAL_SPI_CFG_CS_HAL_CONTROLLED,
-    CFN_HAL_SPI_CFG_CS_HW_CONTROLLED
-} cfn_hal_spi_cfg_cs_t;
-
-/* Types Structs ----------------------------------------------------*/
-typedef struct
-{
-    void             *port;
-    cfn_hal_driver_t *mosi;
-    cfn_hal_driver_t *miso;
-    cfn_hal_driver_t *sck;
-    void             *user_data;
-} cfn_hal_spi_phy_t;
-
-typedef struct
-{
-    uint32_t                 bitrate;
-    uint32_t                 data_size;
-    cfn_hal_spi_cfg_format_t fmt;
-    cfn_hal_spi_cfg_cs_t     chip_select;
-    void                    *custom;
-} cfn_hal_spi_config_t;
-
-typedef struct
-{
-    const uint8_t    *tx_payload;
-    uint8_t          *rx_payload;
-    size_t            nbr_of_bytes;
-    cfn_hal_driver_t *cs;
-} cfn_hal_spi_transaction_t;
-
-typedef struct cfn_hal_spi_s cfn_hal_spi_t;
-
-typedef struct cfn_hal_spi_api_s cfn_hal_spi_api_t;
-
-typedef void (*cfn_hal_spi_callback_t)(
-    cfn_hal_spi_t *driver, cfn_hal_spi_interrupts_t interrupt, uint8_t *data, size_t nbr_of_bytes, void *user_arg);
 
 /**
- * @brief Virtual Method Table (VMT) for the peripheral.
- * Hardware-specific implementations must populate these function pointers.
- * Functions can be set to NULL if not implemented.
+ * @brief SPI nominal event flags.
+ */
+typedef enum
+{
+    CFN_HAL_SPI_EVENT_NONE = 0,
+    CFN_HAL_SPI_EVENT_TX_COMPLETE = CFN_HAL_BIT(0), /*!< Data transmission finished */
+    CFN_HAL_SPI_EVENT_RX_READY = CFN_HAL_BIT(1),    /*!< Data reception finished */
+} cfn_hal_spi_event_t;
+
+/**
+ * @brief SPI exception error flags.
+ */
+typedef enum
+{
+    CFN_HAL_SPI_ERROR_NONE = 0,
+    CFN_HAL_SPI_ERROR_FRAMING = CFN_HAL_BIT(0), /*!< Frame synchronization error */
+    CFN_HAL_SPI_ERROR_OVERRUN = CFN_HAL_BIT(1), /*!< Rx overrun or Tx underrun */
+    CFN_HAL_SPI_ERROR_CRC = CFN_HAL_BIT(2),     /*!< CRC checksum mismatch */
+    CFN_HAL_SPI_ERROR_GENERAL = CFN_HAL_BIT(3), /*!< General hardware error */
+} cfn_hal_spi_error_t;
+
+/**
+ * @brief SPI clock phase and polarity formats.
+ */
+typedef enum
+{
+    CFN_HAL_SPI_CONFIG_FMT_POL0_PHA0, /*!< CPOL=0, CPHA=0 */
+    CFN_HAL_SPI_CONFIG_FMT_POL0_PHA1, /*!< CPOL=0, CPHA=1 */
+    CFN_HAL_SPI_CONFIG_FMT_POL1_PHA0, /*!< CPOL=1, CPHA=0 */
+    CFN_HAL_SPI_CONFIG_FMT_POL1_PHA1, /*!< CPOL=1, CPHA=1 */
+} cfn_hal_spi_config_format_t;
+
+/**
+ * @brief SPI Chip Select (CS) management modes.
+ */
+typedef enum
+{
+    CFN_HAL_SPI_CONFIG_CS_USER_CONTROLLED, /*!< CS toggled manually by application */
+    CFN_HAL_SPI_CONFIG_CS_HAL_CONTROLLED,  /*!< CS toggled by HAL during xfr */
+    CFN_HAL_SPI_CONFIG_CS_HW_CONTROLLED,   /*!< CS toggled by hardware peripheral */
+} cfn_hal_spi_config_cs_mode_t;
+
+/* Types Structs ----------------------------------------------------*/
+
+/**
+ * @brief SPI hardware physical mapping.
+ */
+typedef struct
+{
+    void             *port;      /*!< Peripheral base register address */
+    cfn_hal_driver_t *mosi;      /*!< MOSI pin driver (GPIO) */
+    cfn_hal_driver_t *miso;      /*!< MISO pin driver (GPIO) */
+    cfn_hal_driver_t *sck;       /*!< SCK pin driver (GPIO) */
+    void             *user_data; /*!< Peripheral instance user argument */
+} cfn_hal_spi_phy_t;
+
+/**
+ * @brief SPI configuration structure.
+ */
+typedef struct
+{
+    uint32_t                     bitrate;   /*!< Bus frequency in bps */
+    uint32_t                     data_size; /*!< Bits per frame (e.g. 8, 16) */
+    cfn_hal_spi_config_format_t  fmt;       /*!< Clock phase/polarity */
+    cfn_hal_spi_config_cs_mode_t cs_mode;   /*!< Chip Select behavior */
+    void                        *custom;    /*!< Vendor-specific custom configuration */
+} cfn_hal_spi_config_t;
+
+/**
+ * @brief SPI transaction configuration.
+ */
+typedef struct
+{
+    const uint8_t    *tx_payload;   /*!< Outgoing data buffer */
+    uint8_t          *rx_payload;   /*!< Incoming data buffer */
+    size_t            nbr_of_bytes; /*!< Bytes to exchange */
+    cfn_hal_driver_t *cs;           /*!< Target CS driver (GPIO) if HAL controlled */
+} cfn_hal_spi_transaction_t;
+
+typedef struct cfn_hal_spi_s     cfn_hal_spi_t;
+typedef struct cfn_hal_spi_api_s cfn_hal_spi_api_t;
+
+/**
+ * @brief SPI callback signature.
+ * @param driver Pointer to the SPI driver instance.
+ * @param event_mask Mask of triggered nominal events.
+ * @param error_mask Mask of triggered exception errors.
+ * @param data Pointer to the transaction buffer (if applicable).
+ * @param nbr_of_bytes Number of bytes transferred.
+ * @param user_arg User-defined argument passed during registration.
+ */
+typedef void (*cfn_hal_spi_callback_t)(cfn_hal_spi_t *driver,
+                                       uint32_t       event_mask,
+                                       uint32_t       error_mask,
+                                       uint8_t       *data,
+                                       size_t         nbr_of_bytes,
+                                       void          *user_arg);
+
+/**
+ * @brief SPI Virtual Method Table (VMT).
  */
 struct cfn_hal_spi_api_s
 {
-    cfn_hal_error_code_t (*cfn_hal_spi_register_cb)(cfn_hal_spi_t *driver, cfn_hal_spi_callback_t cb, void *user_arg);
-    cfn_hal_error_code_t (*cfn_hal_spi_set_cb_arg)(cfn_hal_spi_t *driver, void *user_arg);
-    cfn_hal_error_code_t (*cfn_hal_spi_xfr_irq)(cfn_hal_spi_t *driver, cfn_hal_spi_transaction_t *xfr);
-    cfn_hal_error_code_t (*cfn_hal_spi_xfr_irq_abort)(cfn_hal_spi_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_spi_xfr_polling)(
-        cfn_hal_spi_t *driver, cfn_hal_spi_transaction_t *xfr, uint32_t timeout);
-    cfn_hal_error_code_t (*cfn_hal_spi_check_error)(cfn_hal_spi_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_spi_init)(cfn_hal_spi_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_spi_deinit)(cfn_hal_spi_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_spi_cfg_get)(cfn_hal_spi_t *driver, cfn_hal_spi_config_t *config);
-    cfn_hal_error_code_t (*cfn_hal_spi_cfg_set)(cfn_hal_spi_t *driver, const cfn_hal_spi_config_t *config);
-    cfn_hal_error_code_t (*cfn_hal_spi_cfg_tx_enable)(cfn_hal_spi_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_spi_cfg_rx_enable)(cfn_hal_spi_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_spi_cfg_irq_enable)(cfn_hal_spi_t *driver, cfn_hal_spi_interrupts_t irq);
-    cfn_hal_error_code_t (*cfn_hal_spi_cfg_tx_disable)(cfn_hal_spi_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_spi_cfg_rx_disable)(cfn_hal_spi_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_spi_cfg_irq_disable)(cfn_hal_spi_t *driver, cfn_hal_spi_interrupts_t irq);
-    cfn_hal_error_code_t (*cfn_hal_spi_xfr_dma)(cfn_hal_spi_t *driver, cfn_hal_spi_transaction_t *xfr);
+    cfn_hal_api_base_t base;
+
+    /* SPI Specific Extensions */
+    cfn_hal_error_code_t (*xfr_irq)(cfn_hal_spi_t *driver, cfn_hal_spi_transaction_t *xfr);
+    cfn_hal_error_code_t (*xfr_irq_abort)(cfn_hal_spi_t *driver);
+    cfn_hal_error_code_t (*xfr_polling)(cfn_hal_spi_t *driver, cfn_hal_spi_transaction_t *xfr, uint32_t timeout);
+    cfn_hal_error_code_t (*xfr_dma)(cfn_hal_spi_t *driver, cfn_hal_spi_transaction_t *xfr);
 };
 
-/**
- * @brief Generated driver structure for spi.
- *
- * This macro expands to the following structure:
- * \code{c}
- * struct cfn_hal_spi_s {
- *     cfn_hal_driver_t       base;
- *     const cfn_hal_spi_config_t *config;
- *     const cfn_hal_spi_api_t    *api;
- *     const cfn_hal_spi_phy_t    *phy;
- *     cfn_hal_spi_callback_t            cb;
- *     void              *cb_user_arg;
- * };
- * typedef struct cfn_hal_spi_s cfn_hal_spi_t;
- * \endcode
- */
 CFN_HAL_CREATE_DRIVER_TYPE(spi, cfn_hal_spi_config_t, cfn_hal_spi_api_t, cfn_hal_spi_phy_t, cfn_hal_spi_callback_t);
 
-/* Functions inline  ---------------------------------------------*/
+/* Functions inline ------------------------------------------------- */
+
 /**
- * @brief cfn_hal_spi_register_cb implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param cb Callback function to register.
+ * @brief Initializes the SPI driver.
+ * @param driver Pointer to the SPI driver instance.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_spi_init(cfn_hal_spi_t *driver)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    driver->base.vmt = (const void *) driver->api;
+    return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SPI);
+}
+
+/**
+ * @brief Deinitializes the SPI driver.
+ * @param driver Pointer to the SPI driver instance.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_spi_deinit(cfn_hal_spi_t *driver)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_deinit(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SPI);
+}
+
+/**
+ * @brief Sets the SPI configuration.
+ * @param driver Pointer to the SPI driver instance.
+ * @param config Pointer to the configuration structure.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_spi_config_set(cfn_hal_spi_t *driver, const cfn_hal_spi_config_t *config)
+{
+    if (driver)
+    {
+        driver->config = config;
+    }
+    return cfn_hal_base_config_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SPI, (const void *) config);
+}
+
+/**
+ * @brief Gets the current SPI configuration.
+ * @param driver Pointer to the SPI driver instance.
+ * @param config [out] Pointer to store the configuration.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_spi_config_get(cfn_hal_spi_t *driver, cfn_hal_spi_config_t *config)
+{
+    if (!driver || !config || !driver->config)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    *config = *(driver->config);
+    return CFN_HAL_ERROR_OK;
+}
+
+/**
+ * @brief Registers a callback for SPI events and errors.
+ * @param driver Pointer to the SPI driver instance.
+ * @param CALLBACK The callback function to register.
  * @param user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t
-cfn_hal_spi_register_cb(cfn_hal_spi_t *driver, cfn_hal_spi_callback_t cb, void *user_arg)
+cfn_hal_spi_callback_register(cfn_hal_spi_t *driver, const cfn_hal_spi_callback_t CALLBACK, void *user_arg)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SPI, cfn_hal_spi_register_cb, driver, error, cb, user_arg);
-    return error;
+    if (driver)
+    {
+        driver->cb = CALLBACK;
+        driver->cb_user_arg = user_arg;
+    }
+    return cfn_hal_base_callback_register(
+        &driver->base, CFN_HAL_PERIPHERAL_TYPE_SPI, (const void *) CALLBACK, user_arg);
 }
 
 /**
- * @brief cfn_hal_spi_set_cb_arg implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param user_arg User-defined argument passed to the callback.
+ * @brief Sets the SPI power state.
+ * @param driver Pointer to the SPI driver instance.
+ * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_spi_set_cb_arg(cfn_hal_spi_t *driver, void *user_arg)
+static inline cfn_hal_error_code_t cfn_hal_spi_power_state_set(cfn_hal_spi_t *driver, cfn_hal_power_state_t state)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SPI, cfn_hal_spi_set_cb_arg, driver, error, user_arg);
-    return error;
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_power_state_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SPI, state);
 }
 
 /**
- * @brief cfn_hal_spi_xfr_irq implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param xfr Pointer to the transaction structure defining the transfer.
+ * @brief Enables one or more SPI nominal events.
+ * @param driver Pointer to the SPI driver instance.
+ * @param event_mask Mask of events to enable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_spi_event_enable(cfn_hal_spi_t *driver, uint32_t event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SPI, event_mask);
+}
+
+/**
+ * @brief Disables one or more SPI nominal events.
+ * @param driver Pointer to the SPI driver instance.
+ * @param event_mask Mask of events to disable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_spi_event_disable(cfn_hal_spi_t *driver, uint32_t event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SPI, event_mask);
+}
+
+/**
+ * @brief Retrieves the current SPI nominal event status.
+ * @param driver Pointer to the SPI driver instance.
+ * @param event_mask [out] Pointer to store the event mask.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_spi_event_get(cfn_hal_spi_t *driver, uint32_t *event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SPI, event_mask);
+}
+
+/**
+ * @brief Enables one or more SPI exception errors.
+ * @param driver Pointer to the SPI driver instance.
+ * @param error_mask Mask of errors to enable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_spi_error_enable(cfn_hal_spi_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SPI, error_mask);
+}
+
+/**
+ * @brief Disables one or more SPI exception errors.
+ * @param driver Pointer to the SPI driver instance.
+ * @param error_mask Mask of errors to disable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_spi_error_disable(cfn_hal_spi_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SPI, error_mask);
+}
+
+/**
+ * @brief Retrieves the current SPI exception error status.
+ * @param driver Pointer to the SPI driver instance.
+ * @param error_mask [out] Pointer to store the error mask.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_spi_error_get(cfn_hal_spi_t *driver, uint32_t *error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SPI, error_mask);
+}
+
+/* SPI Specific Functions ------------------------------------------- */
+
+/**
+ * @brief Starts an SPI transaction using interrupts (non-blocking).
+ * @param driver Pointer to the SPI driver instance.
+ * @param xfr Pointer to the transaction configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_spi_xfr_irq(cfn_hal_spi_t *driver, cfn_hal_spi_transaction_t *xfr)
 {
-    cfn_hal_error_code_t error = CFN_HAL_LOCK(driver, CFN_HAL_MAX_DELAY);
-    if (error != CFN_HAL_ERROR_OK)
-    {
-        return error;
-    }
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SPI, cfn_hal_spi_xfr_irq, driver, error, xfr);
-    CFN_HAL_UNLOCK(driver);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SPI, xfr_irq, driver, error, xfr);
     return error;
 }
 
 /**
- * @brief cfn_hal_spi_xfr_irq_abort implementation.
- * @param driver Pointer to the peripheral driver instance.
+ * @brief Aborts an ongoing non-blocking SPI transaction.
+ * @param driver Pointer to the SPI driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_spi_xfr_irq_abort(cfn_hal_spi_t *driver)
 {
-    cfn_hal_error_code_t error = CFN_HAL_LOCK(driver, CFN_HAL_MAX_DELAY);
-    if (error != CFN_HAL_ERROR_OK)
-    {
-        return error;
-    }
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_SPI, cfn_hal_spi_xfr_irq_abort, driver, error);
-    CFN_HAL_UNLOCK(driver);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_SPI, xfr_irq_abort, driver, error);
     return error;
 }
 
 /**
- * @brief cfn_hal_spi_xfr_polling implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param xfr Pointer to the transaction structure defining the transfer.
+ * @brief Executes an SPI transaction using polling (blocking).
+ * @param driver Pointer to the SPI driver instance.
+ * @param xfr Pointer to the transaction configuration.
+ * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t
 cfn_hal_spi_xfr_polling(cfn_hal_spi_t *driver, cfn_hal_spi_transaction_t *xfr, uint32_t timeout)
 {
-    cfn_hal_error_code_t error = CFN_HAL_LOCK(driver, CFN_HAL_MAX_DELAY);
-    if (error != CFN_HAL_ERROR_OK)
-    {
-        return error;
-    }
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SPI, cfn_hal_spi_xfr_polling, driver, error, xfr, timeout);
-    CFN_HAL_UNLOCK(driver);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SPI, xfr_polling, driver, error, xfr, timeout);
     return error;
 }
 
 /**
- * @brief cfn_hal_spi_check_error implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
- */
-static inline cfn_hal_error_code_t cfn_hal_spi_check_error(cfn_hal_spi_t *driver)
-{
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_SPI, cfn_hal_spi_check_error, driver, error);
-    return error;
-}
-
-/**
- * @brief cfn_hal_spi_init implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
- */
-static inline cfn_hal_error_code_t cfn_hal_spi_init(cfn_hal_spi_t *driver)
-{
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    if (driver && driver->base.on_config)
-    {
-        error = driver->base.on_config(&driver->base, DRIVER_CONFIG_INIT);
-        if (error != CFN_HAL_ERROR_OK)
-        {
-            return error;
-        }
-    }
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_SPI, cfn_hal_spi_init, driver, error);
-    if (error == CFN_HAL_ERROR_OK && driver)
-    {
-        driver->base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    }
-    return error;
-}
-
-/**
- * @brief cfn_hal_spi_cfg_get implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param config Pointer to the peripheral configuration structure.
- * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
- */
-static inline cfn_hal_error_code_t cfn_hal_spi_cfg_get(cfn_hal_spi_t *driver, cfn_hal_spi_config_t *config)
-{
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SPI, cfn_hal_spi_cfg_get, driver, error, config);
-    return error;
-}
-
-/**
- * @brief cfn_hal_spi_cfg_set implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param config Pointer to the peripheral configuration structure.
- * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
- */
-static inline cfn_hal_error_code_t cfn_hal_spi_cfg_set(cfn_hal_spi_t *driver, const cfn_hal_spi_config_t *config)
-{
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SPI, cfn_hal_spi_cfg_set, driver, error, config);
-    return error;
-}
-
-/**
- * @brief cfn_hal_spi_cfg_tx_enable implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
- */
-static inline cfn_hal_error_code_t cfn_hal_spi_cfg_tx_enable(cfn_hal_spi_t *driver)
-{
-    cfn_hal_error_code_t error = CFN_HAL_LOCK(driver, CFN_HAL_MAX_DELAY);
-    if (error != CFN_HAL_ERROR_OK)
-    {
-        return error;
-    }
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_SPI, cfn_hal_spi_cfg_tx_enable, driver, error);
-    CFN_HAL_UNLOCK(driver);
-    return error;
-}
-
-/**
- * @brief cfn_hal_spi_cfg_rx_enable implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
- */
-static inline cfn_hal_error_code_t cfn_hal_spi_cfg_rx_enable(cfn_hal_spi_t *driver)
-{
-    cfn_hal_error_code_t error = CFN_HAL_LOCK(driver, CFN_HAL_MAX_DELAY);
-    if (error != CFN_HAL_ERROR_OK)
-    {
-        return error;
-    }
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_SPI, cfn_hal_spi_cfg_rx_enable, driver, error);
-    CFN_HAL_UNLOCK(driver);
-    return error;
-}
-
-/**
- * @brief cfn_hal_spi_cfg_irq_enable implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param irq Interrupt type or event identifier.
- * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
- */
-static inline cfn_hal_error_code_t cfn_hal_spi_cfg_irq_enable(cfn_hal_spi_t *driver, cfn_hal_spi_interrupts_t irq)
-{
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SPI, cfn_hal_spi_cfg_irq_enable, driver, error, irq);
-    return error;
-}
-
-/**
- * @brief cfn_hal_spi_cfg_tx_disable implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
- */
-static inline cfn_hal_error_code_t cfn_hal_spi_cfg_tx_disable(cfn_hal_spi_t *driver)
-{
-    cfn_hal_error_code_t error = CFN_HAL_LOCK(driver, CFN_HAL_MAX_DELAY);
-    if (error != CFN_HAL_ERROR_OK)
-    {
-        return error;
-    }
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_SPI, cfn_hal_spi_cfg_tx_disable, driver, error);
-    CFN_HAL_UNLOCK(driver);
-    return error;
-}
-
-/**
- * @brief cfn_hal_spi_cfg_rx_disable implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
- */
-static inline cfn_hal_error_code_t cfn_hal_spi_cfg_rx_disable(cfn_hal_spi_t *driver)
-{
-    cfn_hal_error_code_t error = CFN_HAL_LOCK(driver, CFN_HAL_MAX_DELAY);
-    if (error != CFN_HAL_ERROR_OK)
-    {
-        return error;
-    }
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_SPI, cfn_hal_spi_cfg_rx_disable, driver, error);
-    CFN_HAL_UNLOCK(driver);
-    return error;
-}
-
-/**
- * @brief cfn_hal_spi_cfg_irq_disable implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param irq Interrupt type or event identifier.
- * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
- */
-static inline cfn_hal_error_code_t cfn_hal_spi_cfg_irq_disable(cfn_hal_spi_t *driver, cfn_hal_spi_interrupts_t irq)
-{
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SPI, cfn_hal_spi_cfg_irq_disable, driver, error, irq);
-    return error;
-}
-
-/**
- * @brief cfn_hal_spi_xfr_dma implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param xfr Pointer to the transaction structure defining the transfer.
+ * @brief Starts an SPI transaction using DMA (non-blocking).
+ * @param driver Pointer to the SPI driver instance.
+ * @param xfr Pointer to the transaction configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_spi_xfr_dma(cfn_hal_spi_t *driver, cfn_hal_spi_transaction_t *xfr)
 {
-    cfn_hal_error_code_t error = CFN_HAL_LOCK(driver, CFN_HAL_MAX_DELAY);
-    if (error != CFN_HAL_ERROR_OK)
-    {
-        return error;
-    }
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SPI, cfn_hal_spi_xfr_dma, driver, error, xfr);
-    CFN_HAL_UNLOCK(driver);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SPI, xfr_dma, driver, error, xfr);
     return error;
 }
 

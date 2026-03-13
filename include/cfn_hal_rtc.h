@@ -30,301 +30,370 @@
 extern "C"
 {
 #endif
+
 /* Includes ---------------------------------------------------------*/
+#include <time.h>
 #include "cfn_hal_types.h"
 #include "cfn_hal.h"
+#include "cfn_hal_base.h"
+
 /* Defines ----------------------------------------------------------*/
-/* Macro ------------------------------------------------------------*/
+
 /* Types Enums ------------------------------------------------------*/
-typedef enum
-{
-    CFN_HAL_RTC_INTERRUPT_ALARM,
-    CFN_HAL_RTC_INTERRUPT_WAKEUP,
-
-    CFN_HAL_RTC_INTERRUPT_TAMPER,
-    CFN_HAL_RTC_INTERRUPT_TIMESTAMP,
-    CFN_HAL_RTC_INTERRUPT_ERROR
-} cfn_hal_rtc_interrupts_t;
-
-typedef enum
-{
-    CFN_HAL_RTC_FORMAT_12H,
-    CFN_HAL_RTC_FORMAT_24H,
-
-    CFN_HAL_RTC_FORMAT_TOTAL
-} cfn_hal_rtc_format_t;
-
-typedef enum
-{
-    CFN_HAL_RTC_MODE_BCD,
-    CFN_HAL_RTC_MODE_BINARY,
-    CFN_HAL_RTC_MODE_BINARY_BCD,
-
-    CFN_HAL_RTC_MODE_TOTAL
-} cfn_hal_rtc_mode_t;
-
-/* Types Structs ----------------------------------------------------*/
-typedef struct tm cfn_hal_rtc_time_t;
-
-typedef struct
-{
-    void *port;
-    void *user_arg;
-} cfn_hal_rtc_phy_t;
-
-typedef struct
-{
-    cfn_hal_rtc_format_t format;
-    cfn_hal_rtc_mode_t   mode;
-    uint32_t             target_rtc_clock;
-    void                *custom;
-} cfn_hal_rtc_config_t;
-
-typedef struct cfn_hal_rtc_s cfn_hal_rtc_t;
-
-typedef struct cfn_hal_rtc_api_s cfn_hal_rtc_api_t;
-
-typedef void (*cfn_hal_rtc_callback_t)(
-    cfn_hal_rtc_t *driver, cfn_hal_rtc_interrupts_t interrupt, uint32_t id, void *user_arg);
 
 /**
- * @brief Virtual Method Table (VMT) for the peripheral.
- * Hardware-specific implementations must populate these function pointers.
- * Functions can be set to NULL if not implemented.
+ * @brief RTC nominal event flags.
+ */
+typedef enum
+{
+    CFN_HAL_RTC_EVENT_NONE = 0,
+    CFN_HAL_RTC_EVENT_ALARM = CFN_HAL_BIT(0),     /*!< Alarm time reached */
+    CFN_HAL_RTC_EVENT_WAKEUP = CFN_HAL_BIT(1),    /*!< Periodic wakeup timer event */
+    CFN_HAL_RTC_EVENT_TIMESTAMP = CFN_HAL_BIT(2), /*!< External timestamp capture event */
+    CFN_HAL_RTC_EVENT_TAMPER = CFN_HAL_BIT(3),    /*!< Security tamper event */
+} cfn_hal_rtc_event_t;
+
+/**
+ * @brief RTC exception error flags.
+ */
+typedef enum
+{
+    CFN_HAL_RTC_ERROR_NONE = 0,
+    CFN_HAL_RTC_ERROR_INIT = CFN_HAL_BIT(0),    /*!< Synchronization or oscillator error */
+    CFN_HAL_RTC_ERROR_GENERAL = CFN_HAL_BIT(1), /*!< General hardware error */
+} cfn_hal_rtc_error_t;
+
+/**
+ * @brief RTC time format.
+ */
+typedef enum
+{
+    CFN_HAL_RTC_CONFIG_FORMAT_12H, /*!< 12-hour clock (AM/PM) */
+    CFN_HAL_RTC_CONFIG_FORMAT_24H, /*!< 24-hour clock */
+} cfn_hal_rtc_config_format_t;
+
+/**
+ * @brief RTC clocking mode.
+ */
+typedef enum
+{
+    CFN_HAL_RTC_CONFIG_MODE_BCD,        /*!< Binary Coded Decimal format */
+    CFN_HAL_RTC_CONFIG_MODE_BINARY,     /*!< Standard binary format */
+    CFN_HAL_RTC_CONFIG_MODE_BINARY_BCD, /*!< Mixed mode support */
+} cfn_hal_rtc_config_mode_t;
+
+/* Types Structs ----------------------------------------------------*/
+
+/**
+ * @brief RTC time representation (std tm).
+ */
+typedef struct tm cfn_hal_rtc_time_t;
+
+/**
+ * @brief RTC hardware physical mapping.
+ */
+typedef struct
+{
+    void *port;     /*!< Peripheral base register address */
+    void *user_arg; /*!< Peripheral instance user argument */
+} cfn_hal_rtc_phy_t;
+
+/**
+ * @brief RTC configuration structure.
+ */
+typedef struct
+{
+    cfn_hal_rtc_config_format_t format;           /*!< Time notation format */
+    cfn_hal_rtc_config_mode_t   mode;             /*!< Hardware clocking mode */
+    uint32_t                    target_rtc_clock; /*!< Input clock source frequency */
+    void                       *custom;           /*!< Vendor-specific custom configuration */
+} cfn_hal_rtc_config_t;
+
+typedef struct cfn_hal_rtc_s     cfn_hal_rtc_t;
+typedef struct cfn_hal_rtc_api_s cfn_hal_rtc_api_t;
+
+/**
+ * @brief RTC callback signature.
+ * @param driver Pointer to the RTC driver instance.
+ * @param event_mask Mask of triggered nominal events.
+ * @param error_mask Mask of triggered exception errors.
+ * @param id Identifier of the source (e.g., Alarm index).
+ * @param user_arg User-defined argument passed during registration.
+ */
+typedef void (*cfn_hal_rtc_callback_t)(
+    cfn_hal_rtc_t *driver, uint32_t event_mask, uint32_t error_mask, uint32_t id, void *user_arg);
+
+/**
+ * @brief RTC Virtual Method Table (VMT).
  */
 struct cfn_hal_rtc_api_s
 {
-    cfn_hal_error_code_t (*cfn_hal_rtc_register_cb)(cfn_hal_rtc_t *driver, cfn_hal_rtc_callback_t cb, void *user_arg);
-    cfn_hal_error_code_t (*cfn_hal_rtc_set_cb_arg)(cfn_hal_rtc_t *driver, void *user_arg);
-    cfn_hal_error_code_t (*cfn_hal_rtc_init)(cfn_hal_rtc_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_rtc_deinit)(cfn_hal_rtc_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_rtc_cfg_get)(cfn_hal_rtc_t *driver, cfn_hal_rtc_config_t *config);
-    cfn_hal_error_code_t (*cfn_hal_rtc_cfg_set)(cfn_hal_rtc_t *driver, const cfn_hal_rtc_config_t *config);
-    cfn_hal_error_code_t (*cfn_hal_rtc_check_error)(cfn_hal_rtc_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_rtc_set_time)(cfn_hal_rtc_t *driver, cfn_hal_rtc_time_t *time);
-    cfn_hal_error_code_t (*cfn_hal_rtc_get_time)(cfn_hal_rtc_t *driver, cfn_hal_rtc_time_t *time);
-    cfn_hal_error_code_t (*cfn_hal_rtc_set_alarm)(
-        cfn_hal_rtc_t *driver, uint32_t id, cfn_hal_rtc_time_t *time, cfn_hal_rtc_callback_t cb);
-    cfn_hal_error_code_t (*cfn_hal_rtc_get_alarm)(
-        cfn_hal_rtc_t *driver, uint32_t id, bool *elapsed, cfn_hal_rtc_time_t *time, cfn_hal_rtc_callback_t cb);
-    cfn_hal_error_code_t (*cfn_hal_rtc_stop_alarm)(cfn_hal_rtc_t *driver, uint32_t id);
-    cfn_hal_error_code_t (*cfn_hal_rtc_cfg_irq_enable)(cfn_hal_rtc_t *driver, cfn_hal_rtc_interrupts_t irq);
-    cfn_hal_error_code_t (*cfn_hal_rtc_cfg_irq_disable)(cfn_hal_rtc_t *driver, cfn_hal_rtc_interrupts_t irq);
+    cfn_hal_api_base_t base;
+
+    /* RTC Specific Extensions */
+    cfn_hal_error_code_t (*set_time)(cfn_hal_rtc_t *driver, cfn_hal_rtc_time_t *time);
+    cfn_hal_error_code_t (*get_time)(cfn_hal_rtc_t *driver, cfn_hal_rtc_time_t *time);
+    cfn_hal_error_code_t (*set_alarm)(cfn_hal_rtc_t *driver, uint32_t id, cfn_hal_rtc_time_t *time);
+    cfn_hal_error_code_t (*get_alarm)(cfn_hal_rtc_t *driver, uint32_t id, bool *elapsed, cfn_hal_rtc_time_t *time);
+    cfn_hal_error_code_t (*stop_alarm)(cfn_hal_rtc_t *driver, uint32_t id);
 };
 
-/**
- * @brief Generated driver structure for rtc.
- *
- * This macro expands to the following structure:
- * \code{c}
- * struct cfn_hal_rtc_s {
- *     cfn_hal_driver_t       base;
- *     const cfn_hal_rtc_config_t *config;
- *     const cfn_hal_rtc_api_t    *api;
- *     const cfn_hal_rtc_phy_t    *phy;
- *     cfn_hal_rtc_callback_t            cb;
- *     void              *cb_user_arg;
- * };
- * typedef struct cfn_hal_rtc_s cfn_hal_rtc_t;
- * \endcode
- */
 CFN_HAL_CREATE_DRIVER_TYPE(rtc, cfn_hal_rtc_config_t, cfn_hal_rtc_api_t, cfn_hal_rtc_phy_t, cfn_hal_rtc_callback_t);
 
-/* Functions prototypes ---------------------------------------------*/
+/* Functions inline ------------------------------------------------- */
+
 /**
- * @brief cfn_hal_rtc_init implementation.
- * @param driver Pointer to the peripheral driver instance.
+ * @brief Initializes the RTC driver.
+ * @param driver Pointer to the RTC driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_rtc_init(cfn_hal_rtc_t *driver)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    if (driver && driver->base.on_config)
+    if (!driver)
     {
-        error = driver->base.on_config(&driver->base, DRIVER_CONFIG_INIT);
-        if (error != CFN_HAL_ERROR_OK)
-        {
-            return error;
-        }
+        return CFN_HAL_ERROR_BAD_PARAM;
     }
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_RTC, cfn_hal_rtc_init, driver, error);
-    if (error == CFN_HAL_ERROR_OK && driver)
-    {
-        driver->base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    }
-    return error;
+    driver->base.vmt = (const void *) driver->api;
+    return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_RTC);
 }
+
 /**
- * @brief cfn_hal_rtc_cfg_get implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param config Pointer to the peripheral configuration structure.
+ * @brief Deinitializes the RTC driver.
+ * @param driver Pointer to the RTC driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_rtc_cfg_get(cfn_hal_rtc_t *driver, cfn_hal_rtc_config_t *config)
+static inline cfn_hal_error_code_t cfn_hal_rtc_deinit(cfn_hal_rtc_t *driver)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_RTC, cfn_hal_rtc_cfg_get, driver, error, config);
-    return error;
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_deinit(&driver->base, CFN_HAL_PERIPHERAL_TYPE_RTC);
 }
+
 /**
- * @brief cfn_hal_rtc_cfg_set implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param config Pointer to the peripheral configuration structure.
+ * @brief Sets the RTC configuration.
+ * @param driver Pointer to the RTC driver instance.
+ * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_rtc_cfg_set(cfn_hal_rtc_t *driver, const cfn_hal_rtc_config_t *config)
+static inline cfn_hal_error_code_t cfn_hal_rtc_config_set(cfn_hal_rtc_t *driver, const cfn_hal_rtc_config_t *config)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_RTC, cfn_hal_rtc_cfg_set, driver, error, config);
-    return error;
+    if (driver)
+    {
+        driver->config = config;
+    }
+    return cfn_hal_base_config_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_RTC, (const void *) config);
 }
+
 /**
- * @brief cfn_hal_rtc_register_cb implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param cb Callback function to register.
+ * @brief Gets the current RTC configuration.
+ * @param driver Pointer to the RTC driver instance.
+ * @param config [out] Pointer to store the configuration.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_rtc_config_get(cfn_hal_rtc_t *driver, cfn_hal_rtc_config_t *config)
+{
+    if (!driver || !config || !driver->config)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    *config = *(driver->config);
+    return CFN_HAL_ERROR_OK;
+}
+
+/**
+ * @brief Registers a callback for RTC events and errors.
+ * @param driver Pointer to the RTC driver instance.
+ * @param CALLBACK The callback function to register.
  * @param user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t
-cfn_hal_rtc_register_cb(cfn_hal_rtc_t *driver, cfn_hal_rtc_callback_t cb, void *user_arg)
+cfn_hal_rtc_callback_register(cfn_hal_rtc_t *driver, const cfn_hal_rtc_callback_t CALLBACK, void *user_arg)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_RTC, cfn_hal_rtc_register_cb, driver, error, cb, user_arg);
-    return error;
+    if (driver)
+    {
+        driver->cb = CALLBACK;
+        driver->cb_user_arg = user_arg;
+    }
+    return cfn_hal_base_callback_register(
+        &driver->base, CFN_HAL_PERIPHERAL_TYPE_RTC, (const void *) CALLBACK, user_arg);
 }
 
 /**
- * @brief cfn_hal_rtc_set_cb_arg implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param user_arg User-defined argument passed to the callback.
+ * @brief Sets the RTC power state.
+ * @param driver Pointer to the RTC driver instance.
+ * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_rtc_set_cb_arg(cfn_hal_rtc_t *driver, void *user_arg)
+static inline cfn_hal_error_code_t cfn_hal_rtc_power_state_set(cfn_hal_rtc_t *driver, cfn_hal_power_state_t state)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_RTC, cfn_hal_rtc_set_cb_arg, driver, error, user_arg);
-    return error;
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_power_state_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_RTC, state);
 }
 
 /**
- * @brief cfn_hal_rtc_check_error implementation.
- * @param driver Pointer to the peripheral driver instance.
+ * @brief Enables one or more RTC nominal events.
+ * @param driver Pointer to the RTC driver instance.
+ * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_rtc_check_error(cfn_hal_rtc_t *driver)
+static inline cfn_hal_error_code_t cfn_hal_rtc_event_enable(cfn_hal_rtc_t *driver, uint32_t event_mask)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_RTC, cfn_hal_rtc_check_error, driver, error);
-    return error;
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_RTC, event_mask);
 }
 
 /**
- * @brief cfn_hal_rtc_set_time implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param time Pointer to the RTC time structure.
+ * @brief Disables one or more RTC nominal events.
+ * @param driver Pointer to the RTC driver instance.
+ * @param event_mask Mask of events to disable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_rtc_event_disable(cfn_hal_rtc_t *driver, uint32_t event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_RTC, event_mask);
+}
+
+/**
+ * @brief Retrieves the current RTC nominal event status.
+ * @param driver Pointer to the RTC driver instance.
+ * @param event_mask [out] Pointer to store the event mask.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_rtc_event_get(cfn_hal_rtc_t *driver, uint32_t *event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_RTC, event_mask);
+}
+
+/**
+ * @brief Enables one or more RTC exception errors.
+ * @param driver Pointer to the RTC driver instance.
+ * @param error_mask Mask of errors to enable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_rtc_error_enable(cfn_hal_rtc_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_RTC, error_mask);
+}
+
+/**
+ * @brief Disables one or more RTC exception errors.
+ * @param driver Pointer to the RTC driver instance.
+ * @param error_mask Mask of errors to disable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_rtc_error_disable(cfn_hal_rtc_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_RTC, error_mask);
+}
+
+/**
+ * @brief Retrieves the current RTC exception error status.
+ * @param driver Pointer to the RTC driver instance.
+ * @param error_mask [out] Pointer to store the error mask.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_rtc_error_get(cfn_hal_rtc_t *driver, uint32_t *error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_RTC, error_mask);
+}
+
+/* RTC Specific Functions ------------------------------------------- */
+
+/**
+ * @brief Sets the RTC current wall-clock time.
+ * @param driver Pointer to the RTC driver instance.
+ * @param time Pointer to the structure containing the new time.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_rtc_set_time(cfn_hal_rtc_t *driver, cfn_hal_rtc_time_t *time)
 {
-    cfn_hal_error_code_t error = CFN_HAL_LOCK(driver, CFN_HAL_MAX_DELAY);
-    if (error != CFN_HAL_ERROR_OK)
-    {
-        return error;
-    }
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_RTC, cfn_hal_rtc_set_time, driver, error, time);
-    CFN_HAL_UNLOCK(driver);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_RTC, set_time, driver, error, time);
     return error;
 }
 
 /**
- * @brief cfn_hal_rtc_get_time implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param time Pointer to the RTC time structure.
+ * @brief Retrieves the current wall-clock time from the RTC.
+ * @param driver Pointer to the RTC driver instance.
+ * @param time [out] Pointer to store the current time.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_rtc_get_time(cfn_hal_rtc_t *driver, cfn_hal_rtc_time_t *time)
 {
-    cfn_hal_error_code_t error = CFN_HAL_LOCK(driver, CFN_HAL_MAX_DELAY);
-    if (error != CFN_HAL_ERROR_OK)
-    {
-        return error;
-    }
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_RTC, cfn_hal_rtc_get_time, driver, error, time);
-    CFN_HAL_UNLOCK(driver);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_RTC, get_time, driver, error, time);
     return error;
 }
 
 /**
- * @brief cfn_hal_rtc_set_alarm implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param id Alarm or resource identifier.
- * @param time Pointer to the RTC time structure.
- * @param cb Callback function to register.
+ * @brief Configures an alarm event for a specific time.
+ * @param driver Pointer to the RTC driver instance.
+ * @param id Index of the alarm to set.
+ * @param time Pointer to the structure containing the alarm time.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_rtc_set_alarm(cfn_hal_rtc_t *driver, uint32_t id, cfn_hal_rtc_time_t *time)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_RTC, set_alarm, driver, error, id, time);
+    return error;
+}
+
+/**
+ * @brief Retrieves configuration and status of a specific alarm.
+ * @param driver Pointer to the RTC driver instance.
+ * @param id Index of the alarm.
+ * @param elapsed [out] Set to true if the alarm has triggered.
+ * @param time [out] Pointer to store the configured alarm time.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t
-cfn_hal_rtc_set_alarm(cfn_hal_rtc_t *driver, uint32_t id, cfn_hal_rtc_time_t *time, cfn_hal_rtc_callback_t cb)
+cfn_hal_rtc_get_alarm(cfn_hal_rtc_t *driver, uint32_t id, bool *elapsed, cfn_hal_rtc_time_t *time)
 {
-    cfn_hal_error_code_t error = CFN_HAL_LOCK(driver, CFN_HAL_MAX_DELAY);
-    if (error != CFN_HAL_ERROR_OK)
-    {
-        return error;
-    }
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_RTC, cfn_hal_rtc_set_alarm, driver, error, id, time, cb);
-    CFN_HAL_UNLOCK(driver);
-    return error;
-}
-
-static inline cfn_hal_error_code_t cfn_hal_rtc_get_alarm(
-    cfn_hal_rtc_t *driver, uint32_t id, bool *elapsed, cfn_hal_rtc_time_t *time, cfn_hal_rtc_callback_t cb)
-{
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
-        CFN_HAL_PERIPHERAL_TYPE_RTC, cfn_hal_rtc_get_alarm, driver, error, id, elapsed, time, cb);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_RTC, get_alarm, driver, error, id, elapsed, time);
     return error;
 }
 
 /**
- * @brief cfn_hal_rtc_stop_alarm implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param id Alarm or resource identifier.
+ * @brief Disables a previously configured alarm.
+ * @param driver Pointer to the RTC driver instance.
+ * @param id Index of the alarm to stop.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_rtc_stop_alarm(cfn_hal_rtc_t *driver, uint32_t id)
 {
-    cfn_hal_error_code_t error = CFN_HAL_LOCK(driver, CFN_HAL_MAX_DELAY);
-    if (error != CFN_HAL_ERROR_OK)
-    {
-        return error;
-    }
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_RTC, cfn_hal_rtc_stop_alarm, driver, error, id);
-    CFN_HAL_UNLOCK(driver);
-    return error;
-}
-
-/**
- * @brief cfn_hal_rtc_cfg_irq_enable implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param irq Interrupt type or event identifier.
- * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
- */
-static inline cfn_hal_error_code_t cfn_hal_rtc_cfg_irq_enable(cfn_hal_rtc_t *driver, cfn_hal_rtc_interrupts_t irq)
-{
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_RTC, cfn_hal_rtc_cfg_irq_enable, driver, error, irq);
-    return error;
-}
-
-/**
- * @brief cfn_hal_rtc_cfg_irq_disable implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param irq Interrupt type or event identifier.
- * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
- */
-static inline cfn_hal_error_code_t cfn_hal_rtc_cfg_irq_disable(cfn_hal_rtc_t *driver, cfn_hal_rtc_interrupts_t irq)
-{
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_RTC, cfn_hal_rtc_cfg_irq_disable, driver, error, irq);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_RTC, stop_alarm, driver, error, id);
     return error;
 }
 

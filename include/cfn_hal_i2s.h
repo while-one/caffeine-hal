@@ -31,52 +31,265 @@ extern "C"
 {
 #endif
 
+/* Includes ---------------------------------------------------------*/
 #include "cfn_hal_types.h"
 #include "cfn_hal.h"
+#include "cfn_hal_base.h"
 
+/* Defines ----------------------------------------------------------*/
+
+/* Types Enums ------------------------------------------------------*/
+
+/**
+ * @brief I2S nominal event flags.
+ */
+typedef enum
+{
+    CFN_HAL_I2S_EVENT_NONE = 0,
+    CFN_HAL_I2S_EVENT_TX_COMPLETE = CFN_HAL_BIT(0), /*!< Audio data transmission complete */
+    CFN_HAL_I2S_EVENT_RX_READY = CFN_HAL_BIT(1),    /*!< Audio data reception ready */
+} cfn_hal_i2s_event_t;
+
+/**
+ * @brief I2S exception error flags.
+ */
+typedef enum
+{
+    CFN_HAL_I2S_ERROR_NONE = 0,
+    CFN_HAL_I2S_ERROR_OVERRUN = CFN_HAL_BIT(0), /*!< Rx overrun or Tx underrun */
+    CFN_HAL_I2S_ERROR_SYNC = CFN_HAL_BIT(1),    /*!< Frame synchronization error */
+    CFN_HAL_I2S_ERROR_GENERAL = CFN_HAL_BIT(2), /*!< General hardware error */
+} cfn_hal_i2s_error_t;
+
+/* Types Structs ----------------------------------------------------*/
+
+/**
+ * @brief I2S configuration structure.
+ */
 typedef struct
 {
-    void *user_config;
+    uint32_t sample_rate; /*!< Audio sampling frequency in Hz */
+    uint32_t data_format; /*!< Data bits and standard (e.g. Philips, MSB) */
+    void    *custom;      /*!< Vendor-specific custom configuration */
 } cfn_hal_i2s_config_t;
 
+/**
+ * @brief I2S hardware physical mapping.
+ */
 typedef struct
 {
-    void *port;
-    void *user_arg;
+    void *port;     /*!< I2S peripheral base register address */
+    void *user_arg; /*!< Peripheral instance user argument */
 } cfn_hal_i2s_phy_t;
 
 typedef struct cfn_hal_i2s_s     cfn_hal_i2s_t;
 typedef struct cfn_hal_i2s_api_s cfn_hal_i2s_api_t;
 
-struct cfn_hal_i2s_api_s
-{
-    cfn_hal_error_code_t (*cfn_hal_i2s_init)(cfn_hal_i2s_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_i2s_deinit)(cfn_hal_i2s_t *driver);
-};
+/**
+ * @brief I2S callback signature.
+ * @param driver Pointer to the I2S driver instance.
+ * @param event_mask Mask of triggered nominal events.
+ * @param error_mask Mask of triggered exception errors.
+ * @param user_arg User-defined argument passed during registration.
+ */
+typedef void (*cfn_hal_i2s_callback_t)(cfn_hal_i2s_t *driver, uint32_t event_mask, uint32_t error_mask, void *user_arg);
 
 /**
- * @brief Generated driver structure for i2s.
- * This macro expands to define `struct cfn_hal_i2s_s` and the typedef `cfn_hal_i2s_t`.
+ * @brief I2S Virtual Method Table (VMT).
  */
-CFN_HAL_CREATE_DRIVER_TYPE(i2s, cfn_hal_i2s_config_t, cfn_hal_i2s_api_t, cfn_hal_i2s_phy_t, void *);
+struct cfn_hal_i2s_api_s
+{
+    cfn_hal_api_base_t base;
 
+    /* I2S Specific Extensions can be added here (e.g., transmit/receive audio) */
+};
+
+CFN_HAL_CREATE_DRIVER_TYPE(i2s, cfn_hal_i2s_config_t, cfn_hal_i2s_api_t, cfn_hal_i2s_phy_t, cfn_hal_i2s_callback_t);
+
+/* Functions inline ------------------------------------------------- */
+
+/**
+ * @brief Initializes the I2S driver.
+ * @param driver Pointer to the I2S driver instance.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
 static inline cfn_hal_error_code_t cfn_hal_i2s_init(cfn_hal_i2s_t *driver)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    if (driver && driver->base.on_config)
+    if (!driver)
     {
-        error = driver->base.on_config(&driver->base, DRIVER_CONFIG_INIT);
-        if (error != CFN_HAL_ERROR_OK)
-        {
-            return error;
-        }
+        return CFN_HAL_ERROR_BAD_PARAM;
     }
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_I2S, cfn_hal_i2s_init, driver, error);
-    if (error == CFN_HAL_ERROR_OK && driver)
+    driver->base.vmt = (const void *) driver->api;
+    return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S);
+}
+
+/**
+ * @brief Deinitializes the I2S driver.
+ * @param driver Pointer to the I2S driver instance.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_i2s_deinit(cfn_hal_i2s_t *driver)
+{
+    if (!driver)
     {
-        driver->base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+        return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return error;
+    return cfn_hal_base_deinit(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S);
+}
+
+/**
+ * @brief Sets the I2S configuration.
+ * @param driver Pointer to the I2S driver instance.
+ * @param config Pointer to the configuration structure.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_i2s_config_set(cfn_hal_i2s_t *driver, const cfn_hal_i2s_config_t *config)
+{
+    if (driver)
+    {
+        driver->config = config;
+    }
+    return cfn_hal_base_config_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, (const void *) config);
+}
+
+/**
+ * @brief Gets the current I2S configuration.
+ * @param driver Pointer to the I2S driver instance.
+ * @param config [out] Pointer to store the configuration.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_i2s_config_get(cfn_hal_i2s_t *driver, cfn_hal_i2s_config_t *config)
+{
+    if (!driver || !config || !driver->config)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    *config = *(driver->config);
+    return CFN_HAL_ERROR_OK;
+}
+
+/**
+ * @brief Registers a callback for I2S events and errors.
+ * @param driver Pointer to the I2S driver instance.
+ * @param CALLBACK The callback function to register.
+ * @param user_arg User-defined argument passed to the callback.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t
+cfn_hal_i2s_callback_register(cfn_hal_i2s_t *driver, const cfn_hal_i2s_callback_t CALLBACK, void *user_arg)
+{
+    if (driver)
+    {
+        driver->cb = CALLBACK;
+        driver->cb_user_arg = user_arg;
+    }
+    return cfn_hal_base_callback_register(
+        &driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, (const void *) CALLBACK, user_arg);
+}
+
+/**
+ * @brief Sets the I2S power state.
+ * @param driver Pointer to the I2S driver instance.
+ * @param state Target power state.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_i2s_power_state_set(cfn_hal_i2s_t *driver, cfn_hal_power_state_t state)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_power_state_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, state);
+}
+
+/**
+ * @brief Enables one or more I2S nominal events.
+ * @param driver Pointer to the I2S driver instance.
+ * @param event_mask Mask of events to enable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_i2s_event_enable(cfn_hal_i2s_t *driver, uint32_t event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, event_mask);
+}
+
+/**
+ * @brief Disables one or more I2S nominal events.
+ * @param driver Pointer to the I2S driver instance.
+ * @param event_mask Mask of events to disable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_i2s_event_disable(cfn_hal_i2s_t *driver, uint32_t event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, event_mask);
+}
+
+/**
+ * @brief Retrieves the current I2S nominal event status.
+ * @param driver Pointer to the I2S driver instance.
+ * @param event_mask [out] Pointer to store the event mask.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_i2s_event_get(cfn_hal_i2s_t *driver, uint32_t *event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, event_mask);
+}
+
+/**
+ * @brief Enables one or more I2S exception errors.
+ * @param driver Pointer to the I2S driver instance.
+ * @param error_mask Mask of errors to enable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_i2s_error_enable(cfn_hal_i2s_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, error_mask);
+}
+
+/**
+ * @brief Disables one or more I2S exception errors.
+ * @param driver Pointer to the I2S driver instance.
+ * @param error_mask Mask of errors to disable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_i2s_error_disable(cfn_hal_i2s_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, error_mask);
+}
+
+/**
+ * @brief Retrieves the current I2S exception error status.
+ * @param driver Pointer to the I2S driver instance.
+ * @param error_mask [out] Pointer to store the error mask.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_i2s_error_get(cfn_hal_i2s_t *driver, uint32_t *error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, error_mask);
 }
 
 #ifdef __cplusplus

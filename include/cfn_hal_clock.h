@@ -34,191 +34,350 @@ extern "C"
 /* Includes ---------------------------------------------------------*/
 #include "cfn_hal_types.h"
 #include "cfn_hal.h"
+#include "cfn_hal_base.h"
 
 /* Defines ----------------------------------------------------------*/
-/* Macro ------------------------------------------------------------*/
+
+/* Types Enums ------------------------------------------------------*/
+
+/**
+ * @brief Clock nominal event flags.
+ */
+typedef enum
+{
+    CFN_HAL_CLOCK_EVENT_NONE = 0,
+    CFN_HAL_CLOCK_EVENT_READY = CFN_HAL_BIT(0), /*!< Clock source is stable and ready */
+} cfn_hal_clock_event_t;
+
+/**
+ * @brief Clock exception error flags.
+ */
+typedef enum
+{
+    CFN_HAL_CLOCK_ERROR_NONE = 0,
+    CFN_HAL_CLOCK_ERROR_LSE_FAIL = CFN_HAL_BIT(0), /*!< Low Speed External oscillator failure */
+    CFN_HAL_CLOCK_ERROR_HSE_FAIL = CFN_HAL_BIT(1), /*!< High Speed External oscillator failure */
+    CFN_HAL_CLOCK_ERROR_GENERAL = CFN_HAL_BIT(2),  /*!< General clock hardware error */
+} cfn_hal_clock_error_t;
 
 /* Types Structs ----------------------------------------------------*/
+
+/**
+ * @brief Clock configuration structure.
+ */
 typedef struct
 {
-    void *user_config;
+    void *user_config; /*!< Vendor-specific clock tree configuration */
 } cfn_hal_clock_config_t;
 
+/**
+ * @brief Clock hardware physical mapping.
+ */
 typedef struct
 {
-    void *port;
-    void *user_arg;
+    void *port;     /*!< Peripheral base register address */
+    void *user_arg; /*!< Peripheral instance user argument */
 } cfn_hal_clock_phy_t;
 
 typedef struct cfn_hal_clock_s     cfn_hal_clock_t;
 typedef struct cfn_hal_clock_api_s cfn_hal_clock_api_t;
 
 /**
- * @brief Virtual Method Table (VMT) for the peripheral.
- * Hardware-specific implementations must populate these function pointers.
- * Functions can be set to NULL if not implemented.
+ * @brief Clock callback signature.
+ * @param driver Pointer to the Clock driver instance.
+ * @param event_mask Mask of triggered nominal events.
+ * @param error_mask Mask of triggered exception errors.
+ * @param user_arg User-defined argument passed during registration.
+ */
+typedef void (*cfn_hal_clock_callback_t)(cfn_hal_clock_t *driver,
+                                         uint32_t         event_mask,
+                                         uint32_t         error_mask,
+                                         void            *user_arg);
+
+/**
+ * @brief Clock Virtual Method Table (VMT).
  */
 struct cfn_hal_clock_api_s
 {
-    cfn_hal_error_code_t (*cfn_hal_clock_init)(cfn_hal_clock_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_clock_deinit)(cfn_hal_clock_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_clock_cfg_get)(cfn_hal_clock_t *driver, cfn_hal_clock_config_t *config);
-    cfn_hal_error_code_t (*cfn_hal_clock_cfg_set)(cfn_hal_clock_t *driver, const cfn_hal_clock_config_t *config);
-    cfn_hal_error_code_t (*cfn_hal_clock_suspend_tick)(cfn_hal_clock_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_clock_resume_tick)(cfn_hal_clock_t *driver);
-    cfn_hal_error_code_t (*cfn_hal_clock_get_system_freq)(cfn_hal_clock_t *driver, uint32_t *freq_hz);
-    cfn_hal_error_code_t (*cfn_hal_clock_get_peripheral_freq)(
-        cfn_hal_clock_t *driver, uint32_t peripheral_id, uint32_t *freq_hz);
-    cfn_hal_error_code_t (*cfn_hal_clock_enable_gate)(cfn_hal_clock_t *driver, uint32_t peripheral_id);
-    cfn_hal_error_code_t (*cfn_hal_clock_disable_gate)(cfn_hal_clock_t *driver, uint32_t peripheral_id);
+    cfn_hal_api_base_t base;
+
+    /* Clock Specific Extensions */
+    cfn_hal_error_code_t (*suspend_tick)(cfn_hal_clock_t *driver);
+    cfn_hal_error_code_t (*resume_tick)(cfn_hal_clock_t *driver);
+    cfn_hal_error_code_t (*get_system_freq)(cfn_hal_clock_t *driver, uint32_t *freq_hz);
+    cfn_hal_error_code_t (*get_peripheral_freq)(cfn_hal_clock_t *driver, uint32_t peripheral_id, uint32_t *freq_hz);
+    cfn_hal_error_code_t (*enable_gate)(cfn_hal_clock_t *driver, uint32_t peripheral_id);
+    cfn_hal_error_code_t (*disable_gate)(cfn_hal_clock_t *driver, uint32_t peripheral_id);
 };
 
-/**
- * @brief Generated driver structure for clock.
- * This macro expands to define `struct cfn_hal_clock_s` and the typedef `cfn_hal_clock_t`.
- */
-CFN_HAL_CREATE_DRIVER_TYPE(clock, cfn_hal_clock_config_t, cfn_hal_clock_api_t, cfn_hal_clock_phy_t, void *);
+CFN_HAL_CREATE_DRIVER_TYPE(
+    clock, cfn_hal_clock_config_t, cfn_hal_clock_api_t, cfn_hal_clock_phy_t, cfn_hal_clock_callback_t);
 
-/* Functions prototypes ---------------------------------------------*/
+/* Functions inline ------------------------------------------------- */
+
 /**
- * @brief cfn_hal_clock_init implementation.
- * @param driver Pointer to the peripheral driver instance.
+ * @brief Initializes the Clock driver.
+ * @param driver Pointer to the Clock driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_clock_init(cfn_hal_clock_t *driver)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    if (driver && driver->base.on_config)
+    if (!driver)
     {
-        error = driver->base.on_config(&driver->base, DRIVER_CONFIG_INIT);
-        if (error != CFN_HAL_ERROR_OK)
-        {
-            return error;
-        }
+        return CFN_HAL_ERROR_BAD_PARAM;
     }
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_CLOCK, cfn_hal_clock_init, driver, error);
-    if (error == CFN_HAL_ERROR_OK && driver)
-    {
-        driver->base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    }
-    return error;
+    driver->base.vmt = (const void *) driver->api;
+    return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CLOCK);
 }
 
 /**
- * @brief cfn_hal_clock_cfg_get implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param config Pointer to the peripheral configuration structure.
+ * @brief Deinitializes the Clock driver.
+ * @param driver Pointer to the Clock driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_clock_cfg_get(cfn_hal_clock_t *driver, cfn_hal_clock_config_t *config)
+static inline cfn_hal_error_code_t cfn_hal_clock_deinit(cfn_hal_clock_t *driver)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CLOCK, cfn_hal_clock_cfg_get, driver, error, config);
-    return error;
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_deinit(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CLOCK);
 }
 
 /**
- * @brief cfn_hal_clock_cfg_set implementation.
- * @param driver Pointer to the peripheral driver instance.
- * @param config Pointer to the peripheral configuration structure.
+ * @brief Sets the Clock configuration.
+ * @param driver Pointer to the Clock driver instance.
+ * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_clock_cfg_set(cfn_hal_clock_t *driver, const cfn_hal_clock_config_t *config)
+static inline cfn_hal_error_code_t cfn_hal_clock_config_set(cfn_hal_clock_t              *driver,
+                                                            const cfn_hal_clock_config_t *config)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CLOCK, cfn_hal_clock_cfg_set, driver, error, config);
-    return error;
+    if (driver)
+    {
+        driver->config = config;
+    }
+    return cfn_hal_base_config_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CLOCK, (const void *) config);
 }
 
 /**
- * @brief cfn_hal_clock_suspend_tick implementation.
- * @param driver Pointer to the peripheral driver instance.
+ * @brief Gets the current Clock configuration.
+ * @param driver Pointer to the Clock driver instance.
+ * @param config [out] Pointer to store the configuration.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_clock_config_get(cfn_hal_clock_t *driver, cfn_hal_clock_config_t *config)
+{
+    if (!driver || !config || !driver->config)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    *config = *(driver->config);
+    return CFN_HAL_ERROR_OK;
+}
+
+/**
+ * @brief Registers a callback for Clock events and errors.
+ * @param driver Pointer to the Clock driver instance.
+ * @param CALLBACK The callback function to register.
+ * @param user_arg User-defined argument passed to the callback.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t
+cfn_hal_clock_callback_register(cfn_hal_clock_t *driver, const cfn_hal_clock_callback_t CALLBACK, void *user_arg)
+{
+    if (driver)
+    {
+        driver->cb = CALLBACK;
+        driver->cb_user_arg = user_arg;
+    }
+    return cfn_hal_base_callback_register(
+        &driver->base, CFN_HAL_PERIPHERAL_TYPE_CLOCK, (const void *) CALLBACK, user_arg);
+}
+
+/**
+ * @brief Sets the Clock power state.
+ * @param driver Pointer to the Clock driver instance.
+ * @param state Target power state.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_clock_power_state_set(cfn_hal_clock_t *driver, cfn_hal_power_state_t state)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_power_state_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CLOCK, state);
+}
+
+/**
+ * @brief Enables one or more Clock nominal events.
+ * @param driver Pointer to the Clock driver instance.
+ * @param event_mask Mask of events to enable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_clock_event_enable(cfn_hal_clock_t *driver, uint32_t event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CLOCK, event_mask);
+}
+
+/**
+ * @brief Disables one or more Clock nominal events.
+ * @param driver Pointer to the Clock driver instance.
+ * @param event_mask Mask of events to disable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_clock_event_disable(cfn_hal_clock_t *driver, uint32_t event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CLOCK, event_mask);
+}
+
+/**
+ * @brief Retrieves the current Clock nominal event status.
+ * @param driver Pointer to the Clock driver instance.
+ * @param event_mask [out] Pointer to store the event mask.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_clock_event_get(cfn_hal_clock_t *driver, uint32_t *event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CLOCK, event_mask);
+}
+
+/**
+ * @brief Enables one or more Clock exception errors.
+ * @param driver Pointer to the Clock driver instance.
+ * @param error_mask Mask of errors to enable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_clock_error_enable(cfn_hal_clock_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CLOCK, error_mask);
+}
+
+/**
+ * @brief Disables one or more Clock exception errors.
+ * @param driver Pointer to the Clock driver instance.
+ * @param error_mask Mask of errors to disable.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_clock_error_disable(cfn_hal_clock_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CLOCK, error_mask);
+}
+
+/**
+ * @brief Retrieves the current Clock exception error status.
+ * @param driver Pointer to the Clock driver instance.
+ * @param error_mask [out] Pointer to store the error mask.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_clock_error_get(cfn_hal_clock_t *driver, uint32_t *error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CLOCK, error_mask);
+}
+
+/* Clock Specific Functions ----------------------------------------- */
+
+/**
+ * @brief Suspends the system tick (e.g. before entering sleep).
+ * @param driver Pointer to the Clock driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_clock_suspend_tick(cfn_hal_clock_t *driver)
 {
-    cfn_hal_error_code_t error = CFN_HAL_LOCK(driver, CFN_HAL_MAX_DELAY);
-    if (error != CFN_HAL_ERROR_OK)
-    {
-        return error;
-    }
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_CLOCK, cfn_hal_clock_suspend_tick, driver, error);
-    CFN_HAL_UNLOCK(driver);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_CLOCK, suspend_tick, driver, error);
     return error;
 }
 
 /**
- * @brief cfn_hal_clock_resume_tick implementation.
- * @param driver Pointer to the peripheral driver instance.
+ * @brief Resumes the system tick (e.g. after waking up).
+ * @param driver Pointer to the Clock driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_clock_resume_tick(cfn_hal_clock_t *driver)
 {
-    cfn_hal_error_code_t error = CFN_HAL_LOCK(driver, CFN_HAL_MAX_DELAY);
-    if (error != CFN_HAL_ERROR_OK)
-    {
-        return error;
-    }
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_CLOCK, cfn_hal_clock_resume_tick, driver, error);
-    CFN_HAL_UNLOCK(driver);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_CLOCK, resume_tick, driver, error);
     return error;
 }
 
 /**
- * @brief Get the main system clock frequency.
- * @param driver Pointer to the peripheral driver instance.
- * @param freq_hz Pointer to store the frequency in Hz.
- * @return CFN_HAL_ERROR_OK on success.
+ * @brief Gets the current main system clock frequency.
+ * @param driver Pointer to the Clock driver instance.
+ * @param freq_hz [out] Pointer to store the frequency in Hz.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_clock_get_system_freq(cfn_hal_clock_t *driver, uint32_t *freq_hz)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
-        CFN_HAL_PERIPHERAL_TYPE_CLOCK, cfn_hal_clock_get_system_freq, driver, error, freq_hz);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CLOCK, get_system_freq, driver, error, freq_hz);
     return error;
 }
 
 /**
- * @brief Get the clock frequency for a specific peripheral domain.
- * @param driver Pointer to the peripheral driver instance.
- * @param peripheral_id ID or FourCC of the peripheral.
- * @param freq_hz Pointer to store the frequency in Hz.
- * @return CFN_HAL_ERROR_OK on success.
+ * @brief Gets the clock frequency for a specific peripheral domain.
+ * @param driver Pointer to the Clock driver instance.
+ * @param peripheral_id ID or FourCC of the target peripheral.
+ * @param freq_hz [out] Pointer to store the frequency in Hz.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t
 cfn_hal_clock_get_peripheral_freq(cfn_hal_clock_t *driver, uint32_t peripheral_id, uint32_t *freq_hz)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
-        CFN_HAL_PERIPHERAL_TYPE_CLOCK, cfn_hal_clock_get_peripheral_freq, driver, error, peripheral_id, freq_hz);
+        CFN_HAL_PERIPHERAL_TYPE_CLOCK, get_peripheral_freq, driver, error, peripheral_id, freq_hz);
     return error;
 }
 
 /**
- * @brief Enable the clock gate for a specific peripheral.
- * @param driver Pointer to the peripheral driver instance.
- * @param peripheral_id ID or FourCC of the peripheral.
- * @return CFN_HAL_ERROR_OK on success.
+ * @brief Enables the clock gate for a specific peripheral.
+ * @param driver Pointer to the Clock driver instance.
+ * @param peripheral_id ID or FourCC of the target peripheral.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_clock_enable_gate(cfn_hal_clock_t *driver, uint32_t peripheral_id)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
-        CFN_HAL_PERIPHERAL_TYPE_CLOCK, cfn_hal_clock_enable_gate, driver, error, peripheral_id);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CLOCK, enable_gate, driver, error, peripheral_id);
     return error;
 }
 
 /**
- * @brief Disable the clock gate for a specific peripheral.
- * @param driver Pointer to the peripheral driver instance.
- * @param peripheral_id ID or FourCC of the peripheral.
- * @return CFN_HAL_ERROR_OK on success.
+ * @brief Disables the clock gate for a specific peripheral.
+ * @param driver Pointer to the Clock driver instance.
+ * @param peripheral_id ID or FourCC of the target peripheral.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 static inline cfn_hal_error_code_t cfn_hal_clock_disable_gate(cfn_hal_clock_t *driver, uint32_t peripheral_id)
 {
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_FAIL;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
-        CFN_HAL_PERIPHERAL_TYPE_CLOCK, cfn_hal_clock_disable_gate, driver, error, peripheral_id);
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CLOCK, disable_gate, driver, error, peripheral_id);
     return error;
 }
 
