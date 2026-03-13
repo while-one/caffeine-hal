@@ -65,6 +65,32 @@ typedef enum
 /* Types Structs ----------------------------------------------------*/
 
 /**
+ * @brief SDIO command configuration.
+ */
+typedef struct
+{
+    uint32_t arg;           /*!< Command argument */
+    uint32_t cmd_index;     /*!< Command identifier (CMD0-CMD63) */
+    uint32_t response_type; /*!< Expected response length/format */
+    uint32_t wait_type;     /*!< Interrupt or polling wait strategy */
+} cfn_hal_sdio_cmd_t;
+
+/**
+ * @brief SDIO card information.
+ */
+typedef struct
+{
+    uint32_t card_type;     /*!< SDSC, SDHC, SDXC, etc. */
+    uint32_t card_version;  /*!< Hardware revision */
+    uint32_t class;         /*!< Speed class */
+    uint32_t rel_card_addr; /*!< Relative Card Address (RCA) */
+    uint32_t block_count;   /*!< Total capacity in blocks */
+    uint32_t block_size;    /*!< Block size in bytes (usually 512) */
+    uint32_t log_block_count;
+    uint32_t log_block_size;
+} cfn_hal_sdio_card_info_t;
+
+/**
  * @brief SDIO configuration structure.
  */
 typedef struct
@@ -105,7 +131,14 @@ struct cfn_hal_sdio_api_s
 {
     cfn_hal_api_base_t base;
 
-    /* SDIO Specific Extensions can be added here (e.g., read blocks, write blocks) */
+    /* SDIO Specific Extensions */
+    cfn_hal_error_code_t (*send_command)(cfn_hal_sdio_t *driver, const cfn_hal_sdio_cmd_t *cmd, uint32_t *response);
+    cfn_hal_error_code_t (*read_blocks)(
+        cfn_hal_sdio_t *driver, uint8_t *buffer, uint32_t block_addr, uint32_t nbr_of_blocks, uint32_t timeout);
+    cfn_hal_error_code_t (*write_blocks)(
+        cfn_hal_sdio_t *driver, const uint8_t *data, uint32_t block_addr, uint32_t nbr_of_blocks, uint32_t timeout);
+    cfn_hal_error_code_t (*get_card_info)(cfn_hal_sdio_t *driver, cfn_hal_sdio_card_info_t *info);
+    cfn_hal_error_code_t (*wait_card_ready)(cfn_hal_sdio_t *driver, uint32_t timeout);
 };
 
 CFN_HAL_CREATE_DRIVER_TYPE(
@@ -295,6 +328,85 @@ static inline cfn_hal_error_code_t cfn_hal_sdio_error_get(cfn_hal_sdio_t *driver
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO, error_mask);
+}
+
+/* SDIO Specific Functions ------------------------------------------ */
+
+/**
+ * @brief Sends an SD/MMC command and waits for a response.
+ * @param driver Pointer to the SDIO driver instance.
+ * @param cmd Pointer to the command configuration structure.
+ * @param response [out] Pointer to store the card response.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t
+cfn_hal_sdio_send_command(cfn_hal_sdio_t *driver, const cfn_hal_sdio_cmd_t *cmd, uint32_t *response)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SDIO, send_command, driver, error, cmd, response);
+    return error;
+}
+
+/**
+ * @brief Reads data blocks from the SD card.
+ * @param driver Pointer to the SDIO driver instance.
+ * @param buffer Pointer to the destination memory.
+ * @param block_addr Address of the first block to read.
+ * @param nbr_of_blocks Number of blocks to transfer.
+ * @param timeout Timeout duration in milliseconds.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_sdio_read_blocks(
+    cfn_hal_sdio_t *driver, uint8_t *buffer, uint32_t block_addr, uint32_t nbr_of_blocks, uint32_t timeout)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
+        CFN_HAL_PERIPHERAL_TYPE_SDIO, read_blocks, driver, error, buffer, block_addr, nbr_of_blocks, timeout);
+    return error;
+}
+
+/**
+ * @brief Writes data blocks to the SD card.
+ * @param driver Pointer to the SDIO driver instance.
+ * @param data Pointer to the source data.
+ * @param block_addr Address of the first block to write.
+ * @param nbr_of_blocks Number of blocks to transfer.
+ * @param timeout Timeout duration in milliseconds.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_sdio_write_blocks(
+    cfn_hal_sdio_t *driver, const uint8_t *data, uint32_t block_addr, uint32_t nbr_of_blocks, uint32_t timeout)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
+        CFN_HAL_PERIPHERAL_TYPE_SDIO, write_blocks, driver, error, data, block_addr, nbr_of_blocks, timeout);
+    return error;
+}
+
+/**
+ * @brief Retrieves card-specific registers and capacity.
+ * @param driver Pointer to the SDIO driver instance.
+ * @param info [out] Pointer to the card info structure.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_sdio_get_card_info(cfn_hal_sdio_t *driver, cfn_hal_sdio_card_info_t *info)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SDIO, get_card_info, driver, error, info);
+    return error;
+}
+
+/**
+ * @brief Waits until the SD card is no longer busy.
+ * @param driver Pointer to the SDIO driver instance.
+ * @param timeout Timeout duration in milliseconds.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_sdio_wait_card_ready(cfn_hal_sdio_t *driver, uint32_t timeout)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SDIO, wait_card_ready, driver, error, timeout);
+    return error;
 }
 
 #ifdef __cplusplus

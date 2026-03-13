@@ -20,7 +20,7 @@
  * SOFTWARE.
  *
  * @file cfn_hal_usb.h
- * @brief USB HAL API.
+ * @brief USB Device HAL API.
  */
 
 #ifndef CAFFEINE_HAL_HAL_USB_H
@@ -50,6 +50,8 @@ typedef enum
     CFN_HAL_USB_EVENT_DISCONNECT = CFN_HAL_BIT(1), /*!< Device detached from host */
     CFN_HAL_USB_EVENT_SUSPEND = CFN_HAL_BIT(2),    /*!< Bus entered low power state */
     CFN_HAL_USB_EVENT_RESUME = CFN_HAL_BIT(3),     /*!< Bus activity resumed */
+    CFN_HAL_USB_EVENT_RESET = CFN_HAL_BIT(4),      /*!< USB bus reset detected */
+    CFN_HAL_USB_EVENT_SETUP = CFN_HAL_BIT(5),      /*!< Setup packet received on EP0 */
 } cfn_hal_usb_event_t;
 
 /**
@@ -62,6 +64,17 @@ typedef enum
     CFN_HAL_USB_ERROR_ISO_IN = CFN_HAL_BIT(1),  /*!< Isochronous IN data lost */
     CFN_HAL_USB_ERROR_GENERAL = CFN_HAL_BIT(2), /*!< General hardware error */
 } cfn_hal_usb_error_t;
+
+/**
+ * @brief USB endpoint types.
+ */
+typedef enum
+{
+    CFN_HAL_USB_EP_TYPE_CTRL, /*!< Control endpoint */
+    CFN_HAL_USB_EP_TYPE_ISOC, /*!< Isochronous endpoint */
+    CFN_HAL_USB_EP_TYPE_BULK, /*!< Bulk endpoint */
+    CFN_HAL_USB_EP_TYPE_INTR, /*!< Interrupt endpoint */
+} cfn_hal_usb_ep_type_t;
 
 /* Types Structs ----------------------------------------------------*/
 
@@ -90,9 +103,11 @@ typedef struct cfn_hal_usb_api_s cfn_hal_usb_api_t;
  * @param driver Pointer to the USB driver instance.
  * @param event_mask Mask of triggered nominal events.
  * @param error_mask Mask of triggered exception errors.
+ * @param ep_addr Endpoint address associated with the event (if applicable).
  * @param user_arg User-defined argument passed during registration.
  */
-typedef void (*cfn_hal_usb_callback_t)(cfn_hal_usb_t *driver, uint32_t event_mask, uint32_t error_mask, void *user_arg);
+typedef void (*cfn_hal_usb_callback_t)(
+    cfn_hal_usb_t *driver, uint32_t event_mask, uint32_t error_mask, uint8_t ep_addr, void *user_arg);
 
 /**
  * @brief USB Virtual Method Table (VMT).
@@ -101,7 +116,18 @@ struct cfn_hal_usb_api_s
 {
     cfn_hal_api_base_t base;
 
-    /* USB Specific Extensions can be added here (e.g., set address, handle EP) */
+    /* USB Specific Extensions */
+    cfn_hal_error_code_t (*start)(cfn_hal_usb_t *driver);
+    cfn_hal_error_code_t (*stop)(cfn_hal_usb_t *driver);
+    cfn_hal_error_code_t (*set_address)(cfn_hal_usb_t *driver, uint8_t address);
+    cfn_hal_error_code_t (*ep_open)(cfn_hal_usb_t        *driver,
+                                    uint8_t               ep_addr,
+                                    cfn_hal_usb_ep_type_t ep_type,
+                                    uint16_t              ep_mps);
+    cfn_hal_error_code_t (*ep_close)(cfn_hal_usb_t *driver, uint8_t ep_addr);
+    cfn_hal_error_code_t (*ep_transmit)(cfn_hal_usb_t *driver, uint8_t ep_addr, const uint8_t *data, size_t length);
+    cfn_hal_error_code_t (*ep_receive)(cfn_hal_usb_t *driver, uint8_t ep_addr, uint8_t *buffer, size_t length);
+    cfn_hal_error_code_t (*ep_stall)(cfn_hal_usb_t *driver, uint8_t ep_addr, bool stall);
 };
 
 CFN_HAL_CREATE_DRIVER_TYPE(usb, cfn_hal_usb_config_t, cfn_hal_usb_api_t, cfn_hal_usb_phy_t, cfn_hal_usb_callback_t);
@@ -290,6 +316,120 @@ static inline cfn_hal_error_code_t cfn_hal_usb_error_get(cfn_hal_usb_t *driver, 
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_USB, error_mask);
+}
+
+/* USB Specific Functions ------------------------------------------- */
+
+/**
+ * @brief Starts the USB device controller (connects pull-up).
+ * @param driver Pointer to the USB driver instance.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_usb_start(cfn_hal_usb_t *driver)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_USB, start, driver, error);
+    return error;
+}
+
+/**
+ * @brief Stops the USB device controller (disconnects pull-up).
+ * @param driver Pointer to the USB driver instance.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_usb_stop(cfn_hal_usb_t *driver)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_USB, stop, driver, error);
+    return error;
+}
+
+/**
+ * @brief Sets the USB device address.
+ * @param driver Pointer to the USB driver instance.
+ * @param address Address assigned by the host (0 to 127).
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_usb_set_address(cfn_hal_usb_t *driver, uint8_t address)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_USB, set_address, driver, error, address);
+    return error;
+}
+
+/**
+ * @brief Configures and enables a USB endpoint.
+ * @param driver Pointer to the USB driver instance.
+ * @param ep_addr Endpoint address (including direction bit).
+ * @param ep_type Endpoint transfer type (Bulk, Interrupt, etc.).
+ * @param ep_mps Maximum Packet Size for the endpoint.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t
+cfn_hal_usb_ep_open(cfn_hal_usb_t *driver, uint8_t ep_addr, cfn_hal_usb_ep_type_t ep_type, uint16_t ep_mps)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_USB, ep_open, driver, error, ep_addr, ep_type, ep_mps);
+    return error;
+}
+
+/**
+ * @brief Disables and closes a USB endpoint.
+ * @param driver Pointer to the USB driver instance.
+ * @param ep_addr Endpoint address.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_usb_ep_close(cfn_hal_usb_t *driver, uint8_t ep_addr)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_USB, ep_close, driver, error, ep_addr);
+    return error;
+}
+
+/**
+ * @brief Initiates data transmission on an IN endpoint.
+ * @param driver Pointer to the USB driver instance.
+ * @param ep_addr IN endpoint address.
+ * @param data Pointer to the buffer containing data to send.
+ * @param length Number of bytes to transmit.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t
+cfn_hal_usb_ep_transmit(cfn_hal_usb_t *driver, uint8_t ep_addr, const uint8_t *data, size_t length)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_USB, ep_transmit, driver, error, ep_addr, data, length);
+    return error;
+}
+
+/**
+ * @brief Prepares an OUT endpoint for data reception.
+ * @param driver Pointer to the USB driver instance.
+ * @param ep_addr OUT endpoint address.
+ * @param buffer Pointer to the buffer where received data will be stored.
+ * @param length Maximum number of bytes to receive.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t
+cfn_hal_usb_ep_receive(cfn_hal_usb_t *driver, uint8_t ep_addr, uint8_t *buffer, size_t length)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_USB, ep_receive, driver, error, ep_addr, buffer, length);
+    return error;
+}
+
+/**
+ * @brief Controls the stall condition of an endpoint.
+ * @param driver Pointer to the USB driver instance.
+ * @param ep_addr Endpoint address.
+ * @param stall True to set STALL, False to clear.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_usb_ep_stall(cfn_hal_usb_t *driver, uint8_t ep_addr, bool stall)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_USB, ep_stall, driver, error, ep_addr, stall);
+    return error;
 }
 
 #ifdef __cplusplus

@@ -63,7 +63,36 @@ typedef enum
     CFN_HAL_ETH_ERROR_GENERAL = CFN_HAL_BIT(2), /*!< General hardware error */
 } cfn_hal_eth_error_t;
 
+/**
+ * @brief Ethernet link speed.
+ */
+typedef enum
+{
+    CFN_HAL_ETH_LINK_SPEED_10M,   /*!< 10 Mbps */
+    CFN_HAL_ETH_LINK_SPEED_100M,  /*!< 100 Mbps */
+    CFN_HAL_ETH_LINK_SPEED_1000M, /*!< 1000 Mbps */
+} cfn_hal_eth_link_speed_t;
+
+/**
+ * @brief Ethernet link duplex mode.
+ */
+typedef enum
+{
+    CFN_HAL_ETH_LINK_DUPLEX_HALF, /*!< Half duplex */
+    CFN_HAL_ETH_LINK_DUPLEX_FULL, /*!< Full duplex */
+} cfn_hal_eth_link_duplex_t;
+
 /* Types Structs ----------------------------------------------------*/
+
+/**
+ * @brief Ethernet link status information.
+ */
+typedef struct
+{
+    bool                      is_up;  /*!< Link established flag */
+    cfn_hal_eth_link_speed_t  speed;  /*!< Negotiated speed */
+    cfn_hal_eth_link_duplex_t duplex; /*!< Negotiated duplex mode */
+} cfn_hal_eth_link_status_t;
 
 /**
  * @brief Ethernet configuration structure.
@@ -102,7 +131,17 @@ struct cfn_hal_eth_api_s
 {
     cfn_hal_api_base_t base;
 
-    /* Ethernet Specific Extensions can be added here (e.g., transmit/receive frame) */
+    /* Ethernet Specific Extensions */
+    cfn_hal_error_code_t (*start)(cfn_hal_eth_t *driver);
+    cfn_hal_error_code_t (*stop)(cfn_hal_eth_t *driver);
+    cfn_hal_error_code_t (*transmit_frame)(cfn_hal_eth_t *driver, const uint8_t *frame, size_t length);
+    cfn_hal_error_code_t (*receive_frame)(cfn_hal_eth_t *driver,
+                                          uint8_t       *buffer,
+                                          size_t         max_length,
+                                          size_t        *received_length);
+    cfn_hal_error_code_t (*read_phy_reg)(cfn_hal_eth_t *driver, uint16_t phy_addr, uint16_t reg_addr, uint16_t *value);
+    cfn_hal_error_code_t (*write_phy_reg)(cfn_hal_eth_t *driver, uint16_t phy_addr, uint16_t reg_addr, uint16_t value);
+    cfn_hal_error_code_t (*get_link_status)(cfn_hal_eth_t *driver, cfn_hal_eth_link_status_t *status);
 };
 
 CFN_HAL_CREATE_DRIVER_TYPE(eth, cfn_hal_eth_config_t, cfn_hal_eth_api_t, cfn_hal_eth_phy_t, cfn_hal_eth_callback_t);
@@ -291,6 +330,111 @@ static inline cfn_hal_error_code_t cfn_hal_eth_error_get(cfn_hal_eth_t *driver, 
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH, error_mask);
+}
+
+/* ETH Specific Functions ------------------------------------------- */
+
+/**
+ * @brief Starts the Ethernet MAC and DMA operations.
+ * @param driver Pointer to the Ethernet driver instance.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_eth_start(cfn_hal_eth_t *driver)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_ETH, start, driver, error);
+    return error;
+}
+
+/**
+ * @brief Stops the Ethernet MAC and DMA operations.
+ * @param driver Pointer to the Ethernet driver instance.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_eth_stop(cfn_hal_eth_t *driver)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_ETH, stop, driver, error);
+    return error;
+}
+
+/**
+ * @brief Transmits an Ethernet frame.
+ * @param driver Pointer to the Ethernet driver instance.
+ * @param frame Pointer to the raw frame data.
+ * @param length Length of the frame in bytes.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t
+cfn_hal_eth_transmit_frame(cfn_hal_eth_t *driver, const uint8_t *frame, size_t length)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_ETH, transmit_frame, driver, error, frame, length);
+    return error;
+}
+
+/**
+ * @brief Receives an Ethernet frame.
+ * @param driver Pointer to the Ethernet driver instance.
+ * @param buffer Pointer to the buffer where the frame will be stored.
+ * @param max_length Maximum capacity of the buffer.
+ * @param received_length [out] Actual number of bytes received.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t
+cfn_hal_eth_receive_frame(cfn_hal_eth_t *driver, uint8_t *buffer, size_t max_length, size_t *received_length)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
+        CFN_HAL_PERIPHERAL_TYPE_ETH, receive_frame, driver, error, buffer, max_length, received_length);
+    return error;
+}
+
+/**
+ * @brief Reads a PHY register via MDIO.
+ * @param driver Pointer to the Ethernet driver instance.
+ * @param phy_addr Address of the target PHY.
+ * @param reg_addr Address of the target register.
+ * @param value [out] Pointer to store the read value.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t
+cfn_hal_eth_read_phy_reg(cfn_hal_eth_t *driver, uint16_t phy_addr, uint16_t reg_addr, uint16_t *value)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
+        CFN_HAL_PERIPHERAL_TYPE_ETH, read_phy_reg, driver, error, phy_addr, reg_addr, value);
+    return error;
+}
+
+/**
+ * @brief Writes a PHY register via MDIO.
+ * @param driver Pointer to the Ethernet driver instance.
+ * @param phy_addr Address of the target PHY.
+ * @param reg_addr Address of the target register.
+ * @param value Value to write.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t
+cfn_hal_eth_write_phy_reg(cfn_hal_eth_t *driver, uint16_t phy_addr, uint16_t reg_addr, uint16_t value)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
+        CFN_HAL_PERIPHERAL_TYPE_ETH, write_phy_reg, driver, error, phy_addr, reg_addr, value);
+    return error;
+}
+
+/**
+ * @brief Retrieves the current link status.
+ * @param driver Pointer to the Ethernet driver instance.
+ * @param status [out] Pointer to the link status structure.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_eth_get_link_status(cfn_hal_eth_t *driver, cfn_hal_eth_link_status_t *status)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_ETH, get_link_status, driver, error, status);
+    return error;
 }
 
 #ifdef __cplusplus

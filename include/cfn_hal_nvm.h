@@ -64,6 +64,17 @@ typedef enum
 /* Types Structs ----------------------------------------------------*/
 
 /**
+ * @brief NVM memory organization information.
+ */
+typedef struct
+{
+    size_t   total_size;   /*!< Total capacity in bytes */
+    size_t   sector_size;  /*!< Smallest erasable unit in bytes */
+    size_t   page_size;    /*!< Smallest programmable unit in bytes */
+    uint32_t write_cycles; /*!< Endurance (rated cycles) */
+} cfn_hal_nvm_info_t;
+
+/**
  * @brief NVM configuration structure.
  */
 typedef struct
@@ -99,7 +110,12 @@ struct cfn_hal_nvm_api_s
 {
     cfn_hal_api_base_t base;
 
-    /* NVM Specific Extensions can be added here (e.g., read/write/erase) */
+    /* NVM Specific Extensions */
+    cfn_hal_error_code_t (*read)(cfn_hal_nvm_t *driver, uint32_t addr, uint8_t *buffer, size_t size);
+    cfn_hal_error_code_t (*write)(cfn_hal_nvm_t *driver, uint32_t addr, const uint8_t *data, size_t size);
+    cfn_hal_error_code_t (*erase_sector)(cfn_hal_nvm_t *driver, uint32_t sector_addr);
+    cfn_hal_error_code_t (*erase_chip)(cfn_hal_nvm_t *driver);
+    cfn_hal_error_code_t (*get_info)(cfn_hal_nvm_t *driver, cfn_hal_nvm_info_t *info);
 };
 
 CFN_HAL_CREATE_DRIVER_TYPE(nvm, cfn_hal_nvm_config_t, cfn_hal_nvm_api_t, cfn_hal_nvm_phy_t, cfn_hal_nvm_callback_t);
@@ -288,6 +304,77 @@ static inline cfn_hal_error_code_t cfn_hal_nvm_error_get(cfn_hal_nvm_t *driver, 
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_NVM, error_mask);
+}
+
+/* NVM Specific Functions ------------------------------------------- */
+
+/**
+ * @brief Reads data from non-volatile memory.
+ * @param driver Pointer to the NVM driver instance.
+ * @param addr Source memory address.
+ * @param buffer Pointer to the buffer where data will be stored.
+ * @param size Number of bytes to read.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_nvm_read(cfn_hal_nvm_t *driver, uint32_t addr, uint8_t *buffer, size_t size)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_NVM, read, driver, error, addr, buffer, size);
+    return error;
+}
+
+/**
+ * @brief Programs data into non-volatile memory.
+ * @param driver Pointer to the NVM driver instance.
+ * @param addr Destination memory address.
+ * @param data Pointer to the data to be written.
+ * @param size Number of bytes to write.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t
+cfn_hal_nvm_write(cfn_hal_nvm_t *driver, uint32_t addr, const uint8_t *data, size_t size)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_NVM, write, driver, error, addr, data, size);
+    return error;
+}
+
+/**
+ * @brief Erases a specific sector or page of memory.
+ * @param driver Pointer to the NVM driver instance.
+ * @param sector_addr Address within the sector to be erased.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_nvm_erase_sector(cfn_hal_nvm_t *driver, uint32_t sector_addr)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_NVM, erase_sector, driver, error, sector_addr);
+    return error;
+}
+
+/**
+ * @brief Erases the entire non-volatile memory (Bulk Erase).
+ * @param driver Pointer to the NVM driver instance.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_nvm_erase_chip(cfn_hal_nvm_t *driver)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_NVM, erase_chip, driver, error);
+    return error;
+}
+
+/**
+ * @brief Retrieves information about memory organization and endurance.
+ * @param driver Pointer to the NVM driver instance.
+ * @param info [out] Pointer to the information structure.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_nvm_get_info(cfn_hal_nvm_t *driver, cfn_hal_nvm_info_t *info)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_NVM, get_info, driver, error, info);
+    return error;
 }
 
 #ifdef __cplusplus

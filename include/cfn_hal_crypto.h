@@ -59,6 +59,18 @@ typedef enum
     CFN_HAL_CRYPTO_ERROR_GENERAL = CFN_HAL_BIT(1), /*!< General hardware error */
 } cfn_hal_crypto_error_t;
 
+/**
+ * @brief Supported cryptographic algorithms.
+ */
+typedef enum
+{
+    CFN_HAL_CRYPTO_ALGO_AES_ECB,
+    CFN_HAL_CRYPTO_ALGO_AES_CBC,
+    CFN_HAL_CRYPTO_ALGO_AES_GCM,
+    CFN_HAL_CRYPTO_ALGO_SHA256,
+    CFN_HAL_CRYPTO_ALGO_SHA512,
+} cfn_hal_crypto_algo_t;
+
 /* Types Structs ----------------------------------------------------*/
 
 /**
@@ -66,7 +78,8 @@ typedef enum
  */
 typedef struct
 {
-    void *user_config; /*!< Vendor-specific crypto engine configuration */
+    cfn_hal_crypto_algo_t algo;        /*!< Default hardware algorithm */
+    void                 *user_config; /*!< Vendor-specific crypto engine configuration */
 } cfn_hal_crypto_config_t;
 
 /**
@@ -100,7 +113,13 @@ struct cfn_hal_crypto_api_s
 {
     cfn_hal_api_base_t base;
 
-    /* Crypto Specific Extensions can be added here (e.g., encrypt/decrypt) */
+    /* Crypto Specific Extensions */
+    cfn_hal_error_code_t (*encrypt)(cfn_hal_crypto_t *driver, const uint8_t *in, uint8_t *out, size_t size);
+    cfn_hal_error_code_t (*decrypt)(cfn_hal_crypto_t *driver, const uint8_t *in, uint8_t *out, size_t size);
+    cfn_hal_error_code_t (*hash_update)(cfn_hal_crypto_t *driver, const uint8_t *data, size_t size);
+    cfn_hal_error_code_t (*hash_finish)(cfn_hal_crypto_t *driver, uint8_t *hash);
+    cfn_hal_error_code_t (*generate_random)(cfn_hal_crypto_t *driver, uint8_t *buffer, size_t size);
+    cfn_hal_error_code_t (*set_key)(cfn_hal_crypto_t *driver, const uint8_t *key, size_t key_size);
 };
 
 CFN_HAL_CREATE_DRIVER_TYPE(
@@ -291,6 +310,97 @@ static inline cfn_hal_error_code_t cfn_hal_crypto_error_get(cfn_hal_crypto_t *dr
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO, error_mask);
+}
+
+/* CRYPTO Specific Functions ---------------------------------------- */
+
+/**
+ * @brief Encrypts a block of data.
+ * @param driver Pointer to the Crypto driver instance.
+ * @param in Pointer to the plaintext data.
+ * @param out Pointer to the buffer where ciphertext will be stored.
+ * @param size Number of bytes to encrypt.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t
+cfn_hal_crypto_encrypt(cfn_hal_crypto_t *driver, const uint8_t *in, uint8_t *out, size_t size)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, encrypt, driver, error, in, out, size);
+    return error;
+}
+
+/**
+ * @brief Decrypts a block of data.
+ * @param driver Pointer to the Crypto driver instance.
+ * @param in Pointer to the ciphertext data.
+ * @param out Pointer to the buffer where plaintext will be stored.
+ * @param size Number of bytes to decrypt.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t
+cfn_hal_crypto_decrypt(cfn_hal_crypto_t *driver, const uint8_t *in, uint8_t *out, size_t size)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, decrypt, driver, error, in, out, size);
+    return error;
+}
+
+/**
+ * @brief Feeds data into the hashing engine.
+ * @param driver Pointer to the Crypto driver instance.
+ * @param data Pointer to the data to be hashed.
+ * @param size Number of bytes to process.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t
+cfn_hal_crypto_hash_update(cfn_hal_crypto_t *driver, const uint8_t *data, size_t size)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, hash_update, driver, error, data, size);
+    return error;
+}
+
+/**
+ * @brief Finalizes the hash calculation and retrieves the digest.
+ * @param driver Pointer to the Crypto driver instance.
+ * @param hash [out] Pointer to the buffer where the digest will be stored.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_crypto_hash_finish(cfn_hal_crypto_t *driver, uint8_t *hash)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, hash_finish, driver, error, hash);
+    return error;
+}
+
+/**
+ * @brief Generates cryptographically secure random numbers.
+ * @param driver Pointer to the Crypto driver instance.
+ * @param buffer [out] Pointer to the buffer to be filled with random data.
+ * @param size Number of bytes to generate.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t
+cfn_hal_crypto_generate_random(cfn_hal_crypto_t *driver, uint8_t *buffer, size_t size)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, generate_random, driver, error, buffer, size);
+    return error;
+}
+
+/**
+ * @brief Sets the cryptographic key for symmetric algorithms.
+ * @param driver Pointer to the Crypto driver instance.
+ * @param key Pointer to the key data.
+ * @param key_size Size of the key in bytes.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_crypto_set_key(cfn_hal_crypto_t *driver, const uint8_t *key, size_t key_size)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, set_key, driver, error, key, key_size);
+    return error;
 }
 
 #ifdef __cplusplus

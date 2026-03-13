@@ -101,7 +101,12 @@ struct cfn_hal_i2s_api_s
 {
     cfn_hal_api_base_t base;
 
-    /* I2S Specific Extensions can be added here (e.g., transmit/receive audio) */
+    /* I2S Specific Extensions */
+    cfn_hal_error_code_t (*transmit_dma)(cfn_hal_i2s_t *driver, const uint16_t *data, size_t size);
+    cfn_hal_error_code_t (*receive_dma)(cfn_hal_i2s_t *driver, uint16_t *data, size_t size);
+    cfn_hal_error_code_t (*pause)(cfn_hal_i2s_t *driver);
+    cfn_hal_error_code_t (*resume)(cfn_hal_i2s_t *driver);
+    cfn_hal_error_code_t (*stop)(cfn_hal_i2s_t *driver);
 };
 
 CFN_HAL_CREATE_DRIVER_TYPE(i2s, cfn_hal_i2s_config_t, cfn_hal_i2s_api_t, cfn_hal_i2s_phy_t, cfn_hal_i2s_callback_t);
@@ -290,6 +295,72 @@ static inline cfn_hal_error_code_t cfn_hal_i2s_error_get(cfn_hal_i2s_t *driver, 
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, error_mask);
+}
+
+/* I2S Specific Functions ------------------------------------------- */
+
+/**
+ * @brief Starts non-blocking audio transmission via DMA.
+ * @param driver Pointer to the I2S driver instance.
+ * @param data Pointer to the buffer containing audio samples.
+ * @param size Number of samples to transmit.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_i2s_transmit_dma(cfn_hal_i2s_t *driver, const uint16_t *data, size_t size)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_I2S, transmit_dma, driver, error, data, size);
+    return error;
+}
+
+/**
+ * @brief Starts non-blocking audio reception via DMA.
+ * @param driver Pointer to the I2S driver instance.
+ * @param data Pointer to the buffer where received samples will be stored.
+ * @param size Number of samples to receive.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_i2s_receive_dma(cfn_hal_i2s_t *driver, uint16_t *data, size_t size)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_I2S, receive_dma, driver, error, data, size);
+    return error;
+}
+
+/**
+ * @brief Pauses the ongoing I2S audio stream.
+ * @param driver Pointer to the I2S driver instance.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_i2s_pause(cfn_hal_i2s_t *driver)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_I2S, pause, driver, error);
+    return error;
+}
+
+/**
+ * @brief Resumes a previously paused I2S audio stream.
+ * @param driver Pointer to the I2S driver instance.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_i2s_resume(cfn_hal_i2s_t *driver)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_I2S, resume, driver, error);
+    return error;
+}
+
+/**
+ * @brief Stops the I2S audio operation and DMA transfers.
+ * @param driver Pointer to the I2S driver instance.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_i2s_stop(cfn_hal_i2s_t *driver)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_I2S, stop, driver, error);
+    return error;
 }
 
 #ifdef __cplusplus
