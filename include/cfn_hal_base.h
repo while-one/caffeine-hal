@@ -572,12 +572,16 @@ cfn_hal_base_error_get(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expecte
 
 #if (CFN_HAL_USE_LOCK == 1)
 /**
- * @brief Generic concurrency lock.
+ * @brief Type-validated concurrency lock.
+ * @param base Pointer to the base driver structure.
+ * @param expected_type FourCC code for peripheral type validation.
+ * @param timeout Lock acquisition timeout in milliseconds.
+ * @return CFN_HAL_ERROR_OK on success, or an error code on failure.
  */
 static inline cfn_hal_error_code_t
-cfn_hal_base_lock(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expected_type, uint32_t timeout)
+cfn_hal_base_lock(cfn_hal_driver_t *base, uint32_t timeout)
 {
-    if (!base || base->type != expected_type || !base->vmt)
+    if (!base || !base->vmt)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
@@ -592,11 +596,14 @@ cfn_hal_base_lock(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expected_typ
 }
 
 /**
- * @brief Generic concurrency unlock.
+ * @brief Type-validated concurrency unlock.
+ * @param base Pointer to the base driver structure.
+ * @param expected_type FourCC code for peripheral type validation.
+ * @return CFN_HAL_ERROR_OK on success, or an error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_base_unlock(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expected_type)
+static inline cfn_hal_error_code_t cfn_hal_base_unlock(cfn_hal_driver_t *base)
 {
-    if (!base || base->type != expected_type || !base->vmt)
+    if (!base|| !base->vmt)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }

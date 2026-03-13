@@ -129,8 +129,8 @@ extern "C"
     } while (0)
 
 #if (CFN_HAL_USE_LOCK == 1)
-#define CFN_HAL_LOCK(driver, timeout) cfn_hal_driver_lock(&(driver)->base, timeout)
-#define CFN_HAL_UNLOCK(driver)        cfn_hal_driver_unlock(&(driver)->base)
+#define CFN_HAL_LOCK(driver, timeout) cfn_hal_base_lock(&(driver)->base, timeout)
+#define CFN_HAL_UNLOCK(driver)        cfn_hal_base_unlock(&(driver)->base)
 
 /**
  * @brief Helper macro to execute a driver function with a concurrency lock.
@@ -145,11 +145,11 @@ extern "C"
     {                                                                                                                  \
         if ((driver) != NULL)                                                                                          \
         {                                                                                                              \
-            (result) = cfn_hal_driver_lock(&(driver)->base, (timeout));                                                \
+            (result) = cfn_hal_base_lock(&(driver)->base, (timeout));                             \
             if ((result) == CFN_HAL_ERROR_OK)                                                                          \
             {                                                                                                          \
                 (result) = function((driver), ##__VA_ARGS__);                                                          \
-                (void) cfn_hal_driver_unlock(&(driver)->base);                                                         \
+                (void) cfn_hal_base_unlock(&(driver)->base);                                      \
             }                                                                                                          \
         }                                                                                                              \
         else                                                                                                           \

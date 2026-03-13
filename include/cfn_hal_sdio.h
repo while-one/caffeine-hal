@@ -80,12 +80,12 @@ typedef struct
  */
 typedef struct
 {
-    uint32_t card_type;     /*!< SDSC, SDHC, SDXC, etc. */
-    uint32_t card_version;  /*!< Hardware revision */
-    uint32_t class;         /*!< Speed class */
-    uint32_t rel_card_addr; /*!< Relative Card Address (RCA) */
-    uint32_t block_count;   /*!< Total capacity in blocks */
-    uint32_t block_size;    /*!< Block size in bytes (usually 512) */
+    uint32_t card_type;      /*!< SDSC, SDHC, SDXC, etc. */
+    uint32_t card_version;   /*!< Hardware revision */
+    uint32_t speed_class;    /*!< Speed class */
+    uint32_t rel_card_addr;  /*!< Relative Card Address (RCA) */
+    uint32_t block_count;    /*!< Total capacity in blocks */
+    uint32_t block_size;     /*!< Block size in bytes (usually 512) */
     uint32_t log_block_count;
     uint32_t log_block_size;
 } cfn_hal_sdio_card_info_t;

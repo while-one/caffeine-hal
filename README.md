@@ -36,9 +36,10 @@ Copyright (c) 2026 Hisham Moussa Daou <https://whileone.me>
 
 ### Key Features
 *   **Zero-Copy & Header-Only:** Designed as a CMake `INTERFACE` library for easy integration.
-*   **Polymorphic API:** Consistent interface across different MCUs using a VMT pattern.
+*   **Base Driver Architecture:** All peripherals inherit from a common base (`cfn_hal_base.h`), ensuring a consistent lifecycle across the entire library.
+*   **Nominal/Exception Separation:** Standardized splitting of peripheral status into nominal `events` and exception `errors`.
 *   **Board-Level Hooks:** Built-in `on_config` callback for handling clock gating, pin muxing, and DMA routing without breaking the generic API.
-*   **Thread-Safe by Design:** Optional integrated locking mechanisms for multi-threaded RTOS environments.
+*   **Thread-Safe by Design:** Optimized locking strategy using `CFN_HAL_WITH_LOCK` for clean multi-threaded RTOS environments.
 *   **Pragmatic Static Analysis:** Pre-configured for `clang-format`, `clang-tidy`, and `cppcheck` (BARR-C 2018 / Allman style).
 
 ---
@@ -47,8 +48,9 @@ Copyright (c) 2026 Hisham Moussa Daou <https://whileone.me>
 
 Every peripheral in Caffeine-HAL follows a standard container pattern:
 
-1.  **Generic Driver (`cfn_hal_xxx_t`):** Contains the base state, power status, and VMT pointers.
-3.  **Hardware API (`cfn_hal_xxx_api_t`):** A structure of function pointers implemented by the specific hardware port.
+1.  **Generic Driver (`cfn_hal_xxx_t`):** Contains the base state (via `cfn_hal_driver_t`), configuration pointers, and VMT pointers.
+2.  **Hardware API (`cfn_hal_xxx_api_t`):** A structure of function pointers (Virtual Method Table) implemented by the specific hardware port.
+3.  **Physical Mapping (`cfn_hal_xxx_phy_t`):** Defines the hardware instance and pin mappings (using `cfn_hal_gpio_pin_driver_t`).
 
 ---
 
@@ -89,20 +91,26 @@ target_link_libraries(your_app PRIVATE caffeine-hal)
 // 1. Define your configuration
 cfn_hal_uart_config_t uart_cfg = {
     .baudrate = 115200,
-    .source_clock_hz = 48000000,
-    .word_length = CFN_HAL_UART_WORD_LENGTH_8B,
-    .stop_bits = CFN_HAL_UART_STOP_BITS_1,
-    .parity = CFN_HAL_UART_PARITY_NONE,
+    .data_len = CFN_HAL_UART_CONFIG_DATA_LEN_8,
+    .stop_bits = CFN_HAL_UART_STOP_ONE_BIT,
+    .parity = CFN_HAL_UART_CONFIG_PARITY_NONE,
 };
 
-// 2. Setup the driver instance
+// 2. Setup the physical mapping
+cfn_hal_uart_phy_t uart_phy = {
+    .instance = (void*)UART1_BASE, // Peripheral base address
+};
+
+// 3. Setup the driver instance
 cfn_hal_uart_t my_uart = {
-    .api = &stm32_uart_vmt_impl, // Pointer to the hardware-specific implementation
-    .config = &uart_cfg
+    .api = &stm32_uart_vmt_impl, // Pointer to hardware implementation
+    .phy = &uart_phy
 };
 
-// 3. Initialize and use
+// 4. Initialize and use
 if (cfn_hal_uart_init(&my_uart) == CFN_HAL_ERROR_OK) {
+    cfn_hal_uart_config_set(&my_uart, &uart_cfg);
+    
     uint8_t msg[] = "Hello World\n";
     cfn_hal_uart_tx_polling(&my_uart, msg, sizeof(msg), 1000);
 }
@@ -114,22 +122,22 @@ if (cfn_hal_uart_init(&my_uart) == CFN_HAL_ERROR_OK) {
 
 The project includes built-in targets for maintaining code quality:
 
-*   **Format Code:** `make format` (Requires `clang-format`)
-*   **Run Static Analysis:** `make analyze` (Runs `cppcheck` and `clang-tidy`)
+*   **Format Code:** `make caffeine-hal-format` (Requires `clang-format`)
+*   **Run Static Analysis:** `make caffeine-hal-analyze` (Runs `cppcheck` and `clang-tidy`)
 *   **Run Unit Tests:** `make caffeine-hal-test` (Requires `GoogleTest`)
 
 ---
 
 ## The Caffeine Framework Layers
 
-Caffeine-HAL is the foundational interface within the broader **Caffeine Framework**—a strictly decoupled, layered architecture designed for modern embedded systems. This separation of concerns ensures that business logic remains completely portable across different microcontrollers and even host operating systems.
+Caffeine-HAL is the foundational interface within the broader **Caffeine Framework**—a strictly decoupled, layered architecture designed for modern embedded systems.
 
 The framework is composed of the following distinct layers:
 
 1.  **Generic Interface (`caffeine-hal`):** This repository. Header-only definitions of the Hardware Abstraction Layer and Virtual Method Tables (VMTs).
-2.  **Hardware Ports ([`caffeine-hal-ports`](https://github.com/while-one/caffeine-hal-ports)):** The concrete implementations of the HAL for specific vendors (e.g., STM32, NXP, nRF, TI) and OS environments (Linux POSIX). It encapsulates vendor SDKs and provides modern CMake cross-compilation presets.
-3.  **Middleware (TBD):** Device drivers (e.g., displays, sensors) and protocols (e.g., Modbus, USB stacks) that build strictly upon the generic `caffeine-hal` interface, remaining completely agnostic to the underlying hardware.
-4.  **Application (TBD):** The top-level business logic, state machines, and system orchestration that utilize the middleware and HAL interfaces.
+2.  **Hardware Ports ([`caffeine-hal-ports`](https://github.com/while-one/caffeine-hal-ports)):** The concrete implementations of the HAL for specific vendors (e.g., STM32, NXP, nRF, TI).
+3.  **Middleware (TBD):** Device drivers (e.g., displays, sensors) and protocols (e.g., Modbus, USB stacks) that build strictly upon the generic `caffeine-hal` interface.
+4.  **Application (TBD):** The top-level business logic and system orchestration.
 
 ---
 

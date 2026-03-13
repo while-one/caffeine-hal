@@ -52,7 +52,7 @@ MaxEmptyLinesToKeep: 1
 KeepEmptyLinesAtTheStartOfBlocks: false
 
 # --- Section 8: Formatting Behavior ---
-AlignAfterOpenBracket: AlwaysBreak
+AlignAfterOpenBracket: Align
 AlwaysBreakAfterReturnType: None
 PenaltyReturnTypeOnItsOwnLine: 60
 BreakBeforeBinaryOperators: None
