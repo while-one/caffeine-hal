@@ -122,7 +122,7 @@ static inline cfn_hal_error_code_t cfn_hal_base_init(cfn_hal_driver_t *base, cfn
     else if (base->on_config)
     {
         /* Roll back board-level config if hardware init failed */
-        (void) base->on_config(base, base->on_config_arg, DRIVER_CONFIG_DEINIT);
+        error = base->on_config(base, base->on_config_arg, DRIVER_CONFIG_DEINIT);
     }
 
     return error;
@@ -174,9 +174,8 @@ static inline cfn_hal_error_code_t cfn_hal_base_deinit(cfn_hal_driver_t *base, c
 
         if (base->on_config)
         {
-            /* We ignore this return code to ensure we finish the teardown,
-               but we propagate the failure if hardware deinit failed above. */
-            (void) base->on_config(base, base->on_config_arg, DRIVER_CONFIG_DEINIT);
+
+            error = base->on_config(base, base->on_config_arg, DRIVER_CONFIG_DEINIT);
         }
     }
 

@@ -34,7 +34,7 @@ When contributing to, modifying, or generating code for Caffeine-HAL, you **must
 *   **GPIO Integration:** Use `cfn_hal_gpio_pin_driver_t` for any peripheral member that depends on a GPIO pin.
 
 ### C. Concurrency & Asynchronous Design
-*   **Locking Policy:** Static inline functions should **not** call `CFN_HAL_LOCK` internally. Concurrency protection is the responsibility of the caller using the `CFN_HAL_WITH_LOCK` macro.
+*   **Locking Policy:** Static inline functions should **not** call `CFN_HAL_LOCK` internally. Concurrency protection is the responsibility of the caller using the `CFN_HAL_WITH_LOCK` macro, which utilizes the type-validated `cfn_hal_base_lock` and `cfn_hal_base_unlock` functions.
 *   **Asynchronous Semantics:** Functions suffixed with `_irq` or `_dma` are fundamentally non-blocking. They **must not** contain a `timeout` parameter.
 *   **Polling Semantics:** Functions suffixed with `_polling` or `_read`/`_write` (if blocking) are blocking and **must** contain a `timeout` parameter.
 
