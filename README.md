@@ -127,6 +127,40 @@ The project includes built-in targets for maintaining code quality:
 
 ---
 
+## Build Environment (Docker & Local)
+
+To ensure consistency between local development and CI, a multi-stage `Dockerfile` is provided at the repository root. This Docker image pre-installs all necessary toolchains and dependencies, including a pre-built GoogleTest.
+
+### 1. Building with Docker (Recommended for CI Parity)
+
+Use the `scripts/build-local.sh` helper script to build your project inside a Docker container. This guarantees your build environment is identical to the CI.
+
+```bash
+# Build using the native Linux stage
+./scripts/build-local.sh native
+
+# To build with a specific cross-compiler stage (e.g., ARM)
+# (Note: This is more relevant for caffeine-hal-ports, but stages exist for consistency)
+./scripts/build-local.sh arm
+```
+
+### 2. Building Natively (Without Docker)
+
+You can still build the project directly on your host machine without Docker. The CMake configuration is designed to gracefully handle missing dependencies.
+
+*   **GTest:** If GoogleTest is not found on your system, CMake will automatically download it via `FetchContent`.
+*   **Toolchains:** You will need to install your own `cmake`, `build-essential`, `clang-format`, etc. The `Dockerfile` provides a reference for the required packages.
+
+```bash
+# Standard CMake build on your host
+mkdir build && cd build
+cmake ..
+cmake --build .
+ctest --output-on-failure
+```
+
+---
+
 ## The Caffeine Framework Layers
 
 Caffeine-HAL is the foundational interface within the broader **Caffeine Framework**—a strictly decoupled, layered architecture designed for modern embedded systems. This separation of concerns ensures that business logic remains completely portable across different microcontrollers and even host operating systems.
