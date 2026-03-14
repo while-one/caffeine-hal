@@ -22,7 +22,7 @@ jobs:
       run: cmake -B build -S . -DFORMAT_DRY_RUN=ON
 
     - name: Check Formatting
-      run: cmake --build build --target format
+      run: cmake --build build --target caffeine-hal-format
 
   static-analysis:
     name: Static Analysis (Cppcheck & Clang-Tidy)
@@ -39,7 +39,9 @@ jobs:
       run: cmake -B build -S .
 
     - name: Run Analysis
-      run: cmake --build build --target analyze
+      run: |
+        cmake --build build --target caffeine-hal-analyze
+        cmake --build build --target caffeine-hal-compliance
 
   build-and-test:
     name: Build & Unit Tests
@@ -60,4 +62,21 @@ jobs:
       run: cmake --build build --target caffeine-hal-test -j 4
 
     - name: Run Unit Tests
-      run: ./build/tests/caffeine-hal-test
+      run: ctest --test-dir build --output-on-failure
+
+  docs-generation:
+    name: Documentation Generation (Doxygen)
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Doxygen
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y doxygen cmake
+
+    - name: Configure CMake
+      run: cmake -B build -S .
+
+    - name: Build Doxygen Target
+      run: cmake --build build --target caffeine-hal-docs

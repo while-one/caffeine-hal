@@ -10,15 +10,22 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+# Alias GoogleTest targets with project prefix for better identification
+add_library(${PROJECT_NAME}-gmock_main INTERFACE)
+target_link_libraries(${PROJECT_NAME}-gmock_main INTERFACE gmock_main)
+
 # Create the test executable
 file(GLOB TEST_SOURCES "*.cpp")
 add_executable(${PROJECT_NAME}-test ${TEST_SOURCES})
+
+# Force locking enabled for the unit tests
+target_compile_definitions(${PROJECT_NAME}-test PRIVATE CFN_HAL_USE_LOCK=1)
 
 # Link your HAL library and GoogleTest
 target_link_libraries(${PROJECT_NAME}-test
     PRIVATE
     ${PROJECT_NAME}
-    GTest::gtest_main
+    ${PROJECT_NAME}-gmock_main
 )
 
 # Tell CTest to discover and run all tests in this executable
