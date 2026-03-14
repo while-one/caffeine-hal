@@ -1,5 +1,5 @@
 # --- Stage 1: Base (Common tools + GTest) ---
-FROM ubuntu:22.04 AS base
+FROM ubuntu:24.04 AS base
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     cmake git build-essential python3 curl tar \
