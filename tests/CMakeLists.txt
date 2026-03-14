@@ -23,7 +23,11 @@ endif()
 
 # Alias GoogleTest targets with project prefix for better identification
 add_library(${PROJECT_NAME}-gmock_main INTERFACE)
-target_link_libraries(${PROJECT_NAME}-gmock_main INTERFACE gmock_main)
+if(GTest_FOUND)
+    target_link_libraries(${PROJECT_NAME}-gmock_main INTERFACE GTest::gmock_main)
+else()
+    target_link_libraries(${PROJECT_NAME}-gmock_main INTERFACE gmock_main)
+endif()
 
 # Create the test executable
 file(GLOB TEST_SOURCES "*.cpp")

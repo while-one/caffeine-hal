@@ -100,8 +100,11 @@ A dedicated workflow automatically builds and pushes updated Docker images to th
 ### D. Local Development with Docker (`scripts/build-local.sh`)
 An optional helper script (`scripts/build-local.sh`) allows developers to execute builds inside the Docker environment locally, ensuring perfect parity with CI.
 ```bash
-# Example: Build natively inside Docker
+# Example: Build natively inside Docker (default: builds all targets)
 ./scripts/build-local.sh native
+
+# Example: Run a specific CMake target (e.g., 'caffeine-hal-format')
+./scripts/build-local.sh native caffeine-hal-format
 ```
 
 ### E. Native Host Builds
