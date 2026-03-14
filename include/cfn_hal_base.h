@@ -32,7 +32,6 @@ extern "C"
 #endif
 
 /* Includes ---------------------------------------------------------*/
-#include <assert.h>
 #include "cfn_hal.h"
 #include "cfn_hal_types.h"
 
@@ -88,7 +87,8 @@ typedef struct cfn_hal_api_base_s
  * All peripheral APIs must have 'cfn_hal_api_base_t base' as their FIRST member.
  */
 #define CFN_HAL_VMT_CHECK(api_struct_type)                                                                             \
-    static_assert(offsetof(api_struct_type, base) == 0, "cfn_hal_api_base_t must be the first member of the VMT struct")
+    CFN_HAL_STATIC_ASSERT(offsetof(api_struct_type, base) == 0,                                                        \
+                          "cfn_hal_api_base_t must be the first member of the VMT struct")
 
 /* Functions Prototypes ---------------------------------------------*/
 
