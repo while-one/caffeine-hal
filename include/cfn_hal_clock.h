@@ -158,7 +158,10 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_clock_deinit(cfn_hal_clock_t *driver
 CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_clock_config_set(cfn_hal_clock_t              *driver,
                                                              const cfn_hal_clock_config_t *config)
 {
-    if (driver)
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
     {
         driver->config = config;
     }
@@ -192,7 +195,10 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_clock_callback_register(cfn_hal_cloc
                                                                     const cfn_hal_clock_callback_t callback,
                                                                     void                          *user_arg)
 {
-    if (driver)
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
     {
         driver->cb = callback;
         driver->cb_user_arg = user_arg;

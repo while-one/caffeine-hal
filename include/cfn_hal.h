@@ -66,7 +66,7 @@ extern "C"
 #define CFN_HAL_MAX_DELAY (UINT32_MAX)
 
 /* Macro ------------------------------------------------------------*/
-#define CFN_HAL_BIT(x)                (1UL << (x))                     /*!< Bit position                          */
+#define CFN_HAL_BIT(x)                (UINT32_C(1) << (x))                     /*!< Bit position                          */
 #define CFN_HAL_BIT_SET(x, y)         ((x) |= (CFN_HAL_BIT(y)))        /*!< Set bit y of the variable X            */
 #define CFN_HAL_BIT_CLEAR(x, y)       ((x) &= ~(CFN_HAL_BIT(y)))       /*!< Clear bit y of the variable x          */
 #define CFN_HAL_BIT_TOGGLE(x, y)      ((x) ^= (CFN_HAL_BIT(y)))        /*!< Toggle bit y of the variable x         */
@@ -100,6 +100,11 @@ extern "C"
     {                                                                                                                  \
         .base = { .type = (type_code),                                                                                 \
                   .status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED,                                                         \
+                  .power_state = CFN_HAL_POWER_STATE_UNKNOWN,                                                          \
+                  .on_config = NULL,                                                                                   \
+                  .on_config_arg = NULL,                                                                               \
+                  .dependency = NULL,                                                                                  \
+                  .extension = NULL,                                                                                   \
                   .vmt = (const struct cfn_hal_api_base_s *) (api_ptr) },                                              \
         .config = (config_ptr), .api = (api_ptr), .phy = (phy_ptr), .cb = NULL, .cb_user_arg = NULL                    \
     }

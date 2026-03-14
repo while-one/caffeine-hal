@@ -242,7 +242,10 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_callback_register(cfn_hal_gpio_
                                                                    const cfn_hal_gpio_callback_t callback,
                                                                    void                         *user_arg)
 {
-    if (driver)
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
     {
         driver->cb = callback;
         driver->cb_user_arg = user_arg;

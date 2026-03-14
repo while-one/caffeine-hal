@@ -160,7 +160,10 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_deinit(cfn_hal_dma_t *driver)
  */
 CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_config_set(cfn_hal_dma_t *driver, const cfn_hal_dma_config_t *config)
 {
-    if (driver)
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
     {
         driver->config = config;
     }
@@ -194,7 +197,10 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_callback_register(cfn_hal_dma_t 
                                                                   const cfn_hal_dma_callback_t callback,
                                                                   void                        *user_arg)
 {
-    if (driver)
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
     {
         driver->cb = callback;
         driver->cb_user_arg = user_arg;
