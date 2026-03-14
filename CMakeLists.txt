@@ -192,3 +192,22 @@ set_target_properties(${PROJECT_NAME}-compliance PROPERTIES EXCLUDE_FROM_ALL ON)
 if(TARGET ${PROJECT_NAME}-analyze)
     add_dependencies(${PROJECT_NAME}-analyze ${PROJECT_NAME}-compliance)
 endif()
+
+# 5. Doxygen Documentation
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+    set(DOXYGEN_PROJECT_NAME "Caffeine-HAL")
+    set(DOXYGEN_WARN_AS_ERROR YES)
+    set(DOXYGEN_GENERATE_LATEX NO)
+    set(DOXYGEN_OPTIMIZE_OUTPUT_FOR_C YES)
+    set(DOXYGEN_EXTRACT_ALL YES)
+
+    doxygen_add_docs(
+        ${PROJECT_NAME}-docs
+        ${PROJECT_SOURCE_DIR}/include
+        COMMENT "Generating API documentation with Doxygen"
+    )
+else()
+    message(WARNING "Doxygen not found - documentation cannot be generated")
+endif()
+

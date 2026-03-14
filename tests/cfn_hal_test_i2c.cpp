@@ -181,7 +181,7 @@ TEST_F(I2cTest, ErrorGetSuccess)
 TEST_F(I2cTest, XfrIrqSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.xfr_irq = [](cfn_hal_i2c_t *d, cfn_hal_i2c_transaction_t *xfr) -> cfn_hal_error_code_t
+    api.xfr_irq = [](cfn_hal_i2c_t *d, const cfn_hal_i2c_transaction_t *xfr) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     cfn_hal_i2c_transaction_t xfr{};
     EXPECT_EQ(cfn_hal_i2c_xfr_irq(&driver, &xfr), CFN_HAL_ERROR_OK);
@@ -197,8 +197,9 @@ TEST_F(I2cTest, XfrIrqAbortSuccess)
 TEST_F(I2cTest, XfrPollingSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.xfr_polling = [](cfn_hal_i2c_t *d, cfn_hal_i2c_transaction_t *xfr, uint32_t timeout) -> cfn_hal_error_code_t
-    { return CFN_HAL_ERROR_OK; };
+    api.xfr_polling = [](cfn_hal_i2c_t                   *d,
+                         const cfn_hal_i2c_transaction_t *xfr,
+                         uint32_t                         timeout) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     cfn_hal_i2c_transaction_t xfr{};
     EXPECT_EQ(cfn_hal_i2c_xfr_polling(&driver, &xfr, 100), CFN_HAL_ERROR_OK);
 }
@@ -206,9 +207,9 @@ TEST_F(I2cTest, XfrPollingSuccess)
 TEST_F(I2cTest, MemReadSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.mem_read = [](cfn_hal_i2c_t                 *d,
-                      cfn_hal_i2c_mem_transaction_t *mem_xfr,
-                      uint32_t                       timeout) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.mem_read = [](cfn_hal_i2c_t                       *d,
+                      const cfn_hal_i2c_mem_transaction_t *mem_xfr,
+                      uint32_t timeout) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     cfn_hal_i2c_mem_transaction_t mem_xfr{};
     EXPECT_EQ(cfn_hal_i2c_mem_read(&driver, &mem_xfr, 100), CFN_HAL_ERROR_OK);
 }
@@ -226,7 +227,7 @@ TEST_F(I2cTest, MemWriteSuccess)
 TEST_F(I2cTest, XfrDmaSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.xfr_dma = [](cfn_hal_i2c_t *d, cfn_hal_i2c_transaction_t *xfr) -> cfn_hal_error_code_t
+    api.xfr_dma = [](cfn_hal_i2c_t *d, const cfn_hal_i2c_transaction_t *xfr) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     cfn_hal_i2c_transaction_t xfr{};
     EXPECT_EQ(cfn_hal_i2c_xfr_dma(&driver, &xfr), CFN_HAL_ERROR_OK);
@@ -235,7 +236,7 @@ TEST_F(I2cTest, XfrDmaSuccess)
 TEST_F(I2cTest, WithLockMacroWorks)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.xfr_polling = [](cfn_hal_i2c_t *d, cfn_hal_i2c_transaction_t *x, uint32_t t) { return CFN_HAL_ERROR_OK; };
+    api.xfr_polling = [](cfn_hal_i2c_t *d, const cfn_hal_i2c_transaction_t *x, uint32_t t) { return CFN_HAL_ERROR_OK; };
     cfn_hal_error_code_t      result;
     cfn_hal_i2c_transaction_t xfr{};
     CFN_HAL_WITH_LOCK(&driver, 100, result, cfn_hal_i2c_xfr_polling, &xfr, 0);

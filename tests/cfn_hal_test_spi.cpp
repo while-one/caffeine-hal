@@ -181,8 +181,9 @@ TEST_F(SpiTest, ErrorGetSuccess)
 TEST_F(SpiTest, XfrPollingSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.xfr_polling = [](cfn_hal_spi_t *d, cfn_hal_spi_transaction_t *xfr, uint32_t timeout) -> cfn_hal_error_code_t
-    { return CFN_HAL_ERROR_OK; };
+    api.xfr_polling = [](cfn_hal_spi_t                   *d,
+                         const cfn_hal_spi_transaction_t *xfr,
+                         uint32_t                         timeout) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     cfn_hal_spi_transaction_t xfr = {};
     EXPECT_EQ(cfn_hal_spi_xfr_polling(&driver, &xfr, 100), CFN_HAL_ERROR_OK);
 }
@@ -190,7 +191,7 @@ TEST_F(SpiTest, XfrPollingSuccess)
 TEST_F(SpiTest, XfrIrqSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.xfr_irq = [](cfn_hal_spi_t *d, cfn_hal_spi_transaction_t *xfr) -> cfn_hal_error_code_t
+    api.xfr_irq = [](cfn_hal_spi_t *d, const cfn_hal_spi_transaction_t *xfr) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     cfn_hal_spi_transaction_t xfr = {};
     EXPECT_EQ(cfn_hal_spi_xfr_irq(&driver, &xfr), CFN_HAL_ERROR_OK);
@@ -206,7 +207,7 @@ TEST_F(SpiTest, XfrIrqAbortSuccess)
 TEST_F(SpiTest, XfrDmaSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.xfr_dma = [](cfn_hal_spi_t *d, cfn_hal_spi_transaction_t *xfr) -> cfn_hal_error_code_t
+    api.xfr_dma = [](cfn_hal_spi_t *d, const cfn_hal_spi_transaction_t *xfr) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     cfn_hal_spi_transaction_t xfr = {};
     EXPECT_EQ(cfn_hal_spi_xfr_dma(&driver, &xfr), CFN_HAL_ERROR_OK);

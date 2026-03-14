@@ -148,10 +148,10 @@ struct cfn_hal_spi_api_s
     cfn_hal_api_base_t base;
 
     /* SPI Specific Extensions */
-    cfn_hal_error_code_t (*xfr_irq)(cfn_hal_spi_t *driver, cfn_hal_spi_transaction_t *xfr);
+    cfn_hal_error_code_t (*xfr_irq)(cfn_hal_spi_t *driver, const cfn_hal_spi_transaction_t *xfr);
     cfn_hal_error_code_t (*xfr_irq_abort)(cfn_hal_spi_t *driver);
-    cfn_hal_error_code_t (*xfr_polling)(cfn_hal_spi_t *driver, cfn_hal_spi_transaction_t *xfr, uint32_t timeout);
-    cfn_hal_error_code_t (*xfr_dma)(cfn_hal_spi_t *driver, cfn_hal_spi_transaction_t *xfr);
+    cfn_hal_error_code_t (*xfr_polling)(cfn_hal_spi_t *driver, const cfn_hal_spi_transaction_t *xfr, uint32_t timeout);
+    cfn_hal_error_code_t (*xfr_dma)(cfn_hal_spi_t *driver, const cfn_hal_spi_transaction_t *xfr);
 };
 
 CFN_HAL_VMT_CHECK(struct cfn_hal_spi_api_s);
@@ -362,7 +362,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_error_get(cfn_hal_spi_t *driver,
  * @param xfr Pointer to the transaction configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_xfr_irq(cfn_hal_spi_t *driver, cfn_hal_spi_transaction_t *xfr)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_xfr_irq(cfn_hal_spi_t *driver, const cfn_hal_spi_transaction_t *xfr)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SPI, xfr_irq, driver, error, xfr);
@@ -388,9 +388,9 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_xfr_irq_abort(cfn_hal_spi_t *dri
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_xfr_polling(cfn_hal_spi_t             *driver,
-                                                            cfn_hal_spi_transaction_t *xfr,
-                                                            uint32_t                   timeout)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_xfr_polling(cfn_hal_spi_t                   *driver,
+                                                            const cfn_hal_spi_transaction_t *xfr,
+                                                            uint32_t                         timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SPI, xfr_polling, driver, error, xfr, timeout);
@@ -403,7 +403,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_xfr_polling(cfn_hal_spi_t       
  * @param xfr Pointer to the transaction configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_xfr_dma(cfn_hal_spi_t *driver, cfn_hal_spi_transaction_t *xfr)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_xfr_dma(cfn_hal_spi_t *driver, const cfn_hal_spi_transaction_t *xfr)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SPI, xfr_dma, driver, error, xfr);

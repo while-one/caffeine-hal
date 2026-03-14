@@ -63,3 +63,20 @@ jobs:
 
     - name: Run Unit Tests
       run: ctest --test-dir build --output-on-failure
+
+  docs-generation:
+    name: Documentation Generation (Doxygen)
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Doxygen
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y doxygen cmake
+
+    - name: Configure CMake
+      run: cmake -B build -S .
+
+    - name: Build Doxygen Target
+      run: cmake --build build --target caffeine-hal-docs
