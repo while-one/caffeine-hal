@@ -73,7 +73,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(caffeine-hal)
 
-target_link_libraries(your_app PRIVATE caffeine-hal)
+target_link_libraries(your_app PRIVATE caffeine::hal)
 ```
 
 **Option B: add_subdirectory**
@@ -82,7 +82,7 @@ Clone the repository into your project tree (e.g., `lib/caffeine-hal`) and add i
 
 ```cmake
 add_subdirectory(lib/caffeine-hal)
-target_link_libraries(your_app PRIVATE caffeine-hal)
+target_link_libraries(your_app PRIVATE caffeine::hal)
 ```
 
 ### 2. Basic Usage (UART Example)
