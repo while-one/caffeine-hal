@@ -10,16 +10,13 @@ jobs:
   lint-format:
     name: Lint Format (Clang-Format)
     runs-on: ubuntu-24.04
+    container:
+      image: ghcr.io/${{ github.repository }}/build-native:latest
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install Clang-Format
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y clang-format
-
     - name: Configure CMake (Dry Run Format)
-      run: cmake -B build -S . -DFORMAT_DRY_RUN=ON
+      run: cmake -B build -S . -DFORMAT_DRY_RUN=ON -DFETCHCONTENT_FULLY_DISCONNECTED=ON
 
     - name: Check Formatting
       run: cmake --build build --target caffeine-hal-format
@@ -27,16 +24,13 @@ jobs:
   static-analysis:
     name: Static Analysis (Cppcheck & Clang-Tidy)
     runs-on: ubuntu-24.04
+    container:
+      image: ghcr.io/${{ github.repository }}/build-native:latest
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install Analysis Tools
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y cppcheck clang-tidy cmake
-
     - name: Configure CMake
-      run: cmake -B build -S .
+      run: cmake -B build -S . -DFETCHCONTENT_FULLY_DISCONNECTED=ON
 
     - name: Run Analysis
       run: |
@@ -46,17 +40,14 @@ jobs:
   build-and-test:
     name: Build & Unit Tests
     runs-on: ubuntu-24.04
-    needs: [lint-format] # Optional: only build if format is correct
+    needs: [lint-format]
+    container:
+      image: ghcr.io/${{ github.repository }}/build-native:latest
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install Dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y cmake g++ make
-
     - name: Configure CMake
-      run: cmake -B build -S .
+      run: cmake -B build -S . -DFETCHCONTENT_FULLY_DISCONNECTED=ON
 
     - name: Build Tests
       run: cmake --build build --target caffeine-hal-test -j 4
@@ -67,16 +58,13 @@ jobs:
   docs-generation:
     name: Documentation Generation (Doxygen)
     runs-on: ubuntu-24.04
+    container:
+      image: ghcr.io/${{ github.repository }}/build-native:latest
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install Doxygen
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y doxygen cmake
-
     - name: Configure CMake
-      run: cmake -B build -S .
+      run: cmake -B build -S . -DFETCHCONTENT_FULLY_DISCONNECTED=ON
 
     - name: Build Doxygen Target
       run: cmake --build build --target caffeine-hal-docs
