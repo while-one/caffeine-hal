@@ -66,6 +66,16 @@ extern "C"
 #define CFN_HAL_MAX_DELAY (UINT32_MAX)
 
 /* Macro ------------------------------------------------------------*/
+/**
+ * @brief Cross-compiler static assertion macro.
+ * Uses C++11 static_assert or C11 _Static_assert to avoid dependency on <assert.h>.
+ */
+#ifdef __cplusplus
+#define CFN_HAL_STATIC_ASSERT static_assert
+#else
+#define CFN_HAL_STATIC_ASSERT _Static_assert
+#endif
+
 #define CFN_HAL_BIT(x)                (UINT32_C(1) << (x))             /*!< Bit position                          */
 #define CFN_HAL_BIT_SET(x, y)         ((x) |= (CFN_HAL_BIT(y)))        /*!< Set bit y of the variable X            */
 #define CFN_HAL_BIT_CLEAR(x, y)       ((x) &= ~(CFN_HAL_BIT(y)))       /*!< Clear bit y of the variable x          */
