@@ -66,7 +66,7 @@ extern "C"
 #define CFN_HAL_MAX_DELAY (UINT32_MAX)
 
 /* Macro ------------------------------------------------------------*/
-#define CFN_HAL_BIT(x)                (UINT32_C(1) << (x))                     /*!< Bit position                          */
+#define CFN_HAL_BIT(x)                (UINT32_C(1) << (x))             /*!< Bit position                          */
 #define CFN_HAL_BIT_SET(x, y)         ((x) |= (CFN_HAL_BIT(y)))        /*!< Set bit y of the variable X            */
 #define CFN_HAL_BIT_CLEAR(x, y)       ((x) &= ~(CFN_HAL_BIT(y)))       /*!< Clear bit y of the variable x          */
 #define CFN_HAL_BIT_TOGGLE(x, y)      ((x) ^= (CFN_HAL_BIT(y)))        /*!< Toggle bit y of the variable x         */
