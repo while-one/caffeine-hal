@@ -45,7 +45,7 @@ static cfn_hal_error_code_t dummy_pin_config(cfn_hal_gpio_t *port, const cfn_hal
     return CFN_HAL_ERROR_OK;
 }
 
-static const cfn_hal_gpio_api_t dummy_gpio_api = {
+static const cfn_hal_gpio_api_t DUMMY_GPIO_API = {
     .base = {
         .init = dummy_init,
         .deinit = NULL,
@@ -71,7 +71,7 @@ int main(void)
 {
     /* 1. Test Static Initializer Macros */
     cfn_hal_gpio_phy_t phy = { .port = (void*)0x40000000 };
-    cfn_hal_gpio_t gpio = CFN_HAL_GPIO_INITIALIZER(&dummy_gpio_api, &phy);
+    cfn_hal_gpio_t gpio = CFN_HAL_GPIO_INITIALIZER(&DUMMY_GPIO_API, &phy);
 
     /* 2. Test Base Initialization (Macro Expansion) */
     cfn_hal_error_code_t err = cfn_hal_gpio_init(&gpio);
