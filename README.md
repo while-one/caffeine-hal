@@ -145,6 +145,9 @@ Use the `scripts/build-local.sh` helper script to build your project inside a Do
 # To build a different stage and specific target (e.g., 'arm' stage for 'caffeine-hal-test')
 # (Note: This is more relevant for caffeine-hal-ports, but stages exist for consistency)
 ./scripts/build-local.sh arm caffeine-hal-test
+
+# To run code coverage inside Docker
+./scripts/build-local.sh native caffeine-hal-coverage
 ```
 
 ### 2. Building Natively (Without Docker)

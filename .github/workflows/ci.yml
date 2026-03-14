@@ -45,6 +45,9 @@ jobs:
     name: Build & Unit Tests
     runs-on: ubuntu-24.04
     needs: [lint-format]
+    permissions:
+      contents: read
+      pull-requests: write
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     container:
@@ -60,6 +63,24 @@ jobs:
 
     - name: Run Unit Tests
       run: ctest --test-dir build --output-on-failure
+
+    - name: Run Coverage
+      run: cmake --build build --target caffeine-hal-coverage
+
+    - name: PR Comment with Coverage
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          const fs = require('fs');
+          const coverage = fs.readFileSync('build/coverage.txt', 'utf8');
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '### Code Coverage Report 📊\n```\n' + coverage + '\n```'
+          })
 
   docs-generation:
     name: Documentation Generation (Doxygen)
