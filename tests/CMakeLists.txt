@@ -1,14 +1,25 @@
 enable_language(CXX)
 
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
-  DOWNLOAD_EXTRACT_TIMESTAMP true
-)
-# Prevent GTest from overriding the parent project's compiler/linker settings on Windows
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
+option(FORCE_FETCH_DEPS "Force downloading dependencies even if found on system" OFF)
+
+if(NOT FORCE_FETCH_DEPS)
+    find_package(GTest QUIET)
+endif()
+
+if(NOT GTest_FOUND)
+    message(STATUS "GTest not found locally, fetching from GitHub...")
+    include(FetchContent)
+    FetchContent_Declare(
+      googletest
+      URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
+      DOWNLOAD_EXTRACT_TIMESTAMP true
+    )
+    # Prevent GTest from overriding the parent project's compiler/linker settings on Windows
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
+else()
+    message(STATUS "Using System-provided GoogleTest (Skip Download)")
+endif()
 
 # Alias GoogleTest targets with project prefix for better identification
 add_library(${PROJECT_NAME}-gmock_main INTERFACE)
