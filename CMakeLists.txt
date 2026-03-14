@@ -20,6 +20,9 @@ include(GNUInstallDirs)
 add_library(${PROJECT_NAME} INTERFACE)
 add_library(caffeine::hal ALIAS ${PROJECT_NAME})
 
+# Consistent naming for exported target
+set_target_properties(${PROJECT_NAME} PROPERTIES EXPORT_NAME hal)
+
 # Pass the version down to the code using a compiler definition
 target_compile_definitions(${PROJECT_NAME} INTERFACE CAFFEINE_HAL_VERSION="${PROJECT_VERSION}")
 
@@ -86,7 +89,7 @@ configure_package_config_file(
 install(
         EXPORT ${PROJECT_NAME}_Targets
         FILE ${PROJECT_NAME}Targets.cmake
-        NAMESPACE ${PROJECT_NAME}::
+        NAMESPACE caffeine::
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake)
 
 # Copy the generic config file and the version config file to the installation destination
