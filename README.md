@@ -36,7 +36,7 @@ Copyright (c) 2026 Hisham Moussa Daou <https://whileone.me>
 
 ### Key Features
 *   **Zero-Copy & Header-Only:** Designed as a CMake `INTERFACE` library for easy integration.
-*   **Base Driver Architecture:** All peripherals inherit from a common base (`cfn_hal_base.h`), ensuring a consistent lifecycle across the entire library.
+*   **Modular Base Driver:** All peripherals inherit from a common base (`cfn_hal_base.h`), ensuring a consistent lifecycle. The base logic can be used as header-only (default) or compiled into a library to reduce code duplication in large systems.
 *   **Layered FourCC Identification:** Uses FourCC codes with `CFN_HAL_PERIPHERAL_PREFIX` (reserved 'A' for the HAL layer) to uniquely identify peripheral types across system layers.
 *   **Nominal/Exception Separation:** Standardized splitting of peripheral status into nominal `events` and exception `errors`.
 *   **Board-Level Hooks:** Built-in `on_config` callback (using `cfn_hal_config_phase_t`) for handling clock gating, pin muxing, and DMA routing without breaking the generic API.

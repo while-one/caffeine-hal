@@ -20,7 +20,7 @@
  * SOFTWARE.
  *
  * @file cfn_hal_base.h
- * @brief Base driver Hardware Abstraction Layer implementation.
+ * @brief Base driver Hardware Abstraction Layer declarations.
  */
 
 #ifndef CAFFEINE_HAL_HAL_BASE_H
@@ -35,6 +35,24 @@ extern "C"
 #include <assert.h>
 #include "cfn_hal.h"
 #include "cfn_hal_types.h"
+
+/* Defines ----------------------------------------------------------*/
+
+/**
+ * @def CFN_HAL_BASE_API
+ * @brief API visibility macro for the base driver.
+ *
+ * This macro controls whether the base functions are 'static inline' (default),
+ * 'extern' (when linking against a pre-compiled library), or empty (when compiling
+ * the library source).
+ */
+#if defined(CFN_HAL_COMPILE_BASE)
+#define CFN_HAL_BASE_API
+#elif defined(CFN_HAL_USE_LIB_BASE)
+#define CFN_HAL_BASE_API extern
+#else
+#define CFN_HAL_BASE_API static inline
+#endif
 
 /* Types Structs ----------------------------------------------------*/
 
@@ -72,7 +90,7 @@ typedef struct cfn_hal_api_base_s
 #define CFN_HAL_VMT_CHECK(api_struct_type)                                                                             \
     static_assert(offsetof(api_struct_type, base) == 0, "cfn_hal_api_base_t must be the first member of the VMT struct")
 
-/* Functions inline  ---------------------------------------------*/
+/* Functions Prototypes ---------------------------------------------*/
 
 /**
  * @brief Generic initialization for any driver.
@@ -81,60 +99,7 @@ typedef struct cfn_hal_api_base_s
  * @param expected_type FourCC code for peripheral type validation.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_init(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expected_type)
-{
-    if (!base || base->type != expected_type || !base->vmt)
-    {
-        return CFN_HAL_ERROR_BAD_PARAM;
-    }
-
-    if (base->status == CFN_HAL_DRIVER_STATUS_INITIALIZED)
-    {
-        return CFN_HAL_ERROR_DRIVER_ALREADY_INIT;
-    }
-
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-
-    /* Board-level Initialization Hook (Phase A)
-     * This must happen BEFORE the VMT init. It typically handles clock gating
-     * and pin muxing via the 'on_config' callback provided by the BSP.
-     */
-    if (base->on_config)
-    {
-        error = base->on_config(base, base->on_config_arg, CFN_HAL_CONFIG_PHASE_INIT);
-        if (error != CFN_HAL_ERROR_OK)
-        {
-            return error;
-        }
-    }
-
-    /* Hardware-specific Peripheral Initialization (Phase B)
-     * We cast the generic VMT to the base API type to access the init hook.
-     */
-    const cfn_hal_api_base_t *api = base->vmt;
-    if (api->init)
-    {
-        error = api->init(base);
-    }
-
-    /* 4. Final State Update (Phase C)
-     * If all stages passed, we mark the driver as ready for functional use.
-     */
-    if (error == CFN_HAL_ERROR_OK)
-    {
-        base->status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    }
-    else if (base->on_config)
-    {
-        /* Roll back board-level config if hardware init failed.
-         * We ignore the error code from the DEINIT phase to ensure
-         * the original Phase B error is returned to the caller.
-         */
-        (void) base->on_config(base, base->on_config_arg, CFN_HAL_CONFIG_PHASE_DEINIT);
-    }
-
-    return error;
-}
+CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_init(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expected_type);
 
 /**
  * @brief Generic deinitialization for any driver.
@@ -143,51 +108,8 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_init(cfn_hal_driver_t *base, cf
  * @param expected_type FourCC code for peripheral type validation.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_deinit(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expected_type)
-{
-    if (!base || base->type != expected_type || !base->vmt)
-    {
-        return CFN_HAL_ERROR_BAD_PARAM;
-    }
-
-    if (base->status == CFN_HAL_DRIVER_STATUS_CONSTRUCTED)
-    {
-        return CFN_HAL_ERROR_OK;
-    }
-
-    if (base->status == CFN_HAL_DRIVER_STATUS_UNKNOWN)
-    {
-        return CFN_HAL_ERROR_DRIVER_NOT_INIT;
-    }
-
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-
-    /* Hardware-specific Peripheral Deinitialization (Phase A)
-     * We trigger the VMT deinit first while the clocks/pins are still active.
-     */
-    const cfn_hal_api_base_t *api = base->vmt;
-    if (api->deinit)
-    {
-        error = api->deinit(base);
-    }
-
-    /* Board-level Deinitialization Hook (Phase B)
-     * Only after the peripheral logic is stopped do we release clocks and pins.
-     * We use CFN_HAL_CONFIG_PHASE_DEINIT to signify teardown to the hook.
-     */
-    if (error == CFN_HAL_ERROR_OK)
-    {
-        /* Mark as constructed (not live) before releasing clocks to prevent race conditions */
-        base->status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
-
-        if (base->on_config)
-        {
-            error = base->on_config(base, base->on_config_arg, CFN_HAL_CONFIG_PHASE_DEINIT);
-        }
-    }
-
-    return error;
-}
+CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_deinit(cfn_hal_driver_t         *base,
+                                                          cfn_hal_peripheral_type_t expected_type);
 
 /**
  * @brief Generic configuration setter for any driver.
@@ -196,37 +118,9 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_deinit(cfn_hal_driver_t *base, 
  * @param config Pointer to the peripheral-specific configuration structure.
  * @return cfn_hal_error_code_t status code.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_config_set(cfn_hal_driver_t         *base,
-                                                            cfn_hal_peripheral_type_t expected_type,
-                                                            const void               *config)
-{
-    if (!base || base->type != expected_type || !config)
-    {
-        return CFN_HAL_ERROR_BAD_PARAM;
-    }
-
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-
-    /*
-     * If the hardware is not yet initialized, we do NOT trigger the VMT.
-     * The config has already been "shadowed" (stored) in the peripheral-specific
-     * wrapper before calling this base function.
-     */
-    if (base->status == CFN_HAL_DRIVER_STATUS_INITIALIZED)
-    {
-        const cfn_hal_api_base_t *api = base->vmt;
-        if (api && api->config_set)
-        {
-            error = api->config_set(base, config);
-        }
-        else
-        {
-            error = CFN_HAL_ERROR_NOT_SUPPORTED;
-        }
-    }
-
-    return error;
-}
+CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_config_set(cfn_hal_driver_t         *base,
+                                                              cfn_hal_peripheral_type_t expected_type,
+                                                              const void               *config);
 
 /**
  * @brief Generic callback registration for any driver.
@@ -236,47 +130,12 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_config_set(cfn_hal_driver_t    
  * @param callback Generic callback function pointer.
  * @param user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
- *
- * @warning The 'callback' parameter is type-erased for storage in the base structure.
- * Implementation of the callback_register VMT hook MUST ensure the callback is correctly
- * cast back to its original signature (e.g., cfn_hal_uart_callback_t) before it is called.
- * Calling it via the generic void(*)(void) signature is UNDEFINED BEHAVIOR if the original
- * function signature is different.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_callback_register(cfn_hal_driver_t         *base,
-                                                                   cfn_hal_peripheral_type_t expected_type,
-                                                                   cfn_hal_callback_t        callback,
-                                                                   void                     *user_arg)
-{
-    if (!base || base->type != expected_type)
-    {
-        return CFN_HAL_ERROR_BAD_PARAM;
-    }
+CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_callback_register(cfn_hal_driver_t         *base,
+                                                                     cfn_hal_peripheral_type_t expected_type,
+                                                                     cfn_hal_callback_t        callback,
+                                                                     void                     *user_arg);
 
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-
-    /*
-     * If the hardware is already INITIALIZED, we must notify the VMT.
-     * The callback has already been stored in the peripheral-specific
-     * This is critical for peripherals that enable/disable interrupts or
-     * DMA request lines based on whether a callback is present.
-     */
-    if (base->status == CFN_HAL_DRIVER_STATUS_INITIALIZED)
-    {
-        const cfn_hal_api_base_t *api = base->vmt;
-
-        if (api && api->callback_register)
-        {
-            error = api->callback_register(base, callback, user_arg);
-        }
-        else
-        {
-            error = CFN_HAL_ERROR_NOT_SUPPORTED;
-        }
-    }
-
-    return error;
-}
 /**
  * @brief Generic power state transition for any driver.
  * @param base Pointer to the base driver structure.
@@ -284,52 +143,10 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_callback_register(cfn_hal_drive
  * @param state The target power state to transition to.
  * @return cfn_hal_error_code_t status code.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_power_state_set(cfn_hal_driver_t         *base,
-                                                            cfn_hal_peripheral_type_t expected_type,
-                                                            cfn_hal_power_state_t     state)
-{
-    if (!base || base->type != expected_type)
-    {
-        return CFN_HAL_ERROR_BAD_PARAM;
-    }
+CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_power_state_set(cfn_hal_driver_t         *base,
+                                                              cfn_hal_peripheral_type_t expected_type,
+                                                              cfn_hal_power_state_t     state);
 
-    /* No-op if already in the target state */
-    if (base->power_state == state)
-    {
-        return CFN_HAL_ERROR_OK;
-    }
-
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-
-    /*
-     * Power states are strictly hardware-active operations.
-     * We only trigger the VMT if the driver is INITIALIZED.
-     */
-    if (base->status == CFN_HAL_DRIVER_STATUS_INITIALIZED)
-    {
-        const cfn_hal_api_base_t *api = base->vmt;
-
-        if (api && api->power_state_set)
-        {
-            error = api->power_state_set(base, state);
-            if (error == CFN_HAL_ERROR_OK)
-            {
-                base->power_state = state; /* Update shadow state on success */
-            }
-        }
-        else
-        {
-            error = CFN_HAL_ERROR_NOT_SUPPORTED;
-        }
-    }
-    else
-    {
-        /* If hardware isn't initialized, we just update the shadow intent for when init() is called */
-        base->power_state = state;
-    }
-
-    return error;
-}
 /**
  * @brief Generic power state getter.
  * Returns the current power state from the software shadow.
@@ -337,15 +154,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_power_state_set(cfn_hal_driver_t    
  * @param base Pointer to the base driver structure.
  * @return Current cfn_hal_power_state_t.
  */
-CFN_HAL_INLINE cfn_hal_power_state_t cfn_hal_power_state_get(const cfn_hal_driver_t *base)
-{
-    if (!base)
-    {
-        return CFN_HAL_POWER_STATE_UNKNOWN;
-    }
-
-    return base->power_state;
-}
+CFN_HAL_BASE_API cfn_hal_power_state_t cfn_hal_power_state_get(const cfn_hal_driver_t *base);
 
 /**
  * @brief Generic event enable for any driver.
@@ -356,38 +165,9 @@ CFN_HAL_INLINE cfn_hal_power_state_t cfn_hal_power_state_get(const cfn_hal_drive
  * @param event_mask Pointer to a peripheral-specific event mask.
  * @return cfn_hal_error_code_t status code.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_event_enable(cfn_hal_driver_t         *base,
-                                                              cfn_hal_peripheral_type_t expected_type,
-                                                              uint32_t                  event_mask)
-{
-    if (!base || base->type != expected_type || !base->vmt)
-    {
-        return CFN_HAL_ERROR_BAD_PARAM;
-    }
-
-    /*
-     * Events represent live hardware interrupts. We cannot enable them
-     * if the hardware is not initialized.
-     */
-    if (base->status != CFN_HAL_DRIVER_STATUS_INITIALIZED)
-    {
-        return CFN_HAL_ERROR_DRIVER_NOT_INIT;
-    }
-
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-
-    const cfn_hal_api_base_t *api = base->vmt;
-    if (api->event_enable)
-    {
-        error = api->event_enable(base, event_mask);
-    }
-    else
-    {
-        error = CFN_HAL_ERROR_NOT_SUPPORTED;
-    }
-
-    return error;
-}
+CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_event_enable(cfn_hal_driver_t         *base,
+                                                                cfn_hal_peripheral_type_t expected_type,
+                                                                uint32_t                  event_mask);
 
 /**
  * @brief Generic event disable for any driver.
@@ -398,38 +178,9 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_event_enable(cfn_hal_driver_t  
  * @param event_mask Pointer to a peripheral-specific event mask.
  * @return cfn_hal_error_code_t status code.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_event_disable(cfn_hal_driver_t         *base,
-                                                               cfn_hal_peripheral_type_t expected_type,
-                                                               uint32_t                  event_mask)
-{
-    if (!base || base->type != expected_type || !base->vmt)
-    {
-        return CFN_HAL_ERROR_BAD_PARAM;
-    }
-
-    /* State Check
-     * Unlike configuration shadowing, event disabling is a hardware-active task.
-     * We return an error if the hardware is not initialized.
-     */
-    if (base->status != CFN_HAL_DRIVER_STATUS_INITIALIZED)
-    {
-        return CFN_HAL_ERROR_DRIVER_NOT_INIT;
-    }
-
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-
-    const cfn_hal_api_base_t *api = base->vmt;
-    if (api->event_disable)
-    {
-        error = api->event_disable(base, event_mask);
-    }
-    else
-    {
-        error = CFN_HAL_ERROR_NOT_SUPPORTED;
-    }
-
-    return error;
-}
+CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_event_disable(cfn_hal_driver_t         *base,
+                                                                 cfn_hal_peripheral_type_t expected_type,
+                                                                 uint32_t                  event_mask);
 
 /**
  * @brief Generic event status getter for any driver.
@@ -440,38 +191,10 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_event_disable(cfn_hal_driver_t 
  * @param event_mask [out] Pointer to a buffer to receive the event status.
  * @return cfn_hal_error_code_t status code.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_event_get(cfn_hal_driver_t         *base,
-                                                           cfn_hal_peripheral_type_t expected_type,
-                                                           uint32_t                 *event_mask)
-{
-    if (!base || base->type != expected_type || !event_mask || !base->vmt)
-    {
-        return CFN_HAL_ERROR_BAD_PARAM;
-    }
+CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_event_get(cfn_hal_driver_t         *base,
+                                                             cfn_hal_peripheral_type_t expected_type,
+                                                             uint32_t                 *event_mask);
 
-    /* State Check
-     * Event status resides in physical registers. If the hardware is not
-     * initialized, the status is logically undefined/inaccessible.
-     */
-    if (base->status != CFN_HAL_DRIVER_STATUS_INITIALIZED)
-    {
-        return CFN_HAL_ERROR_DRIVER_NOT_INIT;
-    }
-
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-
-    const cfn_hal_api_base_t *api = base->vmt;
-    if (api->event_get)
-    {
-        error = api->event_get(base, event_mask);
-    }
-    else
-    {
-        error = CFN_HAL_ERROR_NOT_SUPPORTED;
-    }
-
-    return error;
-}
 /**
  * @brief Generic error enable for any driver.
  * Activates exception-flow hardware triggers based on the provided mask.
@@ -481,38 +204,9 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_event_get(cfn_hal_driver_t     
  * @param error_mask Pointer to a peripheral-specific error mask.
  * @return cfn_hal_error_code_t status code.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_error_enable(cfn_hal_driver_t         *base,
-                                                              cfn_hal_peripheral_type_t expected_type,
-                                                              uint32_t                  error_mask)
-{
-    if (!base || base->type != expected_type || !base->vmt)
-    {
-        return CFN_HAL_ERROR_BAD_PARAM;
-    }
-
-    /*
-     * Errors represent hardware exceptions. We cannot enable them
-     * if the hardware is not initialized.
-     */
-    if (base->status != CFN_HAL_DRIVER_STATUS_INITIALIZED)
-    {
-        return CFN_HAL_ERROR_DRIVER_NOT_INIT;
-    }
-
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-
-    const cfn_hal_api_base_t *api = base->vmt;
-    if (api->error_enable)
-    {
-        error = api->error_enable(base, error_mask);
-    }
-    else
-    {
-        error = CFN_HAL_ERROR_NOT_SUPPORTED;
-    }
-
-    return error;
-}
+CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_error_enable(cfn_hal_driver_t         *base,
+                                                                cfn_hal_peripheral_type_t expected_type,
+                                                                uint32_t                  error_mask);
 
 /**
  * @brief Generic error disable for any driver.
@@ -523,37 +217,10 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_error_enable(cfn_hal_driver_t  
  * @param error_mask Pointer to a peripheral-specific error mask.
  * @return cfn_hal_error_code_t status code.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_error_disable(cfn_hal_driver_t         *base,
-                                                               cfn_hal_peripheral_type_t expected_type,
-                                                               uint32_t                  error_mask)
-{
-    if (!base || base->type != expected_type || !base->vmt)
-    {
-        return CFN_HAL_ERROR_BAD_PARAM;
-    }
+CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_error_disable(cfn_hal_driver_t         *base,
+                                                                 cfn_hal_peripheral_type_t expected_type,
+                                                                 uint32_t                  error_mask);
 
-    /*
-     * Hardware must be live to modify error interrupt enable bits.
-     */
-    if (base->status != CFN_HAL_DRIVER_STATUS_INITIALIZED)
-    {
-        return CFN_HAL_ERROR_DRIVER_NOT_INIT;
-    }
-
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-
-    const cfn_hal_api_base_t *api = base->vmt;
-    if (api->error_disable)
-    {
-        error = api->error_disable(base, error_mask);
-    }
-    else
-    {
-        error = CFN_HAL_ERROR_NOT_SUPPORTED;
-    }
-
-    return error;
-}
 /**
  * @brief Generic error status getter for any driver.
  * Retrieves current exception-flow hardware flags/errors.
@@ -563,38 +230,9 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_error_disable(cfn_hal_driver_t 
  * @param error_mask [out] Pointer to a buffer to receive the error status.
  * @return cfn_hal_error_code_t status code.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_error_get(cfn_hal_driver_t         *base,
-                                                           cfn_hal_peripheral_type_t expected_type,
-                                                           uint32_t                 *error_mask)
-{
-    if (!base || base->type != expected_type || !error_mask || !base->vmt)
-    {
-        return CFN_HAL_ERROR_BAD_PARAM;
-    }
-
-    /*
-     * Error registers are part of the physical peripheral.
-     * If not initialized, the state is logically inaccessible.
-     */
-    if (base->status != CFN_HAL_DRIVER_STATUS_INITIALIZED)
-    {
-        return CFN_HAL_ERROR_DRIVER_NOT_INIT;
-    }
-
-    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-
-    const cfn_hal_api_base_t *api = base->vmt;
-    if (api->error_get)
-    {
-        error = api->error_get(base, error_mask);
-    }
-    else
-    {
-        error = CFN_HAL_ERROR_NOT_SUPPORTED;
-    }
-
-    return error;
-}
+CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_error_get(cfn_hal_driver_t         *base,
+                                                             cfn_hal_peripheral_type_t expected_type,
+                                                             uint32_t                 *error_mask);
 
 #if (CFN_HAL_USE_LOCK == 1)
 /**
@@ -603,42 +241,20 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_error_get(cfn_hal_driver_t     
  * @param timeout Lock acquisition timeout in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or an error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_lock(cfn_hal_driver_t *base, uint32_t timeout)
-{
-    if (!base || !base->vmt)
-    {
-        return CFN_HAL_ERROR_BAD_PARAM;
-    }
-
-    const cfn_hal_api_base_t *api = base->vmt;
-    if (!api->lock)
-    {
-        return CFN_HAL_ERROR_OK; /* Safe bare-metal fallback */
-    }
-
-    return api->lock(base, timeout);
-}
+CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_lock(cfn_hal_driver_t *base, uint32_t timeout);
 
 /**
  * @brief Concurrency unlock for a driver instance.
  * @param base Pointer to the base driver structure.
  * @return CFN_HAL_ERROR_OK on success, or an error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_base_unlock(cfn_hal_driver_t *base)
-{
-    if (!base || !base->vmt)
-    {
-        return CFN_HAL_ERROR_BAD_PARAM;
-    }
+CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_unlock(cfn_hal_driver_t *base);
+#endif
 
-    const cfn_hal_api_base_t *api = base->vmt;
-    if (!api->unlock)
-    {
-        return CFN_HAL_ERROR_OK; /* Safe bare-metal fallback */
-    }
+/* Include Implementation -------------------------------------------*/
 
-    return api->unlock(base);
-}
+#if !defined(CFN_HAL_USE_LIB_BASE) && !defined(CFN_HAL_COMPILE_BASE)
+#include "cfn_hal_base_impl.h"
 #endif
 
 #ifdef __cplusplus

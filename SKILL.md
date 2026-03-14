@@ -7,7 +7,10 @@ Its core philosophy is to provide a consistent, polymorphic interface across dif
 
 ### Core Architecture
 *   **Header-Defined Interface (`INTERFACE`):** The entire generic HAL is defined in header files (`include/cfn_hal_*.h`) as `static inline` wrappers around function pointers.
-*   **Base Driver (`cfn_hal_base.h`):** All peripherals inherit from a common base logic. Standard operations like `init`, `deinit`, `config_set`, `callback_register`, and `power_state_set` are handled by centralized base functions.
+*   **Base Driver (`cfn_hal_base.h` / `cfn_hal_base_impl.h`):** All peripherals inherit from a common base logic. Standard operations like `init`, `deinit`, `config_set`, `callback_register`, and `power_state_set` are handled by centralized base functions. The implementation is separated into `cfn_hal_base_impl.h` to allow for:
+    *   **Header-Only (Default):** Functions are `static inline`.
+    *   **Library-Linked:** Functions are `extern` by defining `CFN_HAL_USE_LIB_BASE`.
+    *   **Library-Compile:** Functions are compiled into a library by defining `CFN_HAL_COMPILE_BASE`.
 *   **VMT Pattern:** Every peripheral (e.g., `cfn_hal_uart_t`) contains a generic `cfn_hal_driver_t` base struct and a pointer to an API struct (e.g., `cfn_hal_uart_api_t`). The `vmt` member in the base struct is strictly typed as `const struct cfn_hal_api_base_s *` for compiler-enforced safety. Hardware-specific C files implement these API structures.
 *   **VMT Safety:** To prevent memory corruption, the `cfn_hal_api_base_t` MUST be the first member of every peripheral-specific API struct. This is enforced at compile-time via the `CFN_HAL_VMT_CHECK` macro and at initialization via type-checking.
 *   **Board-Level Hook (`on_config`):** The `cfn_hal_driver_t` base struct contains an `on_config` callback. The generic `_init` and `_deinit` wrappers automatically call this hook before/after touching hardware registers. 
