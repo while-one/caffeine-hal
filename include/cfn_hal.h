@@ -76,7 +76,7 @@ extern "C"
 #define CFN_HAL_STATIC_ASSERT _Static_assert
 #endif
 
-#define CFN_HAL_BIT(x)                ((1UL) << (x))             /*!< Bit position                          */
+#define CFN_HAL_BIT(x)                ((1UL) << (x))                   /*!< Bit position                          */
 #define CFN_HAL_BIT_SET(x, y)         ((x) |= (CFN_HAL_BIT(y)))        /*!< Set bit y of the variable X            */
 #define CFN_HAL_BIT_CLEAR(x, y)       ((x) &= ~(CFN_HAL_BIT(y)))       /*!< Clear bit y of the variable x          */
 #define CFN_HAL_BIT_TOGGLE(x, y)      ((x) ^= (CFN_HAL_BIT(y)))        /*!< Toggle bit y of the variable x         */
