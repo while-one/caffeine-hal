@@ -100,7 +100,7 @@ struct cfn_hal_api_base_s;
 typedef void (*cfn_hal_callback_t)(void);
 
 // Macro to pack 4 characters into a 32-bit integer (FourCC)
-// Note: This packs in Little-Endian order (a is LSB), ensuring 
+// Note: This packs in Little-Endian order (a is LSB), ensuring
 // debug readability in memory dumps on Little-Endian systems (e.g., ARM).
 #define CFN_HAL_MAKE_TYPE(a, b, c, d)                                                                                  \
     (((uint32_t) (a)) | ((uint32_t) (b) << 8) | ((uint32_t) (c) << 16) | ((uint32_t) (d) << 24))
