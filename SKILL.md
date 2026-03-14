@@ -74,3 +74,46 @@ When contributing to, modifying, or generating code for Caffeine-HAL, you **must
 ## 4. CMake & Build System
 *   **Target Type:** Caffeine-HAL is an `INTERFACE` target.
 *   **Header Discovery:** Headers in `include/*.h` are automatically discovered via `file(GLOB ... CONFIGURE_DEPENDS)`. No manual registry is required.
+
+---
+
+## 5. Build Environment & CI
+
+The build process for Caffeine-HAL is highly optimized for consistency across local development and GitHub Actions CI.
+
+### A. Dockerized Toolchain
+A multi-stage `Dockerfile` (at the repository root) defines the entire build environment. This includes:
+*   `base` stage: Installs `cmake`, `ninja-build`, `clang-format`, `clang-tidy`, `cppcheck`, `doxygen`, and pre-builds `googletest`.
+*   `build-arm`, `build-riscv`, `build-native` stages: Add architecture-specific toolchains as needed.
+
+### B. CI Workflow (`.github/workflows/ci.yml`)
+The main CI pipeline runs all checks (linting, static analysis, builds, tests) inside the appropriate Docker image.
+*   **Fast & Consistent Builds:** Jobs run within a pre-built Docker container, eliminating redundant `apt-get install` commands and ensuring a consistent environment.
+*   **Containerized Execution:** Jobs are configured with `container: image: ghcr.io/${{ github.repository }}/build-native:latest` (or `build-arm`, etc.).
+*   **Offline Dependencies:** CMake configuration steps include `-DFETCHCONTENT_FULLY_DISCONNECTED=ON` to leverage pre-installed dependencies and prevent network access.
+
+### C. Docker Image Publishing (`.github/workflows/docker-publish.yml`)
+A dedicated workflow automatically builds and pushes updated Docker images to the GitHub Container Registry (`ghcr.io`).
+*   **Trigger:** Activated when the `Dockerfile` changes on the `main` branch.
+*   **Multi-Stage Build & Push:** Builds and tags images for all `build-*` stages (e.g., `ghcr.io/your-org/your-repo/build-native:latest`).
+
+### D. Local Development with Docker (`scripts/build-local.sh`)
+An optional helper script (`scripts/build-local.sh`) allows developers to execute builds inside the Docker environment locally, ensuring perfect parity with CI.
+```bash
+# Example: Build natively inside Docker (default: builds all targets)
+./scripts/build-local.sh native
+
+# Example: Run a specific CMake target (e.g., 'caffeine-hal-format')
+./scripts/build-local.sh native caffeine-hal-format
+```
+
+### E. Native Host Builds
+Developers can still build the project directly on their host machine without Docker. The CMake `Find-then-Fetch` logic for GoogleTest (`tests/CMakeLists.txt`) ensures that if GTest is not found on the host, it will be automatically downloaded, maintaining native build capability.
+
+```bash
+# Standard CMake build on your host
+mkdir build && cd build
+cmake ..
+cmake --build .
+ctest --output-on-failure
+```
