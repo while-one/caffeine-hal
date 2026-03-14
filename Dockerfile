@@ -3,7 +3,7 @@ FROM ubuntu:24.04 AS base
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     cmake git build-essential python3 curl tar \
-    clang-format clang-tidy cppcheck doxygen ninja-build \
+    clang-format clang-tidy cppcheck doxygen ninja-build gcovr \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp/gtest

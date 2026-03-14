@@ -105,6 +105,9 @@ An optional helper script (`scripts/build-local.sh`) allows developers to execut
 
 # Example: Run a specific CMake target (e.g., 'caffeine-hal-format')
 ./scripts/build-local.sh native caffeine-hal-format
+
+# Example: Run code coverage inside Docker
+./scripts/build-local.sh native caffeine-hal-coverage
 ```
 
 ### E. Native Host Builds
