@@ -93,7 +93,8 @@ CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_init(cfn_hal_driver_t *base, 
     return error;
 }
 
-CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_deinit(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expected_type)
+CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_deinit(cfn_hal_driver_t         *base,
+                                                          cfn_hal_peripheral_type_t expected_type)
 {
     if (!base || base->type != expected_type || !base->vmt)
     {

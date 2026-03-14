@@ -99,7 +99,8 @@ typedef struct cfn_hal_api_base_s
  * @param expected_type FourCC code for peripheral type validation.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_init(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expected_type);
+CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_init(cfn_hal_driver_t         *base,
+                                                        cfn_hal_peripheral_type_t expected_type);
 
 /**
  * @brief Generic deinitialization for any driver.
