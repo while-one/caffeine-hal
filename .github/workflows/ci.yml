@@ -55,6 +55,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Install gcovr
+      run: apt-get update && apt-get install -y gcovr
+
     - name: Configure CMake
       run: cmake -B build -S . -DFETCHCONTENT_FULLY_DISCONNECTED=ON
 
