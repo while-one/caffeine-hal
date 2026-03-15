@@ -129,7 +129,7 @@ The project includes built-in targets for maintaining code quality:
 
 ## Build Environment (Docker & Local)
 
-To ensure consistency between local development and CI, a multi-stage `Dockerfile` is provided at the repository root. This Docker image pre-installs all necessary toolchains and dependencies, including a pre-built GoogleTest.
+To ensure consistency between local development and CI, a multi-stage `Dockerfile` is provided in the **`caffeine-build`** submodule. This Docker image pre-installs all necessary toolchains and dependencies, including a pre-built GoogleTest.
 
 ### 1. Building with Docker (Recommended for CI Parity)
 
@@ -141,13 +141,6 @@ Use the `caffeine-build/scripts/build.sh` helper script to build your project in
 
 # To build a specific CMake target (e.g., 'caffeine-hal-format')
 ./caffeine-build/scripts/build.sh native caffeine-hal-format
-
-# To build a different stage and specific target (e.g., 'arm' stage for 'caffeine-hal-test')
-# (Note: This is more relevant for caffeine-hal-ports, but stages exist for consistency)
-./caffeine-build/scripts/build.sh arm caffeine-hal-test
-
-# To run code coverage inside Docker
-./caffeine-build/scripts/build.sh native caffeine-hal-coverage
 ```
 
 ### 2. Building Natively (Without Docker)
