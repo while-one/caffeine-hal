@@ -79,35 +79,30 @@ When contributing to, modifying, or generating code for Caffeine-HAL, you **must
 
 ## 5. Build Environment & CI
 
-The build process for Caffeine-HAL is highly optimized for consistency across local development and GitHub Actions CI.
+The build process for Caffeine-HAL is highly optimized for consistency across local development and GitHub Actions CI using the **`caffeine-build`** submodule.
 
 ### A. Dockerized Toolchain
-A multi-stage `Dockerfile` (at the repository root) defines the entire build environment. This includes:
-*   `base` stage: Installs `cmake`, `ninja-build`, `clang-format`, `clang-tidy`, `cppcheck`, `doxygen`, and pre-builds `googletest`.
-*   `build-arm`, `build-riscv`, `build-native` stages: Add architecture-specific toolchains as needed.
+A multi-stage `Dockerfile` (located in the `caffeine-build` submodule) defines the entire build environment.
+*   **Centralized Infrastructure:** All build images are published and hosted by the `caffeine-build` repository on the GitHub Container Registry.
+*   **Sanity Checks:** CI jobs in this repository utilize these pre-built images for maximum performance.
 
 ### B. CI Workflow (`.github/workflows/ci.yml`)
 The main CI pipeline runs all checks (linting, static analysis, builds, tests) inside the appropriate Docker image.
-*   **Fast & Consistent Builds:** Jobs run within a pre-built Docker container, eliminating redundant `apt-get install` commands and ensuring a consistent environment.
-*   **Containerized Execution:** Jobs are configured with `container: image: ghcr.io/${{ github.repository }}/build-native:latest` (or `build-arm`, etc.).
+*   **Fast & Consistent Builds:** Jobs run within a pre-built Docker container from the `caffeine-build` registry.
+*   **Submodule Checkout:** Every CI job MUST ensure submodules are initialized recursively to access the build infrastructure.
 *   **Offline Dependencies:** CMake configuration steps include `-DFETCHCONTENT_FULLY_DISCONNECTED=ON` to leverage pre-installed dependencies and prevent network access.
 
-### C. Docker Image Publishing (`.github/workflows/docker-publish.yml`)
-A dedicated workflow automatically builds and pushes updated Docker images to the GitHub Container Registry (`ghcr.io`).
-*   **Trigger:** Activated when the `Dockerfile` changes on the `main` branch.
-*   **Multi-Stage Build & Push:** Builds and tags images for all `build-*` stages (e.g., `ghcr.io/your-org/your-repo/build-native:latest`).
-
-### D. Local Development with Docker (`scripts/build-local.sh`)
-An optional helper script (`scripts/build-local.sh`) allows developers to execute builds inside the Docker environment locally, ensuring perfect parity with CI.
+### D. Local Development with Docker (`caffeine-build/scripts/build.sh`)
+An optional helper script (`caffeine-build/scripts/build.sh`) allows developers to execute builds inside the Docker environment locally, ensuring perfect parity with CI.
 ```bash
 # Example: Build natively inside Docker (default: builds all targets)
-./scripts/build-local.sh native
+./caffeine-build/scripts/build.sh native
 
 # Example: Run a specific CMake target (e.g., 'caffeine-hal-format')
-./scripts/build-local.sh native caffeine-hal-format
+./caffeine-build/scripts/build.sh native caffeine-hal-format
 
 # Example: Run code coverage inside Docker
-./scripts/build-local.sh native caffeine-hal-coverage
+./caffeine-build/scripts/build.sh native caffeine-hal-coverage
 ```
 
 ### E. Native Host Builds

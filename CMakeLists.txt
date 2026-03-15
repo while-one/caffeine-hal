@@ -127,7 +127,7 @@ if(CLANG_FORMAT)
         ${PROJECT_NAME}-format
         COMMAND ${CLANG_FORMAT}
         ${FORMAT_ARGS}
-        -style=file:${PROJECT_SOURCE_DIR}/config/coding/.clang-format
+        -style=file:${PROJECT_SOURCE_DIR}/caffeine-build/config/coding/.clang-format
         ${ALL_ANALYSIS_SOURCES}
         COMMENT "${FORMAT_COMMENT}"
     )
@@ -163,7 +163,7 @@ if(CLANG_TIDY)
     add_custom_target(
         ${PROJECT_NAME}-tidy
         COMMAND ${CLANG_TIDY}
-        --config-file=${PROJECT_SOURCE_DIR}/config/coding/.clang-tidy
+        --config-file=${PROJECT_SOURCE_DIR}/caffeine-build/config/coding/.clang-tidy
         --header-filter=.*
         ${ALL_HEADERS}
         ${PROJECT_SOURCE_DIR}/tests/compliance.c
