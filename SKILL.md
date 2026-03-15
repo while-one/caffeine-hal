@@ -97,17 +97,17 @@ A dedicated workflow automatically builds and pushes updated Docker images to th
 *   **Trigger:** Activated when the `Dockerfile` changes on the `main` branch.
 *   **Multi-Stage Build & Push:** Builds and tags images for all `build-*` stages (e.g., `ghcr.io/your-org/your-repo/build-native:latest`).
 
-### D. Local Development with Docker (`scripts/build-local.sh`)
-An optional helper script (`scripts/build-local.sh`) allows developers to execute builds inside the Docker environment locally, ensuring perfect parity with CI.
+### D. Local Development with Docker (`caffeine-build/scripts/build.sh`)
+An optional helper script (`caffeine-build/scripts/build.sh`) allows developers to execute builds inside the Docker environment locally, ensuring perfect parity with CI.
 ```bash
 # Example: Build natively inside Docker (default: builds all targets)
-./scripts/build-local.sh native
+./caffeine-build/scripts/build.sh native
 
 # Example: Run a specific CMake target (e.g., 'caffeine-hal-format')
-./scripts/build-local.sh native caffeine-hal-format
+./caffeine-build/scripts/build.sh native caffeine-hal-format
 
 # Example: Run code coverage inside Docker
-./scripts/build-local.sh native caffeine-hal-coverage
+./caffeine-build/scripts/build.sh native caffeine-hal-coverage
 ```
 
 ### E. Native Host Builds
