@@ -20,7 +20,9 @@
  * SOFTWARE.
  *
  * @file cfn_hal_usb.h
- * @brief USB Device HAL API.
+ * @brief USB Device HAL API (PCD Layer).
+ * This HAL focuses strictly on the Peripheral Controller Device (PCD) hardware.
+ * High-level USB stacks utilize this interface to manage endpoints and transfers.
  */
 
 #ifndef CAFFEINE_HAL_HAL_USB_H
@@ -42,16 +44,17 @@ extern "C"
 
 /**
  * @brief USB nominal event flags.
+ * These events drive the state machine of the upper USB stack.
  */
 typedef enum
 {
     CFN_HAL_USB_EVENT_NONE = 0,
-    CFN_HAL_USB_EVENT_CONNECTED = CFN_HAL_BIT(0),  /*!< Device attached to host */
-    CFN_HAL_USB_EVENT_DISCONNECT = CFN_HAL_BIT(1), /*!< Device detached from host */
-    CFN_HAL_USB_EVENT_SUSPEND = CFN_HAL_BIT(2),    /*!< Bus entered low power state */
-    CFN_HAL_USB_EVENT_RESUME = CFN_HAL_BIT(3),     /*!< Bus activity resumed */
-    CFN_HAL_USB_EVENT_RESET = CFN_HAL_BIT(4),      /*!< USB bus reset detected */
-    CFN_HAL_USB_EVENT_SETUP = CFN_HAL_BIT(5),      /*!< Setup packet received on EP0 */
+    CFN_HAL_USB_EVENT_SUSPEND = CFN_HAL_BIT(0),     /*!< Bus entered low power state */
+    CFN_HAL_USB_EVENT_RESUME = CFN_HAL_BIT(1),      /*!< Bus activity resumed */
+    CFN_HAL_USB_EVENT_RESET = CFN_HAL_BIT(2),       /*!< USB bus reset detected */
+    CFN_HAL_USB_EVENT_SETUP_READY = CFN_HAL_BIT(3), /*!< Setup packet received on EP0 */
+    CFN_HAL_USB_EVENT_EP_DATA_OUT = CFN_HAL_BIT(4), /*!< Data received on endpoint (Host -> Device) */
+    CFN_HAL_USB_EVENT_EP_DATA_IN = CFN_HAL_BIT(5),  /*!< Data transmitted on endpoint (Device -> Host) */
 } cfn_hal_usb_event_t;
 
 /**
@@ -83,7 +86,7 @@ typedef enum
  */
 typedef struct
 {
-    void *user_config; /*!< Vendor-specific USB stack configuration */
+    void *user_config; /*!< Vendor-specific USB hardware configuration */
 } cfn_hal_usb_config_t;
 
 /**
@@ -91,7 +94,7 @@ typedef struct
  */
 typedef struct
 {
-    void *instance; /*!< Peripheral base instance */
+    void *instance; /*!< Peripheral base instance (e.g. USB_OTG_FS) */
     void *user_arg; /*!< Peripheral instance user argument */
 } cfn_hal_usb_phy_t;
 
@@ -111,12 +114,13 @@ typedef void (*cfn_hal_usb_callback_t)(
 
 /**
  * @brief USB Virtual Method Table (VMT).
+ * Focuses exclusively on Peripheral Controller Device (PCD) functions.
  */
 struct cfn_hal_usb_api_s
 {
     cfn_hal_api_base_t base;
 
-    /* USB Specific Extensions */
+    /* USB PCD Extensions */
     cfn_hal_error_code_t (*start)(cfn_hal_usb_t *driver);
     cfn_hal_error_code_t (*stop)(cfn_hal_usb_t *driver);
     cfn_hal_error_code_t (*set_address)(cfn_hal_usb_t *driver, uint8_t address);
@@ -128,6 +132,10 @@ struct cfn_hal_usb_api_s
     cfn_hal_error_code_t (*ep_transmit)(cfn_hal_usb_t *driver, uint8_t ep_addr, const uint8_t *data, size_t length);
     cfn_hal_error_code_t (*ep_receive)(cfn_hal_usb_t *driver, uint8_t ep_addr, uint8_t *buffer, size_t length);
     cfn_hal_error_code_t (*ep_stall)(cfn_hal_usb_t *driver, uint8_t ep_addr, bool stall);
+
+    /* Stack Integration Helpers */
+    cfn_hal_error_code_t (*read_setup_packet)(cfn_hal_usb_t *driver, uint8_t *buffer);
+    cfn_hal_error_code_t (*get_rx_data_size)(cfn_hal_usb_t *driver, uint8_t ep_addr, size_t *size);
 };
 
 CFN_HAL_VMT_CHECK(struct cfn_hal_usb_api_s);
@@ -447,6 +455,33 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_usb_ep_stall(cfn_hal_usb_t *driver, 
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_USB, ep_stall, driver, error, ep_addr, stall);
+    return error;
+}
+
+/**
+ * @brief Reads the latest received 8-byte setup packet.
+ * @param driver Pointer to the USB driver instance.
+ * @param buffer Pointer to the 8-byte buffer to store the setup packet.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_usb_read_setup_packet(cfn_hal_usb_t *driver, uint8_t *buffer)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_USB, read_setup_packet, driver, error, buffer);
+    return error;
+}
+
+/**
+ * @brief Retrieves the size of the last received data on an endpoint.
+ * @param driver Pointer to the USB driver instance.
+ * @param ep_addr Endpoint address.
+ * @param size [out] Pointer to store the number of bytes received.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_usb_get_rx_data_size(cfn_hal_usb_t *driver, uint8_t ep_addr, size_t *size)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_USB, get_rx_data_size, driver, error, ep_addr, size);
     return error;
 }
 
