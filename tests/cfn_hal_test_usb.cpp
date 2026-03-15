@@ -166,6 +166,29 @@ TEST_F(UsbTest, EpStallSuccess)
     EXPECT_EQ(cfn_hal_usb_ep_stall(&driver, 0x01, false), CFN_HAL_ERROR_OK);
 }
 
+TEST_F(UsbTest, ReadSetupPacketSuccess)
+{
+    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    api.read_setup_packet = [](cfn_hal_usb_t *d, uint8_t *buf) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+
+    uint8_t buf[8];
+    EXPECT_EQ(cfn_hal_usb_read_setup_packet(&driver, buf), CFN_HAL_ERROR_OK);
+}
+
+TEST_F(UsbTest, GetRxDataSizeSuccess)
+{
+    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    api.get_rx_data_size = [](cfn_hal_usb_t *d, uint8_t addr, size_t *sz) -> cfn_hal_error_code_t
+    {
+        *sz = 64;
+        return CFN_HAL_ERROR_OK;
+    };
+
+    size_t received = 0;
+    EXPECT_EQ(cfn_hal_usb_get_rx_data_size(&driver, 0x01, &received), CFN_HAL_ERROR_OK);
+    EXPECT_EQ(received, 64);
+}
+
 TEST_F(UsbTest, EventEnableDisable)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
@@ -175,6 +198,9 @@ TEST_F(UsbTest, EventEnableDisable)
 
     EXPECT_EQ(cfn_hal_usb_event_enable(&driver, CFN_HAL_USB_EVENT_RESET), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_usb_event_disable(&driver, CFN_HAL_USB_EVENT_RESET), CFN_HAL_ERROR_OK);
+    EXPECT_EQ(cfn_hal_usb_event_enable(&driver, CFN_HAL_USB_EVENT_SETUP_READY), CFN_HAL_ERROR_OK);
+    EXPECT_EQ(cfn_hal_usb_event_enable(&driver, CFN_HAL_USB_EVENT_EP_DATA_OUT), CFN_HAL_ERROR_OK);
+    EXPECT_EQ(cfn_hal_usb_event_enable(&driver, CFN_HAL_USB_EVENT_EP_DATA_IN), CFN_HAL_ERROR_OK);
 }
 
 TEST_F(UsbTest, ErrorEnableDisable)
