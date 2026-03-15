@@ -49,9 +49,9 @@ extern "C"
 typedef enum
 {
     CFN_HAL_USB_EVENT_NONE = 0,
-    CFN_HAL_USB_EVENT_SUSPEND = CFN_HAL_BIT(0),    /*!< Bus entered low power state */
-    CFN_HAL_USB_EVENT_RESUME = CFN_HAL_BIT(1),     /*!< Bus activity resumed */
-    CFN_HAL_USB_EVENT_RESET = CFN_HAL_BIT(2),      /*!< USB bus reset detected */
+    CFN_HAL_USB_EVENT_SUSPEND = CFN_HAL_BIT(0),     /*!< Bus entered low power state */
+    CFN_HAL_USB_EVENT_RESUME = CFN_HAL_BIT(1),      /*!< Bus activity resumed */
+    CFN_HAL_USB_EVENT_RESET = CFN_HAL_BIT(2),       /*!< USB bus reset detected */
     CFN_HAL_USB_EVENT_SETUP_READY = CFN_HAL_BIT(3), /*!< Setup packet received on EP0 */
     CFN_HAL_USB_EVENT_EP_DATA_OUT = CFN_HAL_BIT(4), /*!< Data received on endpoint (Host -> Device) */
     CFN_HAL_USB_EVENT_EP_DATA_IN = CFN_HAL_BIT(5),  /*!< Data transmitted on endpoint (Device -> Host) */
