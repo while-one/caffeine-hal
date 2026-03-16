@@ -173,13 +173,19 @@ The framework is composed of the following distinct layers:
 
 ---
 
-## Support
+## Support the Gallery
 
-They say dealing with abstraction is a form of art, so I suppose that makes me an artist? Whether this caffeine fuels an elegant HAL or a deep debugging session, I appreciate you being part of the gallery.
+While this library is no Mondrian, it deals with a different form of abstraction art. HAL is a craft of its own, one that keeps your code portable and your debugging sessions short.
+Whether **Caffeine** is fueling an elegant project or just helping you wake up your hardware, you can contribute to the "exhibition" in the following ways:
 
-If my projects helped you, buy me a brew or if the opposite open a PR!
+* **Propose Features:** If the library is missing a specific feature, let's design the interface together.
+* **Port New Targets:** Help expand the collection by porting the HAL to new silicon or peripheral sets.
+* **Expand the HIL Lab:** Support primarily goes toward acquiring new development boards. These serve as dedicated **Hardware-in-the-Loop** test targets, ensuring every commit remains rock-solid across the entire fleet of supported hardware.
 
-<a href="https://www.buymeacoffee.com/whileone" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+**If my projects helped you, feel free to buy me a brew. Or if the opposite, then open a PR!**
+
+<a href="https://www.buymeacoffee.com/whileone" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me A Coffee" style="height: 40px !important;width: 128px !important;" ></a>
+
 
 ---
 
