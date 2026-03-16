@@ -172,20 +172,30 @@ The framework is composed of the following distinct layers:
 4.  **Application (TBD):** The top-level business logic, state machines, and system orchestration that utilize the middleware and HAL interfaces.
 
 ---
-
 ## Support the Gallery
 
-While this library is no Mondrian, it deals with a different form of abstraction art. HAL is a craft of its own, one that keeps your code portable and your debugging sessions short.
-Whether **Caffeine** is fueling an elegant project or just helping you wake up your hardware, you can contribute to the "exhibition" in the following ways:
+While this library is no Mondrian, it deals with a different form of **abstraction art**. Hardware abstraction is a craft of its own—one that keeps your application code portable and your debugging sessions short.
 
-* **Propose Features:** If the library is missing a specific feature, let's design the interface together.
-* **Port New Targets:** Help expand the collection by porting the HAL to new silicon or peripheral sets.
-* **Expand the HIL Lab:** Support primarily goes toward acquiring new development boards. These serve as dedicated **Hardware-in-the-Loop** test targets, ensuring every commit remains rock-solid across the entire fleet of supported hardware.
+Whether **Caffeine** is fueling an elegant embedded project or just helping you wake up your hardware, you can contribute in the following ways:
 
-**If my projects helped you, feel free to buy me a brew. Or if the opposite, then open a PR!**
+* **Star & Share:** If you find this project useful, give it a ⭐ on GitHub and share it with your fellow firmware engineers. It helps others find the library and grows the Caffeine community.
+* **Show & Tell:** If you are using Caffeine in a project (personal or professional), **let me know!** Hearing how it's being used is a huge motivator.
+* **Propose Features:** If the library is missing a specific "brushstroke," let's design the interface together.
+* **Port New Targets:** Help us expand the collection by porting the HAL to new silicon or peripheral sets.
+* **Expand the HIL Lab:** Contributions go primarily toward acquiring new development boards. These serve as dedicated **Hardware-in-the-Loop** test targets, ensuring every commit remains rock-solid across our entire fleet of supported hardware.
 
-<a href="https://www.buymeacoffee.com/whileone" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me A Coffee" style="height: 40px !important;width: 128px !important;" ></a>
+**If my projects helped you, feel free to buy me a brew. Or if it caused you an extra debugging session, open a PR!**
 
+<a href="https://www.buymeacoffee.com/whileone" target="_blank">
+  <img src="https://img.shields.io/badge/Caffeine%20me--0077ff?style=for-the-badge&logo=buy-me-a-coffee&logoColor=white" 
+       height="40" 
+       style="border-radius: 5px;">
+</a>&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="https://github.com/sponsors/whileone" target="_blank">
+<img src="https://img.shields.io/badge/Sponsor--ea4aaa?style=for-the-badge&logo=github-sponsors" height="40" style="border-radius: 5px;"> </a>&nbsp;&nbsp;&nbsp;
+<a href="hhttps://github.com/while-one/caffeine-hal/compare" target="_blank">
+<img src="https://img.shields.io/badge/Open%20a%20PR--orange?style=for-the-badge&logo=github&logoColor=white" height="40" style="border-radius: 5px;">
+</a>
 
 ---
 
