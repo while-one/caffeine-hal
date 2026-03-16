@@ -1,7 +1,3 @@
 [submodule "caffeine-build"]
 	path = caffeine-build
 	url = https://github.com/while-one/caffeine-build.git
-<<<<<<< HEAD
-=======
-	branch = main
->>>>>>> a07be8f484e2cc91a10c60473d2c3fe2e3c70ef6
