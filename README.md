@@ -120,10 +120,10 @@ if (cfn_hal_uart_init(&my_uart) == CFN_HAL_ERROR_OK) {
 
 The project includes built-in targets for maintaining code quality:
 
-*   **Format Code:** `make caffeine-hal-format` (Requires `clang-format`)
-*   **Run Static Analysis:** `make caffeine-hal-analyze` (Runs `cppcheck` and `clang-tidy`)
-*   **Verify C11 Compliance:** `make caffeine-hal-compliance` (Strict C11 check)
-*   **Run Unit Tests:** `make caffeine-hal-test` (Requires `GoogleTest`)
+*   **Format Code:** `cmake --build build --target caffeine-hal-format` (Requires `clang-format`)
+*   **Run Static Analysis:** `cmake --build build --target caffeine-hal-analyze` (Runs `cppcheck` and `clang-tidy`)
+*   **Verify C11 Compliance:** `cmake --build build --target caffeine-hal-compliance` (Strict C11 check)
+*   **Run Unit Tests:** `cmake --build build --target caffeine-hal-test` (Requires `GoogleTest`)
 
 ---
 
@@ -137,10 +137,10 @@ Use the `caffeine-build/scripts/build.sh` helper script to build your project in
 
 ```bash
 # Build using the native Linux stage (default: builds all targets)
-./caffeine-build/scripts/build.sh native
+./caffeine-build/scripts/build.sh tests-native
 
 # To build a specific CMake target (e.g., 'caffeine-hal-format')
-./caffeine-build/scripts/build.sh native caffeine-hal-format
+./caffeine-build/scripts/build.sh tests-native caffeine-hal-format
 ```
 
 ### 2. Building Natively (Without Docker)
@@ -167,9 +167,9 @@ Caffeine-HAL is the foundational interface within the broader **Caffeine Framewo
 The framework is composed of the following distinct layers:
 
 1.  **Generic Interface (`caffeine-hal`):** This repository. Header-only definitions of the Hardware Abstraction Layer and Virtual Method Tables (VMTs).
-2.  **Hardware Ports ([`caffeine-hal-ports`](https://github.com/while-one/caffeine-hal-ports)):** The concrete implementations of the HAL for specific vendors (e.g., STM32, NXP, nRF, TI) and OS environments (Linux POSIX). It encapsulates vendor SDKs and provides modern CMake cross-compilation presets.
-3.  **Middleware (TBD):** Device drivers (e.g., displays, sensors) and protocols (e.g., Modbus, USB stacks) that build strictly upon the generic `caffeine-hal` interface, remaining completely agnostic to the underlying hardware.
-4.  **Application (TBD):** The top-level business logic, state machines, and system orchestration that utilize the middleware and HAL interfaces.
+2.  **Hardware Ports ([`caffeine-hal-ports`](https://github.com/while-one/caffeine-hal-ports)):** The concrete implementations of the HAL for specific vendors (e.g., STM32, GD32V) and OS environments (Linux POSIX). It encapsulates vendor SDKs and provides modern CMake cross-compilation presets.
+3.  **Middleware ([`caffeine-services`](https://github.com/while-one/caffeine-services)):** Device drivers (e.g., displays, sensors) and generic connectivity abstractions (`Connection`, `Transport`) that build strictly upon the generic `caffeine-hal` interface, remaining completely agnostic to the underlying hardware.
+4.  **Application ([`caffeine-app-mvp`](https://github.com/while-one/caffeine-app-mvp)):** The top-level business logic, state machines, and system orchestration that utilize the middleware and HAL interfaces.
 
 ---
 ## Support the Gallery
@@ -191,9 +191,9 @@ Whether **Caffeine** is fueling an elegant embedded project or just helping you 
        height="40" 
        style="border-radius: 5px;">
 </a>&nbsp;&nbsp;&nbsp;&nbsp;
-<a href="https://github.com/sponsors/whileone" target="_blank">
+<a href="https://github.com/sponsors/while-one" target="_blank">
 <img src="https://img.shields.io/badge/Sponsor--ea4aaa?style=for-the-badge&logo=github-sponsors" height="40" style="border-radius: 5px;"> </a>&nbsp;&nbsp;&nbsp;
-<a href="hhttps://github.com/while-one/caffeine-hal/compare" target="_blank">
+<a href="https://github.com/while-one/caffeine-hal/compare" target="_blank">
 <img src="https://img.shields.io/badge/Open%20a%20PR--orange?style=for-the-badge&logo=github&logoColor=white" height="40" style="border-radius: 5px;">
 </a>
 
