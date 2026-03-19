@@ -47,14 +47,9 @@ target_sources(
 )
 
 # Define an option to build tests, default is OFF unless this is the top-level project
-if(PROJECT_IS_TOP_LEVEL)
-    set(DEFAULT_BUILD_TESTS ON)
-else()
-    set(DEFAULT_BUILD_TESTS OFF)
-endif()
-option(CFN_HAL_BUILD_TESTS "Build the Caffeine-HAL test executable" ${DEFAULT_BUILD_TESTS})
+option(CFN_HAL_BUILD_TESTS "Build the Caffeine-HAL test executable" OFF)
 
-if(CFN_HAL_BUILD_TESTS)
+if(CFN_HAL_BUILD_TESTS AND PROJECT_IS_TOP_LEVEL)
     include(CTest)
     if(BUILD_TESTING)
         add_subdirectory(tests)

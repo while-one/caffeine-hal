@@ -16,7 +16,7 @@ jobs:
         submodules: recursive
     
     - name: Check Formatting
-      run: ./caffeine-build/scripts/build.sh tests-native caffeine-hal-format -DFORMAT_DRY_RUN=ON
+      run: ./caffeine-build/scripts/build.sh unit-tests-gtest caffeine-hal-format -DFORMAT_DRY_RUN=ON
 
   static-analysis:
     name: Static Analysis (Cppcheck & Clang-Tidy)
@@ -27,7 +27,7 @@ jobs:
         submodules: recursive
     
     - name: Run Analysis
-      run: ./caffeine-build/scripts/build.sh tests-native caffeine-hal-analyze
+      run: ./caffeine-build/scripts/build.sh unit-tests-gtest caffeine-hal-analyze
 
   build-and-test:
     name: Build & Unit Tests
@@ -42,10 +42,10 @@ jobs:
         submodules: recursive
     
     - name: Build and Run Tests
-      run: ./caffeine-build/scripts/build.sh tests-native all
+      run: ./caffeine-build/scripts/build.sh unit-tests-gtest all
 
     - name: Run Coverage
-      run: ./caffeine-build/scripts/build.sh tests-native caffeine-hal-coverage
+      run: ./caffeine-build/scripts/build.sh unit-tests-gtest caffeine-hal-coverage
 
     - name: PR Comment with Coverage
       if: github.event_name == 'pull_request'
@@ -54,7 +54,7 @@ jobs:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
           const fs = require('fs');
-          const coverage = fs.readFileSync('build/tests-native/coverage.txt', 'utf8');
+          const coverage = fs.readFileSync('build/unit-tests-gtest/coverage.txt', 'utf8');
           github.rest.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
@@ -71,4 +71,4 @@ jobs:
         submodules: recursive
     
     - name: Build Doxygen Target
-      run: ./caffeine-build/scripts/build.sh tests-native caffeine-hal-docs
+      run: ./caffeine-build/scripts/build.sh unit-tests-gtest caffeine-hal-docs
