@@ -115,6 +115,7 @@ extern "C"
                   .on_config_arg = NULL,                                                                               \
                   .dependency = NULL,                                                                                  \
                   .extension = NULL,                                                                                   \
+                  .flags = 0,                                                                                          \
                   .vmt = (const struct cfn_hal_api_base_s *) (api_ptr) },                                              \
         .config = (config_ptr), .api = (api_ptr), .phy = (phy_ptr), .cb = NULL, .cb_user_arg = NULL                    \
     }
