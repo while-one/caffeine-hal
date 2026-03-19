@@ -15,6 +15,25 @@ project(
 # This provides some important cross-platform paths to be used later during install
 include(GNUInstallDirs)
 
+# User-configurable flags (with sensible defaults)
+option(CAFFEINE_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
+set(CAFFEINE_OPTIMIZATION_LEVEL "-Os" CACHE STRING "Compiler optimization level (e.g., -O0, -O2, -Os, -O3)")
+
+# Universal strict warnings and preparation for dead-code elimination
+set(CAFFEINE_COMPILE_OPTIONS
+        -pedantic-errors
+        -Wall -Wextra -Wpedantic -Wshadow
+        -ffunction-sections -fdata-sections
+        ${CAFFEINE_OPTIMIZATION_LEVEL}
+)
+
+if(CAFFEINE_WARNINGS_AS_ERRORS)
+    list(APPEND CAFFEINE_COMPILE_OPTIONS -Werror)
+endif()
+
+MESSAGE(STATUS "Target CAFFEINE_BUILD_STAGE: ${CAFFEINE_BUILD_STAGE}")
+
+
 #################################### Build ####################################
 # Create our target, this is a Header-Defined Interface library so we should use interface
 add_library(${PROJECT_NAME} INTERFACE)
@@ -47,14 +66,9 @@ target_sources(
 )
 
 # Define an option to build tests, default is OFF unless this is the top-level project
-if(PROJECT_IS_TOP_LEVEL)
-    set(DEFAULT_BUILD_TESTS ON)
-else()
-    set(DEFAULT_BUILD_TESTS OFF)
-endif()
-option(CFN_HAL_BUILD_TESTS "Build the Caffeine-HAL test executable" ${DEFAULT_BUILD_TESTS})
+option(CFN_HAL_BUILD_TESTS "Build the Caffeine-HAL test executable" OFF)
 
-if(CFN_HAL_BUILD_TESTS)
+if(CFN_HAL_BUILD_TESTS AND PROJECT_IS_TOP_LEVEL)
     include(CTest)
     if(BUILD_TESTING)
         add_subdirectory(tests)

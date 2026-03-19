@@ -1,0 +1,27 @@
+{
+  "version": 4,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 23,
+    "patch": 0
+  },
+  "include": [
+    "caffeine-build/cmake/presets/base.json",
+    "caffeine-build/cmake/presets/stm32/stm32f4.json",
+    "caffeine-build/cmake/presets/gigadevice/gd32v.json",
+    "caffeine-build/cmake/presets/posix/linux.json",
+    "caffeine-build/cmake/presets/mock/tests.json",
+    "caffeine-build/cmake/presets/template/compliance.json"
+  ],
+  "configurePresets": [
+    {
+      "name": "unit-tests-gtest",
+      "displayName": "HAL Unit Tests (Native GTest)",
+      "inherits": "tests-native",
+      "binaryDir": "${sourceDir}/build/unit-tests-gtest",
+      "cacheVariables": {
+        "CFN_HAL_BUILD_TESTS": "ON"
+      }
+    }
+  ]
+}
