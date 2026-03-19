@@ -50,7 +50,13 @@ typedef enum
     CFN_HAL_UART_EVENT_TX_COMPLETE = CFN_HAL_BIT(0), /*!< Data transmission finished */
     CFN_HAL_UART_EVENT_RX_READY = CFN_HAL_BIT(1),    /*!< Data reception finished */
     CFN_HAL_UART_EVENT_BUS_IDLE = CFN_HAL_BIT(2),    /*!< UART bus idle detected */
+    CFN_HAL_UART_EVENT_RX_BYTE = CFN_HAL_BIT(3),     /*!< Single byte received (continuous mode) */
 } cfn_hal_uart_event_t;
+
+/**
+ * @brief UART continuous RX flag for tracking state in the base driver.
+ */
+#define CFN_HAL_UART_FLAG_CONTINUOUS_RX CFN_HAL_BIT(0)
 
 /**
  * @brief UART exception error flags.
@@ -184,7 +190,8 @@ struct cfn_hal_uart_api_s
     /* UART Specific Extensions */
     cfn_hal_error_code_t (*tx_irq)(cfn_hal_uart_t *driver, const uint8_t *data, size_t nbr_of_bytes);
     cfn_hal_error_code_t (*tx_irq_abort)(cfn_hal_uart_t *driver);
-    cfn_hal_error_code_t (*rx_irq)(cfn_hal_uart_t *driver, uint8_t *data, size_t nbr_of_bytes);
+    cfn_hal_error_code_t (*rx_n_irq)(cfn_hal_uart_t *driver, uint8_t *data, size_t nbr_of_bytes);
+    cfn_hal_error_code_t (*rx_irq)(cfn_hal_uart_t *driver);
     cfn_hal_error_code_t (*rx_irq_abort)(cfn_hal_uart_t *driver);
     cfn_hal_error_code_t (*tx_polling)(cfn_hal_uart_t *driver,
                                        const uint8_t  *data,
@@ -429,16 +436,28 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_tx_irq_abort(cfn_hal_uart_t *dr
 }
 
 /**
- * @brief Starts UART data reception using interrupts (non-blocking).
+ * @brief Starts UART data reception using interrupts to receive exactly N bytes.
  * @param driver Pointer to the UART driver instance.
  * @param data Pointer to the buffer to store received data.
  * @param nbr_of_bytes Number of bytes to receive.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_rx_irq(cfn_hal_uart_t *driver, uint8_t *data, size_t nbr_of_bytes)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_rx_n_irq(cfn_hal_uart_t *driver, uint8_t *data, size_t nbr_of_bytes)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_UART, rx_irq, driver, error, data, nbr_of_bytes);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_UART, rx_n_irq, driver, error, data, nbr_of_bytes);
+    return error;
+}
+
+/**
+ * @brief Starts UART data reception in continuous interrupt mode.
+ * @param driver Pointer to the UART driver instance.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_rx_irq(cfn_hal_uart_t *driver)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_UART, rx_irq, driver, error);
     return error;
 }
 

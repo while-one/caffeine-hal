@@ -12,6 +12,7 @@ Its core philosophy is to provide a consistent, polymorphic interface across dif
     *   **Library-Linked:** Functions are `extern` by defining `CFN_HAL_USE_LIB_BASE`.
     *   **Library-Compile:** Functions are compiled into a library by defining `CFN_HAL_COMPILE_BASE`.
 *   **VMT Pattern:** Every peripheral (e.g., `cfn_hal_uart_t`) contains a generic `cfn_hal_driver_t` base struct and a pointer to an API struct (e.g., `cfn_hal_uart_api_t`). The `vmt` member in the base struct is strictly typed as `const struct cfn_hal_api_base_s *` for compiler-enforced safety. Hardware-specific C files implement these API structures.
+*   **Base State Tracking (`flags`):** The `cfn_hal_driver_t` contains a `uint32_t flags` member. This is reserved for portable, port-internal state tracking (e.g., enabling/disabling continuous modes). Peripherals define their own flag masks (e.g., `CFN_HAL_UART_FLAG_CONTINUOUS_RX`).
 *   **VMT Safety:** To prevent memory corruption, the `cfn_hal_api_base_t` MUST be the first member of every peripheral-specific API struct. This is enforced at compile-time via the `CFN_HAL_VMT_CHECK` macro and at initialization via type-checking.
 *   **Board-Level Hook (`on_config`):** The `cfn_hal_driver_t` base struct contains an `on_config` callback. The generic `_init` and `_deinit` wrappers automatically call this hook before/after touching hardware registers. 
 *   **Error Preservation:** The `cfn_hal_base_init` logic ensures that the primary initialization error code from the hardware-specific driver is preserved and returned even if the board-level rollback (DEINIT phase) fails.
@@ -50,6 +51,9 @@ When contributing to, modifying, or generating code for Caffeine-HAL, you **must
 ### C. Concurrency & Asynchronous Design
 *   **Locking Policy:** Static inline functions should **not** call `CFN_HAL_LOCK` internally. Concurrency protection is the responsibility of the caller using the `CFN_HAL_WITH_LOCK` macro.
 *   **Asynchronous Semantics:** Functions suffixed with `_irq` or `_dma` are fundamentally non-blocking. They **must not** contain a `timeout` parameter.
+*   **UART Asynchronous RX:** UART defines two distinct asynchronous receive modes:
+    *   `rx_n_irq`: Receives exactly N bytes into a provided buffer. Fires `CFN_HAL_UART_EVENT_RX_READY` when finished.
+    *   `rx_irq`: Enables continuous receive mode. Fires `CFN_HAL_UART_EVENT_RX_BYTE` for every single byte received until aborted.
 *   **Polling Semantics:** Functions suffixed with `_polling` or `_read`/`_write` (if blocking) are blocking and **must** contain a `timeout` parameter.
 
 ### D. Formatting & Style
