@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./caffeine-build/assets/logo.png" alt="Caffeine Logo" width="50%">
+    <img src="https://raw.githubusercontent.com/while-one/caffeine-build/main/assets/logo.png" alt="Caffeine Logo" width="50%">
 <h1 align="center">The Caffeine Framework</h1>
 </p>
 
