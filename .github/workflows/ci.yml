@@ -10,40 +10,24 @@ jobs:
   lint-format:
     name: Lint Format (Clang-Format)
     runs-on: ubuntu-24.04
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-    container:
-      image: ghcr.io/${{ github.repository_owner }}/caffeine-build/build-native:latest
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: recursive
     
-    - name: Configure CMake (Dry Run Format)
-      run: cmake -B build -S . -DFORMAT_DRY_RUN=ON -DFETCHCONTENT_FULLY_DISCONNECTED=ON
-
     - name: Check Formatting
-      run: cmake --build build --target caffeine-hal-format
+      run: ./caffeine-build/scripts/build.sh tests-native caffeine-hal-format -DFORMAT_DRY_RUN=ON
 
   static-analysis:
     name: Static Analysis (Cppcheck & Clang-Tidy)
     runs-on: ubuntu-24.04
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-    container:
-      image: ghcr.io/${{ github.repository_owner }}/caffeine-build/build-native:latest
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: recursive
     
-    - name: Configure CMake
-      run: cmake -B build -S . -DFETCHCONTENT_FULLY_DISCONNECTED=ON
-
     - name: Run Analysis
-      run: |
-        cmake --build build --target caffeine-hal-analyze
-        cmake --build build --target caffeine-hal-compliance
+      run: ./caffeine-build/scripts/build.sh tests-native caffeine-hal-analyze
 
   build-and-test:
     name: Build & Unit Tests
@@ -52,29 +36,16 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-    container:
-      image: ghcr.io/${{ github.repository_owner }}/caffeine-build/build-native:latest
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: recursive
     
-    - name: Install gcovr
-      run: apt-get update && apt-get install -y gcovr
-
-    - name: Configure CMake
-      run: cmake -B build -S . -DFETCHCONTENT_FULLY_DISCONNECTED=ON
-
-    - name: Build Tests
-      run: cmake --build build --target caffeine-hal-test -j 4
-
-    - name: Run Unit Tests
-      run: ctest --test-dir build --output-on-failure
+    - name: Build and Run Tests
+      run: ./caffeine-build/scripts/build.sh tests-native all
 
     - name: Run Coverage
-      run: cmake --build build --target caffeine-hal-coverage
+      run: ./caffeine-build/scripts/build.sh tests-native caffeine-hal-coverage
 
     - name: PR Comment with Coverage
       if: github.event_name == 'pull_request'
@@ -83,7 +54,7 @@ jobs:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
           const fs = require('fs');
-          const coverage = fs.readFileSync('build/coverage.txt', 'utf8');
+          const coverage = fs.readFileSync('build/tests-native/coverage.txt', 'utf8');
           github.rest.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
@@ -94,17 +65,10 @@ jobs:
   docs-generation:
     name: Documentation Generation (Doxygen)
     runs-on: ubuntu-24.04
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-    container:
-      image: ghcr.io/${{ github.repository_owner }}/caffeine-build/build-native:latest
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: recursive
     
-    - name: Configure CMake
-      run: cmake -B build -S . -DFETCHCONTENT_FULLY_DISCONNECTED=ON
-
     - name: Build Doxygen Target
-      run: cmake --build build --target caffeine-hal-docs
+      run: ./caffeine-build/scripts/build.sh tests-native caffeine-hal-docs
