@@ -133,7 +133,8 @@ TEST_F(UartTest, TxRxIrqSuccess)
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.tx_irq = [](cfn_hal_uart_t *d, const uint8_t *data, size_t len) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
-    api.rx_n_irq = [](cfn_hal_uart_t *d, uint8_t *data, size_t len) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.rx_n_irq = [](cfn_hal_uart_t *d, uint8_t *data, size_t len) -> cfn_hal_error_code_t
+    { return CFN_HAL_ERROR_OK; };
     api.rx_irq = [](cfn_hal_uart_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
     uint8_t buf[4] = { 1, 2, 3, 4 };
