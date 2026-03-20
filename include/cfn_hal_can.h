@@ -104,7 +104,7 @@ typedef struct
 
 typedef struct cfn_hal_can_s     cfn_hal_can_t;
 typedef struct cfn_hal_can_api_s cfn_hal_can_api_t;
-
+struct cfn_hal_clock_s; // Forward declaration
 /**
  * @brief CAN callback signature.
  * @param driver Pointer to the CAN driver instance.
@@ -132,10 +132,6 @@ struct cfn_hal_can_api_s
 CFN_HAL_VMT_CHECK(struct cfn_hal_can_api_s);
 
 CFN_HAL_CREATE_DRIVER_TYPE(can, cfn_hal_can_config_t, cfn_hal_can_api_t, cfn_hal_can_phy_t, cfn_hal_can_callback_t);
-
-#define CFN_HAL_CAN_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                          \
-    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_CAN, api_ptr, phy_ptr, config_ptr)
-
 /* Functions inline ------------------------------------------------- */
 
 /**
@@ -405,7 +401,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_can_add_filter(cfn_hal_can_t *driver
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CAN, add_filter, driver, error, filter);
     return error;
 }
-
+cfn_hal_error_code_t cfn_hal_can_construct(cfn_hal_can_t              *driver,
+                                           const cfn_hal_can_config_t *config,
+                                           const cfn_hal_can_phy_t    *phy,
+                                           struct cfn_hal_clock_s     *clock,
+                                           cfn_hal_can_callback_t      callback,
+                                           void                       *user_arg);
+cfn_hal_error_code_t cfn_hal_can_destruct(cfn_hal_can_t *driver);
 #ifdef __cplusplus
 }
 #endif

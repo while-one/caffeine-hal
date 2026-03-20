@@ -150,9 +150,6 @@ CFN_HAL_VMT_CHECK(struct cfn_hal_qspi_api_s);
 CFN_HAL_CREATE_DRIVER_TYPE(
     qspi, cfn_hal_qspi_config_t, cfn_hal_qspi_api_t, cfn_hal_qspi_phy_t, cfn_hal_qspi_callback_t);
 
-#define CFN_HAL_QSPI_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                         \
-    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_QSPI, api_ptr, phy_ptr, config_ptr)
-
 /* Functions inline ------------------------------------------------- */
 
 /**
@@ -451,6 +448,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_autopolling_enable(
     return error;
 }
 
+cfn_hal_error_code_t cfn_hal_qspi_construct(cfn_hal_qspi_t              *driver,
+                                            const cfn_hal_qspi_config_t *config,
+                                            const cfn_hal_qspi_phy_t    *phy,
+                                            struct cfn_hal_clock_s      *clock,
+                                            cfn_hal_qspi_callback_t      callback,
+                                            void                        *user_arg);
+cfn_hal_error_code_t cfn_hal_qspi_destruct(cfn_hal_qspi_t *driver);
 #ifdef __cplusplus
 }
 #endif

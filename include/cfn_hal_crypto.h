@@ -95,7 +95,7 @@ typedef struct
 
 typedef struct cfn_hal_crypto_s     cfn_hal_crypto_t;
 typedef struct cfn_hal_crypto_api_s cfn_hal_crypto_api_t;
-
+struct cfn_hal_clock_s; // Forward declaration
 /**
  * @brief Crypto callback signature.
  * @param driver Pointer to the Crypto driver instance.
@@ -128,10 +128,6 @@ CFN_HAL_VMT_CHECK(struct cfn_hal_crypto_api_s);
 
 CFN_HAL_CREATE_DRIVER_TYPE(
     crypto, cfn_hal_crypto_config_t, cfn_hal_crypto_api_t, cfn_hal_crypto_phy_t, cfn_hal_crypto_callback_t);
-
-#define CFN_HAL_CRYPTO_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                       \
-    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, api_ptr, phy_ptr, config_ptr)
-
 /* Functions inline ------------------------------------------------- */
 
 /**
@@ -452,7 +448,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_set_key(cfn_hal_crypto_t *dri
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, set_key, driver, error, key, key_size);
     return error;
 }
-
+cfn_hal_error_code_t cfn_hal_crypto_construct(cfn_hal_crypto_t              *driver,
+                                              const cfn_hal_crypto_config_t *config,
+                                              const cfn_hal_crypto_phy_t    *phy,
+                                              struct cfn_hal_clock_s        *clock,
+                                              cfn_hal_crypto_callback_t      callback,
+                                              void                          *user_arg);
+cfn_hal_error_code_t cfn_hal_crypto_destruct(cfn_hal_crypto_t *driver);
 #ifdef __cplusplus
 }
 #endif

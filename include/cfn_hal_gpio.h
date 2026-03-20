@@ -164,7 +164,7 @@ typedef struct
 
 typedef struct cfn_hal_gpio_s     cfn_hal_gpio_t;
 typedef struct cfn_hal_gpio_api_s cfn_hal_gpio_api_t;
-
+struct cfn_hal_clock_s; // Forward declaration
 /**
  * @brief Lightweight handle to a specific GPIO pin.
  * Used by other peripherals to reference physical pins.
@@ -207,9 +207,6 @@ CFN_HAL_VMT_CHECK(struct cfn_hal_gpio_api_s);
 /* Note: 'void' is used for config_type because the port driver does not have a
  * global config state */
 CFN_HAL_CREATE_DRIVER_TYPE(gpio, void, cfn_hal_gpio_api_t, cfn_hal_gpio_phy_t, cfn_hal_gpio_callback_t);
-
-#define CFN_HAL_GPIO_INITIALIZER(api_ptr, phy_ptr)                                                                     \
-    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_GPIO, api_ptr, phy_ptr, NULL)
 
 /* Functions inline ------------------------------------------------- */
 
@@ -484,7 +481,12 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_port_write(cfn_hal_gpio_t *port
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_GPIO, port_write, port, error, pin_mask, port_value);
     return error;
 }
-
+cfn_hal_error_code_t cfn_hal_gpio_construct(cfn_hal_gpio_t           *driver,
+                                            const cfn_hal_gpio_phy_t *phy,
+                                            cfn_hal_gpio_callback_t   callback,
+                                            struct cfn_hal_clock_s   *clock,
+                                            void                     *user_arg);
+cfn_hal_error_code_t cfn_hal_gpio_destruct(cfn_hal_gpio_t *driver);
 #ifdef __cplusplus
 }
 #endif

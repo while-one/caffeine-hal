@@ -125,10 +125,6 @@ struct cfn_hal_pwm_api_s
 CFN_HAL_VMT_CHECK(struct cfn_hal_pwm_api_s);
 
 CFN_HAL_CREATE_DRIVER_TYPE(pwm, cfn_hal_pwm_config_t, cfn_hal_pwm_api_t, cfn_hal_pwm_phy_t, cfn_hal_pwm_callback_t);
-
-#define CFN_HAL_PWM_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                          \
-    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_PWM, api_ptr, phy_ptr, config_ptr)
-
 /* Functions inline ------------------------------------------------- */
 
 /**
@@ -405,7 +401,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_set_duty_cycle(cfn_hal_pwm_t *dr
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_PWM, set_duty_cycle, driver, error, duty_percent);
     return error;
 }
-
+cfn_hal_error_code_t cfn_hal_pwm_construct(cfn_hal_pwm_t              *driver,
+                                           const cfn_hal_pwm_config_t *config,
+                                           const cfn_hal_pwm_phy_t    *phy,
+                                           struct cfn_hal_clock_s     *clock,
+                                           cfn_hal_pwm_callback_t      callback,
+                                           void                       *user_arg);
+cfn_hal_error_code_t cfn_hal_pwm_destruct(cfn_hal_pwm_t *driver);
 #ifdef __cplusplus
 }
 #endif

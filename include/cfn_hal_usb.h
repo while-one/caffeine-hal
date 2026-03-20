@@ -148,9 +148,6 @@ CFN_HAL_VMT_CHECK(struct cfn_hal_usb_api_s);
 
 CFN_HAL_CREATE_DRIVER_TYPE(usb, cfn_hal_usb_config_t, cfn_hal_usb_api_t, cfn_hal_usb_phy_t, cfn_hal_usb_callback_t);
 
-#define CFN_HAL_USB_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                          \
-    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_USB, api_ptr, phy_ptr, config_ptr)
-
 /* Functions inline ------------------------------------------------- */
 
 /**
@@ -517,9 +514,15 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_usb_get_rx_data_size(cfn_hal_usb_t *
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_USB, get_rx_data_size, driver, error, ep_addr, size);
     return error;
 }
-
+cfn_hal_error_code_t cfn_hal_usb_construct(cfn_hal_usb_t              *driver,
+                                           const cfn_hal_usb_config_t *config,
+                                           const cfn_hal_usb_phy_t    *phy,
+                                           struct cfn_hal_clock_s     *clock,
+                                           cfn_hal_usb_callback_t      callback,
+                                           void                       *user_arg);
+cfn_hal_error_code_t cfn_hal_usb_destruct(cfn_hal_usb_t *driver);
 #ifdef __cplusplus
 }
 #endif
 
-#endif // CAFFEINE_HAL_HAL_USB_H
+#endif // CAFFEINE_HAL_HAL_usb_H

@@ -177,9 +177,6 @@ CFN_HAL_VMT_CHECK(struct cfn_hal_i2c_api_s);
 
 CFN_HAL_CREATE_DRIVER_TYPE(i2c, cfn_hal_i2c_config_t, cfn_hal_i2c_api_t, cfn_hal_i2c_phy_t, cfn_hal_i2c_callback_t);
 
-#define CFN_HAL_I2C_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                          \
-    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_I2C, api_ptr, phy_ptr, config_ptr)
-
 /* Functions inline ------------------------------------------------- */
 
 /**
@@ -492,7 +489,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_xfr_dma(cfn_hal_i2c_t *driver, c
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_I2C, xfr_dma, driver, error, xfr);
     return error;
 }
-
+cfn_hal_error_code_t cfn_hal_i2c_construct(cfn_hal_i2c_t              *driver,
+                                           const cfn_hal_i2c_config_t *config,
+                                           const cfn_hal_i2c_phy_t    *phy,
+                                           struct cfn_hal_clock_s     *clock,
+                                           cfn_hal_i2c_callback_t      callback,
+                                           void                       *user_arg);
+cfn_hal_error_code_t cfn_hal_i2c_destruct(cfn_hal_i2c_t *driver);
 #ifdef __cplusplus
 }
 #endif

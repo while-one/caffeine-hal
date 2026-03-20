@@ -71,7 +71,9 @@ int main(void)
 {
     /* 1. Test Static Initializer Macros */
     cfn_hal_gpio_phy_t phy = { .port = (void*)0x40000000 };
-    cfn_hal_gpio_t gpio = CFN_HAL_GPIO_INITIALIZER(&DUMMY_GPIO_API, &phy);
+    cfn_hal_gpio_t gpio = {0};
+    gpio.phy = &phy;
+    gpio.api = &DUMMY_GPIO_API;
 
     /* 2. Test Base Initialization (Macro Expansion) */
     cfn_hal_error_code_t error = cfn_hal_gpio_init(&gpio);

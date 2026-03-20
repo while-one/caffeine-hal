@@ -121,10 +121,6 @@ struct cfn_hal_nvm_api_s
 CFN_HAL_VMT_CHECK(struct cfn_hal_nvm_api_s);
 
 CFN_HAL_CREATE_DRIVER_TYPE(nvm, cfn_hal_nvm_config_t, cfn_hal_nvm_api_t, cfn_hal_nvm_phy_t, cfn_hal_nvm_callback_t);
-
-#define CFN_HAL_NVM_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                          \
-    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_NVM, api_ptr, phy_ptr, config_ptr)
-
 /* Functions inline ------------------------------------------------- */
 
 /**
@@ -417,7 +413,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_nvm_get_info(cfn_hal_nvm_t *driver, 
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_NVM, get_info, driver, error, info);
     return error;
 }
-
+cfn_hal_error_code_t cfn_hal_nvm_construct(cfn_hal_nvm_t              *driver,
+                                           const cfn_hal_nvm_config_t *config,
+                                           const cfn_hal_nvm_phy_t    *phy,
+                                           struct cfn_hal_clock_s     *clock,
+                                           cfn_hal_nvm_callback_t      callback,
+                                           void                       *user_arg);
+cfn_hal_error_code_t cfn_hal_nvm_destruct(cfn_hal_nvm_t *driver);
 #ifdef __cplusplus
 }
 #endif

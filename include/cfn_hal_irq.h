@@ -106,10 +106,6 @@ struct cfn_hal_irq_api_s
 CFN_HAL_VMT_CHECK(struct cfn_hal_irq_api_s);
 
 CFN_HAL_CREATE_DRIVER_TYPE(irq, cfn_hal_irq_config_t, cfn_hal_irq_api_t, cfn_hal_irq_phy_t, cfn_hal_irq_callback_t);
-
-#define CFN_HAL_IRQ_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                          \
-    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_IRQ, api_ptr, phy_ptr, config_ptr)
-
 /* Functions inline ------------------------------------------------- */
 
 /**
@@ -408,7 +404,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_irq_clear_pending(cfn_hal_irq_t *dri
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_IRQ, clear_pending, driver, error, irq_id);
     return error;
 }
-
+cfn_hal_error_code_t cfn_hal_irq_construct(cfn_hal_irq_t              *driver,
+                                           const cfn_hal_irq_config_t *config,
+                                           const cfn_hal_irq_phy_t    *phy,
+                                           struct cfn_hal_clock_s     *clock,
+                                           cfn_hal_irq_callback_t      callback,
+                                           void                       *user_arg);
+cfn_hal_error_code_t cfn_hal_irq_destruct(cfn_hal_irq_t *driver);
 #ifdef __cplusplus
 }
 #endif

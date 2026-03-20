@@ -99,28 +99,6 @@ extern "C"
  */
 #define CFN_HAL_GET_DRIVER_FROM_BASE(ptr, type) CFN_HAL_CONTAINER_OF(ptr, type, base)
 
-/**
- * @brief Helper macro to initialize a peripheral driver structure.
- *
- * @param type_code The FourCC peripheral type code.
- * @param api_ptr Pointer to the VMT implementation.
- * @param phy_ptr Pointer to the physical mapping.
- * @param config_ptr Pointer to the configuration structure.
- */
-#define CFN_HAL_DRIVER_INITIALIZER(type_code, api_ptr, phy_ptr, config_ptr)                                            \
-    {                                                                                                                  \
-        .base   = { .type          = (type_code),                                                                      \
-                    .status        = CFN_HAL_DRIVER_STATUS_CONSTRUCTED,                                                \
-                    .power_state   = CFN_HAL_POWER_STATE_UNKNOWN,                                                      \
-                    .on_config     = NULL,                                                                             \
-                    .on_config_arg = NULL,                                                                             \
-                    .dependency    = NULL,                                                                             \
-                    .extension     = NULL,                                                                             \
-                    .flags         = 0,                                                                                \
-                    .vmt           = (const struct cfn_hal_api_base_s *) (api_ptr) },                                            \
-        .config = (config_ptr), .api = (api_ptr), .phy = (phy_ptr), .cb = NULL, .cb_user_arg = NULL                    \
-    }
-
 #define CFN_HAL_CREATE_DRIVER_TYPE(prefix, config_type, api_type, phy_type, cb_type)                                   \
     struct cfn_hal_##prefix##_s                                                                                        \
     {                                                                                                                  \

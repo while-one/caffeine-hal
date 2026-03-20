@@ -81,7 +81,7 @@ typedef struct
 
 typedef struct cfn_hal_clock_s     cfn_hal_clock_t;
 typedef struct cfn_hal_clock_api_s cfn_hal_clock_api_t;
-
+struct cfn_hal_clock_s; // Forward declaration
 /**
  * @brief Clock callback signature.
  * @param driver Pointer to the Clock driver instance.
@@ -114,9 +114,6 @@ CFN_HAL_VMT_CHECK(struct cfn_hal_clock_api_s);
 
 CFN_HAL_CREATE_DRIVER_TYPE(
     clock, cfn_hal_clock_config_t, cfn_hal_clock_api_t, cfn_hal_clock_phy_t, cfn_hal_clock_callback_t);
-
-#define CFN_HAL_CLOCK_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                        \
-    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_CLOCK, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
 
@@ -415,7 +412,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_clock_disable_gate(cfn_hal_clock_t *
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CLOCK, disable_gate, driver, error, peripheral_id);
     return error;
 }
-
+cfn_hal_error_code_t cfn_hal_clock_construct(cfn_hal_clock_t              *driver,
+                                             const cfn_hal_clock_config_t *config,
+                                             const cfn_hal_clock_phy_t    *phy,
+                                             struct cfn_hal_clock_s       *clock,
+                                             cfn_hal_clock_callback_t      callback,
+                                             void                         *user_arg);
+cfn_hal_error_code_t cfn_hal_clock_destruct(cfn_hal_clock_t *driver);
 #ifdef __cplusplus
 }
 #endif
