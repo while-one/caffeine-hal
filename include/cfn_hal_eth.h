@@ -27,7 +27,8 @@
 #define CAFFEINE_HAL_HAL_ETH_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 /* Includes ---------------------------------------------------------*/
@@ -43,40 +44,43 @@ extern "C" {
 /**
  * @brief Ethernet nominal event flags.
  */
-typedef enum {
-  CFN_HAL_ETH_EVENT_NONE = 0,
-  CFN_HAL_ETH_EVENT_RX_COMPLETE = CFN_HAL_BIT(0), /*!< Frame received */
-  CFN_HAL_ETH_EVENT_TX_COMPLETE = CFN_HAL_BIT(1), /*!< Frame transmitted */
-  CFN_HAL_ETH_EVENT_LINK_UP = CFN_HAL_BIT(2), /*!< Ethernet link established */
-  CFN_HAL_ETH_EVENT_LINK_DOWN = CFN_HAL_BIT(3), /*!< Ethernet link lost */
+typedef enum
+{
+    CFN_HAL_ETH_EVENT_NONE        = 0,
+    CFN_HAL_ETH_EVENT_RX_COMPLETE = CFN_HAL_BIT(0), /*!< Frame received */
+    CFN_HAL_ETH_EVENT_TX_COMPLETE = CFN_HAL_BIT(1), /*!< Frame transmitted */
+    CFN_HAL_ETH_EVENT_LINK_UP     = CFN_HAL_BIT(2), /*!< Ethernet link established */
+    CFN_HAL_ETH_EVENT_LINK_DOWN   = CFN_HAL_BIT(3), /*!< Ethernet link lost */
 } cfn_hal_eth_event_t;
 
 /**
  * @brief Ethernet exception error flags.
  */
-typedef enum {
-  CFN_HAL_ETH_ERROR_NONE = 0,
-  CFN_HAL_ETH_ERROR_MAC =
-      CFN_HAL_BIT(0), /*!< MAC layer error (CRC, jabber, etc) */
-  CFN_HAL_ETH_ERROR_PHY = CFN_HAL_BIT(1),     /*!< PHY layer or MDIO error */
-  CFN_HAL_ETH_ERROR_GENERAL = CFN_HAL_BIT(2), /*!< General hardware error */
+typedef enum
+{
+    CFN_HAL_ETH_ERROR_NONE    = 0,
+    CFN_HAL_ETH_ERROR_MAC     = CFN_HAL_BIT(0), /*!< MAC layer error (CRC, jabber, etc) */
+    CFN_HAL_ETH_ERROR_PHY     = CFN_HAL_BIT(1), /*!< PHY layer or MDIO error */
+    CFN_HAL_ETH_ERROR_GENERAL = CFN_HAL_BIT(2), /*!< General hardware error */
 } cfn_hal_eth_error_t;
 
 /**
  * @brief Ethernet link speed.
  */
-typedef enum {
-  CFN_HAL_ETH_LINK_SPEED_10M,   /*!< 10 Mbps */
-  CFN_HAL_ETH_LINK_SPEED_100M,  /*!< 100 Mbps */
-  CFN_HAL_ETH_LINK_SPEED_1000M, /*!< 1000 Mbps */
+typedef enum
+{
+    CFN_HAL_ETH_LINK_SPEED_10M,   /*!< 10 Mbps */
+    CFN_HAL_ETH_LINK_SPEED_100M,  /*!< 100 Mbps */
+    CFN_HAL_ETH_LINK_SPEED_1000M, /*!< 1000 Mbps */
 } cfn_hal_eth_link_speed_t;
 
 /**
  * @brief Ethernet link duplex mode.
  */
-typedef enum {
-  CFN_HAL_ETH_LINK_DUPLEX_HALF, /*!< Half duplex */
-  CFN_HAL_ETH_LINK_DUPLEX_FULL, /*!< Full duplex */
+typedef enum
+{
+    CFN_HAL_ETH_LINK_DUPLEX_HALF, /*!< Half duplex */
+    CFN_HAL_ETH_LINK_DUPLEX_FULL, /*!< Full duplex */
 } cfn_hal_eth_link_duplex_t;
 
 /* Types Structs ----------------------------------------------------*/
@@ -84,38 +88,41 @@ typedef enum {
 /**
  * @brief Ethernet link status information.
  */
-typedef struct {
-  bool is_up;                       /*!< Link established flag */
-  cfn_hal_eth_link_speed_t speed;   /*!< Negotiated speed */
-  cfn_hal_eth_link_duplex_t duplex; /*!< Negotiated duplex mode */
+typedef struct
+{
+    bool                      is_up;  /*!< Link established flag */
+    cfn_hal_eth_link_speed_t  speed;  /*!< Negotiated speed */
+    cfn_hal_eth_link_duplex_t duplex; /*!< Negotiated duplex mode */
 } cfn_hal_eth_link_status_t;
 
 /**
  * @brief Ethernet configuration structure.
  */
-typedef struct {
-  uint8_t mac_addr[6]; /*!< Device MAC address */
-  void *user_config;   /*!< Vendor-specific MAC/PHY configuration */
+typedef struct
+{
+    uint8_t mac_addr[6]; /*!< Device MAC address */
+    void   *user_config; /*!< Vendor-specific MAC/PHY configuration */
 } cfn_hal_eth_config_t;
 
 /**
  * @brief Ethernet hardware physical mapping.
  */
-typedef struct {
-  void *instance;                     /*!< Peripheral base instance */
-  cfn_hal_gpio_pin_handle_t *ref_clk; /*!< Reference clock mapping */
-  cfn_hal_gpio_pin_handle_t *mdio;    /*!< Management Data I/O mapping */
-  cfn_hal_gpio_pin_handle_t *mdc;     /*!< Management Data Clock mapping */
-  cfn_hal_gpio_pin_handle_t *crs_dv;  /*!< Carrier Sense/Data Valid mapping */
-  cfn_hal_gpio_pin_handle_t *rxd0;    /*!< Receive Data 0 mapping */
-  cfn_hal_gpio_pin_handle_t *rxd1;    /*!< Receive Data 1 mapping */
-  cfn_hal_gpio_pin_handle_t *tx_en;   /*!< Transmit Enable mapping */
-  cfn_hal_gpio_pin_handle_t *txd0;    /*!< Transmit Data 0 mapping */
-  cfn_hal_gpio_pin_handle_t *txd1;    /*!< Transmit Data 1 mapping */
-  void *user_arg;                     /*!< Peripheral instance user argument */
+typedef struct
+{
+    void                      *instance; /*!< Peripheral base instance */
+    cfn_hal_gpio_pin_handle_t *ref_clk;  /*!< Reference clock mapping */
+    cfn_hal_gpio_pin_handle_t *mdio;     /*!< Management Data I/O mapping */
+    cfn_hal_gpio_pin_handle_t *mdc;      /*!< Management Data Clock mapping */
+    cfn_hal_gpio_pin_handle_t *crs_dv;   /*!< Carrier Sense/Data Valid mapping */
+    cfn_hal_gpio_pin_handle_t *rxd0;     /*!< Receive Data 0 mapping */
+    cfn_hal_gpio_pin_handle_t *rxd1;     /*!< Receive Data 1 mapping */
+    cfn_hal_gpio_pin_handle_t *tx_en;    /*!< Transmit Enable mapping */
+    cfn_hal_gpio_pin_handle_t *txd0;     /*!< Transmit Data 0 mapping */
+    cfn_hal_gpio_pin_handle_t *txd1;     /*!< Transmit Data 1 mapping */
+    void                      *user_arg; /*!< Peripheral instance user argument */
 } cfn_hal_eth_phy_t;
 
-typedef struct cfn_hal_eth_s cfn_hal_eth_t;
+typedef struct cfn_hal_eth_s     cfn_hal_eth_t;
 typedef struct cfn_hal_eth_api_s cfn_hal_eth_api_t;
 
 /**
@@ -125,41 +132,34 @@ typedef struct cfn_hal_eth_api_s cfn_hal_eth_api_t;
  * @param error_mask Mask of triggered exception errors.
  * @param user_arg User-defined argument passed during registration.
  */
-typedef void (*cfn_hal_eth_callback_t)(cfn_hal_eth_t *driver,
-                                       uint32_t event_mask, uint32_t error_mask,
-                                       void *user_arg);
+typedef void (*cfn_hal_eth_callback_t)(cfn_hal_eth_t *driver, uint32_t event_mask, uint32_t error_mask, void *user_arg);
 
 /**
  * @brief Ethernet Virtual Method Table (VMT).
  */
-struct cfn_hal_eth_api_s {
-  cfn_hal_api_base_t base;
+struct cfn_hal_eth_api_s
+{
+    cfn_hal_api_base_t base;
 
-  /* Ethernet Specific Extensions */
-  cfn_hal_error_code_t (*start)(cfn_hal_eth_t *driver);
-  cfn_hal_error_code_t (*stop)(cfn_hal_eth_t *driver);
-  cfn_hal_error_code_t (*transmit_frame)(cfn_hal_eth_t *driver,
-                                         const uint8_t *frame, size_t length);
-  cfn_hal_error_code_t (*receive_frame)(cfn_hal_eth_t *driver, uint8_t *buffer,
-                                        size_t max_length,
-                                        size_t *received_length);
-  cfn_hal_error_code_t (*read_phy_reg)(cfn_hal_eth_t *driver, uint16_t phy_addr,
-                                       uint16_t reg_addr, uint16_t *value);
-  cfn_hal_error_code_t (*write_phy_reg)(cfn_hal_eth_t *driver,
-                                        uint16_t phy_addr, uint16_t reg_addr,
-                                        uint16_t value);
-  cfn_hal_error_code_t (*get_link_status)(cfn_hal_eth_t *driver,
-                                          cfn_hal_eth_link_status_t *status);
+    /* Ethernet Specific Extensions */
+    cfn_hal_error_code_t (*start)(cfn_hal_eth_t *driver);
+    cfn_hal_error_code_t (*stop)(cfn_hal_eth_t *driver);
+    cfn_hal_error_code_t (*transmit_frame)(cfn_hal_eth_t *driver, const uint8_t *frame, size_t length);
+    cfn_hal_error_code_t (*receive_frame)(cfn_hal_eth_t *driver,
+                                          uint8_t       *buffer,
+                                          size_t         max_length,
+                                          size_t        *received_length);
+    cfn_hal_error_code_t (*read_phy_reg)(cfn_hal_eth_t *driver, uint16_t phy_addr, uint16_t reg_addr, uint16_t *value);
+    cfn_hal_error_code_t (*write_phy_reg)(cfn_hal_eth_t *driver, uint16_t phy_addr, uint16_t reg_addr, uint16_t value);
+    cfn_hal_error_code_t (*get_link_status)(cfn_hal_eth_t *driver, cfn_hal_eth_link_status_t *status);
 };
 
 CFN_HAL_VMT_CHECK(struct cfn_hal_eth_api_s);
 
-CFN_HAL_CREATE_DRIVER_TYPE(eth, cfn_hal_eth_config_t, cfn_hal_eth_api_t,
-                           cfn_hal_eth_phy_t, cfn_hal_eth_callback_t);
+CFN_HAL_CREATE_DRIVER_TYPE(eth, cfn_hal_eth_config_t, cfn_hal_eth_api_t, cfn_hal_eth_phy_t, cfn_hal_eth_callback_t);
 
-#define CFN_HAL_ETH_INITIALIZER(api_ptr, phy_ptr, config_ptr)                  \
-  CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_ETH, api_ptr, phy_ptr,    \
-                             config_ptr)
+#define CFN_HAL_ETH_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                          \
+    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_ETH, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
 
@@ -168,14 +168,15 @@ CFN_HAL_CREATE_DRIVER_TYPE(eth, cfn_hal_eth_config_t, cfn_hal_eth_api_t,
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_config_validate(
-    const cfn_hal_eth_t *driver, const cfn_hal_eth_config_t *config) {
-  if (driver == NULL || config == NULL) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_config_validate(const cfn_hal_eth_t        *driver,
+                                                                const cfn_hal_eth_config_t *config)
+{
+    if (driver == NULL || config == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
 
-  return cfn_hal_base_config_validate(&driver->base,
-                                      CFN_HAL_PERIPHERAL_TYPE_ETH, config);
+    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH, config);
 }
 
 /**
@@ -183,17 +184,19 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_config_validate(
  * @param driver Pointer to the Ethernet driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_init(cfn_hal_eth_t *driver) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  driver->base.vmt = (const struct cfn_hal_api_base_s *)driver->api;
-  cfn_hal_error_code_t error =
-      cfn_hal_eth_config_validate(driver, driver->config);
-  if (error != CFN_HAL_ERROR_OK) {
-    return error;
-  }
-  return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_init(cfn_hal_eth_t *driver)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    driver->base.vmt           = (const struct cfn_hal_api_base_s *) driver->api;
+    cfn_hal_error_code_t error = cfn_hal_eth_config_validate(driver, driver->config);
+    if (error != CFN_HAL_ERROR_OK)
+    {
+        return error;
+    }
+    return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH);
 }
 
 /**
@@ -201,11 +204,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_init(cfn_hal_eth_t *driver) {
  * @param driver Pointer to the Ethernet driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_deinit(cfn_hal_eth_t *driver) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_base_deinit(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_deinit(cfn_hal_eth_t *driver)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_deinit(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH);
 }
 
 /**
@@ -214,18 +219,21 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_deinit(cfn_hal_eth_t *driver) {
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_config_set(
-    cfn_hal_eth_t *driver, const cfn_hal_eth_config_t *config) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  cfn_hal_error_code_t error = cfn_hal_eth_config_validate(driver, config);
-  if (error != CFN_HAL_ERROR_OK) {
-    return error;
-  }
-  { driver->config = config; }
-  return cfn_hal_base_config_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH,
-                                 (const void *)config);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_config_set(cfn_hal_eth_t *driver, const cfn_hal_eth_config_t *config)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    cfn_hal_error_code_t error = cfn_hal_eth_config_validate(driver, config);
+    if (error != CFN_HAL_ERROR_OK)
+    {
+        return error;
+    }
+    {
+        driver->config = config;
+    }
+    return cfn_hal_base_config_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH, (const void *) config);
 }
 
 /**
@@ -234,13 +242,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_config_set(
  * @param config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_eth_config_get(cfn_hal_eth_t *driver, cfn_hal_eth_config_t *config) {
-  if (!driver || !config || !driver->config) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  *config = *(driver->config);
-  return CFN_HAL_ERROR_OK;
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_config_get(cfn_hal_eth_t *driver, cfn_hal_eth_config_t *config)
+{
+    if (!driver || !config || !driver->config)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    *config = *(driver->config);
+    return CFN_HAL_ERROR_OK;
 }
 
 /**
@@ -250,19 +259,20 @@ cfn_hal_eth_config_get(cfn_hal_eth_t *driver, cfn_hal_eth_config_t *config) {
  * @param user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_callback_register(
-    cfn_hal_eth_t *driver, const cfn_hal_eth_callback_t callback,
-    void *user_arg) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  {
-    driver->cb = callback;
-    driver->cb_user_arg = user_arg;
-  }
-  return cfn_hal_base_callback_register(&driver->base,
-                                        CFN_HAL_PERIPHERAL_TYPE_ETH,
-                                        (cfn_hal_callback_t)callback, user_arg);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_callback_register(cfn_hal_eth_t               *driver,
+                                                                  const cfn_hal_eth_callback_t callback,
+                                                                  void                        *user_arg)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    {
+        driver->cb          = callback;
+        driver->cb_user_arg = user_arg;
+    }
+    return cfn_hal_base_callback_register(
+        &driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH, (cfn_hal_callback_t) callback, user_arg);
 }
 
 /**
@@ -271,13 +281,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_callback_register(
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_power_state_set(
-    cfn_hal_eth_t *driver, cfn_hal_power_state_t state) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_power_state_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH,
-                                 state);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_power_state_set(cfn_hal_eth_t *driver, cfn_hal_power_state_t state)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_power_state_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH, state);
 }
 
 /**
@@ -286,13 +296,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_power_state_set(
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_eth_event_enable(cfn_hal_eth_t *driver, uint32_t event_mask) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_base_event_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH,
-                                   event_mask);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_event_enable(cfn_hal_eth_t *driver, uint32_t event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH, event_mask);
 }
 
 /**
@@ -301,13 +311,13 @@ cfn_hal_eth_event_enable(cfn_hal_eth_t *driver, uint32_t event_mask) {
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_eth_event_disable(cfn_hal_eth_t *driver, uint32_t event_mask) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_base_event_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH,
-                                    event_mask);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_event_disable(cfn_hal_eth_t *driver, uint32_t event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH, event_mask);
 }
 
 /**
@@ -316,13 +326,13 @@ cfn_hal_eth_event_disable(cfn_hal_eth_t *driver, uint32_t event_mask) {
  * @param event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_eth_event_get(cfn_hal_eth_t *driver, uint32_t *event_mask) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_base_event_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH,
-                                event_mask);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_event_get(cfn_hal_eth_t *driver, uint32_t *event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH, event_mask);
 }
 
 /**
@@ -331,13 +341,13 @@ cfn_hal_eth_event_get(cfn_hal_eth_t *driver, uint32_t *event_mask) {
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_eth_error_enable(cfn_hal_eth_t *driver, uint32_t error_mask) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_base_error_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH,
-                                   error_mask);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_error_enable(cfn_hal_eth_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH, error_mask);
 }
 
 /**
@@ -346,13 +356,13 @@ cfn_hal_eth_error_enable(cfn_hal_eth_t *driver, uint32_t error_mask) {
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_eth_error_disable(cfn_hal_eth_t *driver, uint32_t error_mask) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_base_error_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH,
-                                    error_mask);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_error_disable(cfn_hal_eth_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH, error_mask);
 }
 
 /**
@@ -361,13 +371,13 @@ cfn_hal_eth_error_disable(cfn_hal_eth_t *driver, uint32_t error_mask) {
  * @param error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_eth_error_get(cfn_hal_eth_t *driver, uint32_t *error_mask) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH,
-                                error_mask);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_error_get(cfn_hal_eth_t *driver, uint32_t *error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH, error_mask);
 }
 
 /* ETH Specific Functions ------------------------------------------- */
@@ -377,11 +387,11 @@ cfn_hal_eth_error_get(cfn_hal_eth_t *driver, uint32_t *error_mask) {
  * @param driver Pointer to the Ethernet driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_start(cfn_hal_eth_t *driver) {
-  cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-  CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_ETH, start, driver,
-                              error);
-  return error;
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_start(cfn_hal_eth_t *driver)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_ETH, start, driver, error);
+    return error;
 }
 
 /**
@@ -389,10 +399,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_start(cfn_hal_eth_t *driver) {
  * @param driver Pointer to the Ethernet driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_stop(cfn_hal_eth_t *driver) {
-  cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-  CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_ETH, stop, driver, error);
-  return error;
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_stop(cfn_hal_eth_t *driver)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_ETH, stop, driver, error);
+    return error;
 }
 
 /**
@@ -402,12 +413,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_stop(cfn_hal_eth_t *driver) {
  * @param length Length of the frame in bytes.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_transmit_frame(
-    cfn_hal_eth_t *driver, const uint8_t *frame, size_t length) {
-  cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-  CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_ETH, transmit_frame,
-                                   driver, error, frame, length);
-  return error;
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_transmit_frame(cfn_hal_eth_t *driver,
+                                                               const uint8_t *frame,
+                                                               size_t         length)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_ETH, transmit_frame, driver, error, frame, length);
+    return error;
 }
 
 /**
@@ -418,14 +430,15 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_transmit_frame(
  * @param received_length [out] Actual number of bytes received.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_eth_receive_frame(cfn_hal_eth_t *driver, uint8_t *buffer,
-                          size_t max_length, size_t *received_length) {
-  cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-  CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_ETH, receive_frame,
-                                   driver, error, buffer, max_length,
-                                   received_length);
-  return error;
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_receive_frame(cfn_hal_eth_t *driver,
+                                                              uint8_t       *buffer,
+                                                              size_t         max_length,
+                                                              size_t        *received_length)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
+        CFN_HAL_PERIPHERAL_TYPE_ETH, receive_frame, driver, error, buffer, max_length, received_length);
+    return error;
 }
 
 /**
@@ -436,13 +449,15 @@ cfn_hal_eth_receive_frame(cfn_hal_eth_t *driver, uint8_t *buffer,
  * @param value [out] Pointer to store the read value.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_eth_read_phy_reg(cfn_hal_eth_t *driver, uint16_t phy_addr,
-                         uint16_t reg_addr, uint16_t *value) {
-  cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-  CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_ETH, read_phy_reg,
-                                   driver, error, phy_addr, reg_addr, value);
-  return error;
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_read_phy_reg(cfn_hal_eth_t *driver,
+                                                             uint16_t       phy_addr,
+                                                             uint16_t       reg_addr,
+                                                             uint16_t      *value)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
+        CFN_HAL_PERIPHERAL_TYPE_ETH, read_phy_reg, driver, error, phy_addr, reg_addr, value);
+    return error;
 }
 
 /**
@@ -453,13 +468,15 @@ cfn_hal_eth_read_phy_reg(cfn_hal_eth_t *driver, uint16_t phy_addr,
  * @param value Value to write.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_eth_write_phy_reg(cfn_hal_eth_t *driver, uint16_t phy_addr,
-                          uint16_t reg_addr, uint16_t value) {
-  cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-  CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_ETH, write_phy_reg,
-                                   driver, error, phy_addr, reg_addr, value);
-  return error;
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_write_phy_reg(cfn_hal_eth_t *driver,
+                                                              uint16_t       phy_addr,
+                                                              uint16_t       reg_addr,
+                                                              uint16_t       value)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
+        CFN_HAL_PERIPHERAL_TYPE_ETH, write_phy_reg, driver, error, phy_addr, reg_addr, value);
+    return error;
 }
 
 /**
@@ -468,12 +485,12 @@ cfn_hal_eth_write_phy_reg(cfn_hal_eth_t *driver, uint16_t phy_addr,
  * @param status [out] Pointer to the link status structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_get_link_status(
-    cfn_hal_eth_t *driver, cfn_hal_eth_link_status_t *status) {
-  cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-  CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_ETH, get_link_status,
-                                   driver, error, status);
-  return error;
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_get_link_status(cfn_hal_eth_t             *driver,
+                                                                cfn_hal_eth_link_status_t *status)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_ETH, get_link_status, driver, error, status);
+    return error;
 }
 
 #ifdef __cplusplus

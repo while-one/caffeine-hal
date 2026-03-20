@@ -77,7 +77,7 @@ int main(void)
     cfn_hal_error_code_t error = cfn_hal_gpio_init(&gpio);
     if (error != CFN_HAL_ERROR_OK)
     {
-        return (int)err;
+        return (int)error;
     }
 
     /* 3. Test Complex Variadic Macro Expansion (CFN_HAL_CHECK_AND_CALL_FUNC_VARG) */
@@ -91,5 +91,5 @@ int main(void)
     cfn_hal_error_code_t lock_result;
     CFN_HAL_WITH_LOCK(&gpio, 100, lock_result, cfn_hal_gpio_pin_config, &pin_cfg);
 
-    return (int)(lock_result + err);
+    return (int)(lock_result + error);
 }

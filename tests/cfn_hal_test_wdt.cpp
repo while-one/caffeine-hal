@@ -30,15 +30,15 @@
 class WdtTest : public ::testing::Test
 {
   protected:
-    cfn_hal_wdt_t     driver{};
-    cfn_hal_wdt_api_t api{};
+    cfn_hal_wdt_t        driver{};
+    cfn_hal_wdt_api_t    api{};
     cfn_hal_wdt_config_t dummy_config{};
 
     void SetUp() override
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
-        driver.config = &dummy_config;
+        driver.config      = &dummy_config;
         driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_WDT;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
         driver.base.vmt    = (const struct cfn_hal_api_base_s *) &api;
@@ -97,9 +97,9 @@ TEST_F(WdtTest, DeinitSuccess)
 TEST_F(WdtTest, ConfigValidation)
 {
     cfn_hal_wdt_config_t config = {
-        .sleep      = CFN_HAL_WDT_CONFIG_SLEEP_RUN,
-        .reset      = CFN_HAL_WDT_CONFIG_RESET_CPU,
-        .custom     = nullptr,
+        .sleep  = CFN_HAL_WDT_CONFIG_SLEEP_RUN,
+        .reset  = CFN_HAL_WDT_CONFIG_RESET_CPU,
+        .custom = nullptr,
     };
 
     // Valid config

@@ -27,7 +27,8 @@
 #define CAFFEINE_HAL_HAL_DMA_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 /* Includes ---------------------------------------------------------*/
@@ -42,21 +43,21 @@ extern "C" {
 /**
  * @brief DMA nominal event flags.
  */
-typedef enum {
-  CFN_HAL_DMA_EVENT_NONE = 0,
-  CFN_HAL_DMA_EVENT_TRANSFER_HALF =
-      CFN_HAL_BIT(0), /*!< Half of data transferred */
-  CFN_HAL_DMA_EVENT_TRANSFER_COMPLETE =
-      CFN_HAL_BIT(1), /*!< All data transferred */
+typedef enum
+{
+    CFN_HAL_DMA_EVENT_NONE              = 0,
+    CFN_HAL_DMA_EVENT_TRANSFER_HALF     = CFN_HAL_BIT(0), /*!< Half of data transferred */
+    CFN_HAL_DMA_EVENT_TRANSFER_COMPLETE = CFN_HAL_BIT(1), /*!< All data transferred */
 } cfn_hal_dma_event_t;
 
 /**
  * @brief DMA exception error flags.
  */
-typedef enum {
-  CFN_HAL_DMA_ERROR_NONE = 0,
-  CFN_HAL_DMA_ERROR_TRANSFER = CFN_HAL_BIT(0), /*!< Transfer or bus error */
-  CFN_HAL_DMA_ERROR_GENERAL = CFN_HAL_BIT(1),  /*!< General hardware error */
+typedef enum
+{
+    CFN_HAL_DMA_ERROR_NONE     = 0,
+    CFN_HAL_DMA_ERROR_TRANSFER = CFN_HAL_BIT(0), /*!< Transfer or bus error */
+    CFN_HAL_DMA_ERROR_GENERAL  = CFN_HAL_BIT(1), /*!< General hardware error */
 } cfn_hal_dma_error_t;
 
 /* Types Structs ----------------------------------------------------*/
@@ -64,30 +65,33 @@ typedef enum {
 /**
  * @brief DMA transfer configuration.
  */
-typedef struct {
-  uint32_t src_addr; /*!< Source memory or peripheral address */
-  uint32_t dst_addr; /*!< Destination memory or peripheral address */
-  uint32_t length;   /*!< Number of data units to transfer */
+typedef struct
+{
+    uint32_t src_addr; /*!< Source memory or peripheral address */
+    uint32_t dst_addr; /*!< Destination memory or peripheral address */
+    uint32_t length;   /*!< Number of data units to transfer */
 } cfn_hal_dma_transfer_t;
 
 /**
  * @brief DMA configuration structure.
  */
-typedef struct {
-  uint32_t direction; /*!< Transfer direction (M2M, P2M, M2P) */
-  uint32_t priority;  /*!< Channel priority level */
-  void *custom;       /*!< Vendor-specific custom configuration */
+typedef struct
+{
+    uint32_t direction; /*!< Transfer direction (M2M, P2M, M2P) */
+    uint32_t priority;  /*!< Channel priority level */
+    void    *custom;    /*!< Vendor-specific custom configuration */
 } cfn_hal_dma_config_t;
 
 /**
  * @brief DMA hardware physical mapping.
  */
-typedef struct {
-  void *instance; /*!< Peripheral base instance */
-  void *user_arg; /*!< Channel or stream specific user argument */
+typedef struct
+{
+    void *instance; /*!< Peripheral base instance */
+    void *user_arg; /*!< Channel or stream specific user argument */
 } cfn_hal_dma_phy_t;
 
-typedef struct cfn_hal_dma_s cfn_hal_dma_t;
+typedef struct cfn_hal_dma_s     cfn_hal_dma_t;
 typedef struct cfn_hal_dma_api_s cfn_hal_dma_api_t;
 
 /**
@@ -97,29 +101,25 @@ typedef struct cfn_hal_dma_api_s cfn_hal_dma_api_t;
  * @param error_mask Mask of triggered exception errors.
  * @param user_arg User-defined argument passed during registration.
  */
-typedef void (*cfn_hal_dma_callback_t)(cfn_hal_dma_t *driver,
-                                       uint32_t event_mask, uint32_t error_mask,
-                                       void *user_arg);
+typedef void (*cfn_hal_dma_callback_t)(cfn_hal_dma_t *driver, uint32_t event_mask, uint32_t error_mask, void *user_arg);
 
 /**
  * @brief DMA Virtual Method Table (VMT).
  */
-struct cfn_hal_dma_api_s {
-  cfn_hal_api_base_t base;
+struct cfn_hal_dma_api_s
+{
+    cfn_hal_api_base_t base;
 
-  /* DMA Specific Extensions */
-  cfn_hal_error_code_t (*start)(cfn_hal_dma_t *driver,
-                                const cfn_hal_dma_transfer_t *transfer);
-  cfn_hal_error_code_t (*stop)(cfn_hal_dma_t *driver);
+    /* DMA Specific Extensions */
+    cfn_hal_error_code_t (*start)(cfn_hal_dma_t *driver, const cfn_hal_dma_transfer_t *transfer);
+    cfn_hal_error_code_t (*stop)(cfn_hal_dma_t *driver);
 };
 CFN_HAL_VMT_CHECK(struct cfn_hal_dma_api_s);
 
-CFN_HAL_CREATE_DRIVER_TYPE(dma, cfn_hal_dma_config_t, cfn_hal_dma_api_t,
-                           cfn_hal_dma_phy_t, cfn_hal_dma_callback_t);
+CFN_HAL_CREATE_DRIVER_TYPE(dma, cfn_hal_dma_config_t, cfn_hal_dma_api_t, cfn_hal_dma_phy_t, cfn_hal_dma_callback_t);
 
-#define CFN_HAL_DMA_INITIALIZER(api_ptr, phy_ptr, config_ptr)                  \
-  CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_DMA, api_ptr, phy_ptr,    \
-                             config_ptr)
+#define CFN_HAL_DMA_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                          \
+    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_DMA, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
 
@@ -128,14 +128,15 @@ CFN_HAL_CREATE_DRIVER_TYPE(dma, cfn_hal_dma_config_t, cfn_hal_dma_api_t,
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_config_validate(
-    const cfn_hal_dma_t *driver, const cfn_hal_dma_config_t *config) {
-  if (driver == NULL || config == NULL) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_config_validate(const cfn_hal_dma_t        *driver,
+                                                                const cfn_hal_dma_config_t *config)
+{
+    if (driver == NULL || config == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
 
-  return cfn_hal_base_config_validate(&driver->base,
-                                      CFN_HAL_PERIPHERAL_TYPE_DMA, config);
+    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DMA, config);
 }
 
 /**
@@ -143,17 +144,19 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_config_validate(
  * @param driver Pointer to the DMA driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_init(cfn_hal_dma_t *driver) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  driver->base.vmt = (const struct cfn_hal_api_base_s *)driver->api;
-  cfn_hal_error_code_t error =
-      cfn_hal_dma_config_validate(driver, driver->config);
-  if (error != CFN_HAL_ERROR_OK) {
-    return error;
-  }
-  return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DMA);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_init(cfn_hal_dma_t *driver)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    driver->base.vmt           = (const struct cfn_hal_api_base_s *) driver->api;
+    cfn_hal_error_code_t error = cfn_hal_dma_config_validate(driver, driver->config);
+    if (error != CFN_HAL_ERROR_OK)
+    {
+        return error;
+    }
+    return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DMA);
 }
 
 /**
@@ -161,11 +164,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_init(cfn_hal_dma_t *driver) {
  * @param driver Pointer to the DMA driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_deinit(cfn_hal_dma_t *driver) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_base_deinit(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DMA);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_deinit(cfn_hal_dma_t *driver)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_deinit(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DMA);
 }
 
 /**
@@ -174,18 +179,21 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_deinit(cfn_hal_dma_t *driver) {
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_config_set(
-    cfn_hal_dma_t *driver, const cfn_hal_dma_config_t *config) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  cfn_hal_error_code_t error = cfn_hal_dma_config_validate(driver, config);
-  if (error != CFN_HAL_ERROR_OK) {
-    return error;
-  }
-  { driver->config = config; }
-  return cfn_hal_base_config_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DMA,
-                                 (const void *)config);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_config_set(cfn_hal_dma_t *driver, const cfn_hal_dma_config_t *config)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    cfn_hal_error_code_t error = cfn_hal_dma_config_validate(driver, config);
+    if (error != CFN_HAL_ERROR_OK)
+    {
+        return error;
+    }
+    {
+        driver->config = config;
+    }
+    return cfn_hal_base_config_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DMA, (const void *) config);
 }
 
 /**
@@ -194,13 +202,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_config_set(
  * @param config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_dma_config_get(cfn_hal_dma_t *driver, cfn_hal_dma_config_t *config) {
-  if (!driver || !config || !driver->config) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  *config = *(driver->config);
-  return CFN_HAL_ERROR_OK;
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_config_get(cfn_hal_dma_t *driver, cfn_hal_dma_config_t *config)
+{
+    if (!driver || !config || !driver->config)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    *config = *(driver->config);
+    return CFN_HAL_ERROR_OK;
 }
 
 /**
@@ -210,19 +219,20 @@ cfn_hal_dma_config_get(cfn_hal_dma_t *driver, cfn_hal_dma_config_t *config) {
  * @param user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_callback_register(
-    cfn_hal_dma_t *driver, const cfn_hal_dma_callback_t callback,
-    void *user_arg) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  {
-    driver->cb = callback;
-    driver->cb_user_arg = user_arg;
-  }
-  return cfn_hal_base_callback_register(&driver->base,
-                                        CFN_HAL_PERIPHERAL_TYPE_DMA,
-                                        (cfn_hal_callback_t)callback, user_arg);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_callback_register(cfn_hal_dma_t               *driver,
+                                                                  const cfn_hal_dma_callback_t callback,
+                                                                  void                        *user_arg)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    {
+        driver->cb          = callback;
+        driver->cb_user_arg = user_arg;
+    }
+    return cfn_hal_base_callback_register(
+        &driver->base, CFN_HAL_PERIPHERAL_TYPE_DMA, (cfn_hal_callback_t) callback, user_arg);
 }
 
 /**
@@ -231,13 +241,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_callback_register(
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_power_state_set(
-    cfn_hal_dma_t *driver, cfn_hal_power_state_t state) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_power_state_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DMA,
-                                 state);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_power_state_set(cfn_hal_dma_t *driver, cfn_hal_power_state_t state)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_power_state_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DMA, state);
 }
 
 /**
@@ -246,13 +256,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_power_state_set(
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_dma_event_enable(cfn_hal_dma_t *driver, uint32_t event_mask) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_base_event_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DMA,
-                                   event_mask);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_event_enable(cfn_hal_dma_t *driver, uint32_t event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DMA, event_mask);
 }
 
 /**
@@ -261,13 +271,13 @@ cfn_hal_dma_event_enable(cfn_hal_dma_t *driver, uint32_t event_mask) {
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_dma_event_disable(cfn_hal_dma_t *driver, uint32_t event_mask) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_base_event_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DMA,
-                                    event_mask);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_event_disable(cfn_hal_dma_t *driver, uint32_t event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DMA, event_mask);
 }
 
 /**
@@ -276,13 +286,13 @@ cfn_hal_dma_event_disable(cfn_hal_dma_t *driver, uint32_t event_mask) {
  * @param event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_dma_event_get(cfn_hal_dma_t *driver, uint32_t *event_mask) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_base_event_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DMA,
-                                event_mask);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_event_get(cfn_hal_dma_t *driver, uint32_t *event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DMA, event_mask);
 }
 
 /**
@@ -291,13 +301,13 @@ cfn_hal_dma_event_get(cfn_hal_dma_t *driver, uint32_t *event_mask) {
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_dma_error_enable(cfn_hal_dma_t *driver, uint32_t error_mask) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_base_error_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DMA,
-                                   error_mask);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_error_enable(cfn_hal_dma_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DMA, error_mask);
 }
 
 /**
@@ -306,13 +316,13 @@ cfn_hal_dma_error_enable(cfn_hal_dma_t *driver, uint32_t error_mask) {
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_dma_error_disable(cfn_hal_dma_t *driver, uint32_t error_mask) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_base_error_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DMA,
-                                    error_mask);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_error_disable(cfn_hal_dma_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DMA, error_mask);
 }
 
 /**
@@ -321,13 +331,13 @@ cfn_hal_dma_error_disable(cfn_hal_dma_t *driver, uint32_t error_mask) {
  * @param error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_dma_error_get(cfn_hal_dma_t *driver, uint32_t *error_mask) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DMA,
-                                error_mask);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_error_get(cfn_hal_dma_t *driver, uint32_t *error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DMA, error_mask);
 }
 
 /* DMA Specific Functions ------------------------------------------- */
@@ -338,12 +348,11 @@ cfn_hal_dma_error_get(cfn_hal_dma_t *driver, uint32_t *error_mask) {
  * @param transfer Pointer to the transfer configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_start(
-    cfn_hal_dma_t *driver, const cfn_hal_dma_transfer_t *transfer) {
-  cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-  CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_DMA, start, driver,
-                                   error, transfer);
-  return error;
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_start(cfn_hal_dma_t *driver, const cfn_hal_dma_transfer_t *transfer)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_DMA, start, driver, error, transfer);
+    return error;
 }
 
 /**
@@ -351,10 +360,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_start(
  * @param driver Pointer to the DMA driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_stop(cfn_hal_dma_t *driver) {
-  cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-  CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_DMA, stop, driver, error);
-  return error;
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dma_stop(cfn_hal_dma_t *driver)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_DMA, stop, driver, error);
+    return error;
 }
 
 #ifdef __cplusplus

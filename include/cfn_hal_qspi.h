@@ -27,7 +27,8 @@
 #define CAFFEINE_HAL_HAL_QSPI_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 /* Includes ---------------------------------------------------------*/
@@ -43,32 +44,33 @@ extern "C" {
 /**
  * @brief QSPI nominal event flags.
  */
-typedef enum {
-  CFN_HAL_QSPI_EVENT_NONE = 0,
-  CFN_HAL_QSPI_EVENT_TX_COMPLETE =
-      CFN_HAL_BIT(0), /*!< Data transmission finished */
-  CFN_HAL_QSPI_EVENT_RX_READY = CFN_HAL_BIT(1), /*!< Data reception finished */
-  CFN_HAL_QSPI_EVENT_CMD_DONE = CFN_HAL_BIT(2), /*!< Command phase complete */
+typedef enum
+{
+    CFN_HAL_QSPI_EVENT_NONE        = 0,
+    CFN_HAL_QSPI_EVENT_TX_COMPLETE = CFN_HAL_BIT(0), /*!< Data transmission finished */
+    CFN_HAL_QSPI_EVENT_RX_READY    = CFN_HAL_BIT(1), /*!< Data reception finished */
+    CFN_HAL_QSPI_EVENT_CMD_DONE    = CFN_HAL_BIT(2), /*!< Command phase complete */
 } cfn_hal_qspi_event_t;
 
 /**
  * @brief QSPI exception error flags.
  */
-typedef enum {
-  CFN_HAL_QSPI_ERROR_NONE = 0,
-  CFN_HAL_QSPI_ERROR_TIMEOUT =
-      CFN_HAL_BIT(0), /*!< Peripheral or memory timeout */
-  CFN_HAL_QSPI_ERROR_GENERAL = CFN_HAL_BIT(1), /*!< General hardware error */
+typedef enum
+{
+    CFN_HAL_QSPI_ERROR_NONE    = 0,
+    CFN_HAL_QSPI_ERROR_TIMEOUT = CFN_HAL_BIT(0), /*!< Peripheral or memory timeout */
+    CFN_HAL_QSPI_ERROR_GENERAL = CFN_HAL_BIT(1), /*!< General hardware error */
 } cfn_hal_qspi_error_t;
 
 /**
  * @brief QSPI bus width modes.
  */
-typedef enum {
-  CFN_HAL_QSPI_BUS_WIDTH_NONE = 0,
-  CFN_HAL_QSPI_BUS_WIDTH_SINGLE = 1,
-  CFN_HAL_QSPI_BUS_WIDTH_DUAL = 2,
-  CFN_HAL_QSPI_BUS_WIDTH_QUAD = 3,
+typedef enum
+{
+    CFN_HAL_QSPI_BUS_WIDTH_NONE   = 0,
+    CFN_HAL_QSPI_BUS_WIDTH_SINGLE = 1,
+    CFN_HAL_QSPI_BUS_WIDTH_DUAL   = 2,
+    CFN_HAL_QSPI_BUS_WIDTH_QUAD   = 3,
 } cfn_hal_qspi_bus_width_t;
 
 /* Types Structs ----------------------------------------------------*/
@@ -76,40 +78,43 @@ typedef enum {
 /**
  * @brief QSPI command configuration.
  */
-typedef struct {
-  uint32_t instruction;                      /*!< Instruction to be sent */
-  uint32_t address;                          /*!< Memory address */
-  uint32_t dummy_cycles;                     /*!< Number of dummy cycles */
-  cfn_hal_qspi_bus_width_t instruction_mode; /*!< Instruction bus width */
-  cfn_hal_qspi_bus_width_t address_mode;     /*!< Address bus width */
-  cfn_hal_qspi_bus_width_t data_mode;        /*!< Data bus width */
-  size_t nbr_of_data; /*!< Number of bytes expected in data phase */
+typedef struct
+{
+    uint32_t                 instruction;      /*!< Instruction to be sent */
+    uint32_t                 address;          /*!< Memory address */
+    uint32_t                 dummy_cycles;     /*!< Number of dummy cycles */
+    cfn_hal_qspi_bus_width_t instruction_mode; /*!< Instruction bus width */
+    cfn_hal_qspi_bus_width_t address_mode;     /*!< Address bus width */
+    cfn_hal_qspi_bus_width_t data_mode;        /*!< Data bus width */
+    size_t                   nbr_of_data;      /*!< Number of bytes expected in data phase */
 } cfn_hal_qspi_cmd_t;
 
 /**
  * @brief QSPI configuration structure.
  */
-typedef struct {
-  uint32_t clock_prescaler; /*!< SPI clock division factor */
-  uint32_t flash_size;      /*!< Memory size in bytes */
-  void *custom;             /*!< Vendor-specific custom configuration */
+typedef struct
+{
+    uint32_t clock_prescaler; /*!< SPI clock division factor */
+    uint32_t flash_size;      /*!< Memory size in bytes */
+    void    *custom;          /*!< Vendor-specific custom configuration */
 } cfn_hal_qspi_config_t;
 
 /**
  * @brief QSPI hardware physical mapping.
  */
-typedef struct {
-  void *instance;                 /*!< Peripheral base instance */
-  cfn_hal_gpio_pin_handle_t *clk; /*!< Clock signal mapping */
-  cfn_hal_gpio_pin_handle_t *cs;  /*!< Chip Select mapping */
-  cfn_hal_gpio_pin_handle_t *io0; /*!< Data I/O 0 mapping */
-  cfn_hal_gpio_pin_handle_t *io1; /*!< Data I/O 1 mapping */
-  cfn_hal_gpio_pin_handle_t *io2; /*!< Data I/O 2 mapping */
-  cfn_hal_gpio_pin_handle_t *io3; /*!< Data I/O 3 mapping */
-  void *user_arg;                 /*!< Peripheral instance user argument */
+typedef struct
+{
+    void                      *instance; /*!< Peripheral base instance */
+    cfn_hal_gpio_pin_handle_t *clk;      /*!< Clock signal mapping */
+    cfn_hal_gpio_pin_handle_t *cs;       /*!< Chip Select mapping */
+    cfn_hal_gpio_pin_handle_t *io0;      /*!< Data I/O 0 mapping */
+    cfn_hal_gpio_pin_handle_t *io1;      /*!< Data I/O 1 mapping */
+    cfn_hal_gpio_pin_handle_t *io2;      /*!< Data I/O 2 mapping */
+    cfn_hal_gpio_pin_handle_t *io3;      /*!< Data I/O 3 mapping */
+    void                      *user_arg; /*!< Peripheral instance user argument */
 } cfn_hal_qspi_phy_t;
 
-typedef struct cfn_hal_qspi_s cfn_hal_qspi_t;
+typedef struct cfn_hal_qspi_s     cfn_hal_qspi_t;
 typedef struct cfn_hal_qspi_api_s cfn_hal_qspi_api_t;
 
 /**
@@ -120,39 +125,33 @@ typedef struct cfn_hal_qspi_api_s cfn_hal_qspi_api_t;
  * @param user_arg User-defined argument passed during registration.
  */
 typedef void (*cfn_hal_qspi_callback_t)(cfn_hal_qspi_t *driver,
-                                        uint32_t event_mask,
-                                        uint32_t error_mask, void *user_arg);
+                                        uint32_t        event_mask,
+                                        uint32_t        error_mask,
+                                        void           *user_arg);
 
 /**
  * @brief QSPI Virtual Method Table (VMT).
  */
-struct cfn_hal_qspi_api_s {
-  cfn_hal_api_base_t base;
+struct cfn_hal_qspi_api_s
+{
+    cfn_hal_api_base_t base;
 
-  /* QSPI Specific Extensions */
-  cfn_hal_error_code_t (*command)(cfn_hal_qspi_t *driver,
-                                  const cfn_hal_qspi_cmd_t *cmd,
-                                  uint32_t timeout);
-  cfn_hal_error_code_t (*transmit)(cfn_hal_qspi_t *driver, const uint8_t *data,
-                                   uint32_t timeout);
-  cfn_hal_error_code_t (*receive)(cfn_hal_qspi_t *driver, uint8_t *data,
-                                  uint32_t timeout);
-  cfn_hal_error_code_t (*memory_mapped_enable)(cfn_hal_qspi_t *driver,
-                                               const cfn_hal_qspi_cmd_t *cmd);
-  cfn_hal_error_code_t (*autopolling_enable)(cfn_hal_qspi_t *driver,
-                                             const cfn_hal_qspi_cmd_t *cmd,
-                                             uint32_t match, uint32_t mask,
-                                             uint32_t timeout);
+    /* QSPI Specific Extensions */
+    cfn_hal_error_code_t (*command)(cfn_hal_qspi_t *driver, const cfn_hal_qspi_cmd_t *cmd, uint32_t timeout);
+    cfn_hal_error_code_t (*transmit)(cfn_hal_qspi_t *driver, const uint8_t *data, uint32_t timeout);
+    cfn_hal_error_code_t (*receive)(cfn_hal_qspi_t *driver, uint8_t *data, uint32_t timeout);
+    cfn_hal_error_code_t (*memory_mapped_enable)(cfn_hal_qspi_t *driver, const cfn_hal_qspi_cmd_t *cmd);
+    cfn_hal_error_code_t (*autopolling_enable)(
+        cfn_hal_qspi_t *driver, const cfn_hal_qspi_cmd_t *cmd, uint32_t match, uint32_t mask, uint32_t timeout);
 };
 
 CFN_HAL_VMT_CHECK(struct cfn_hal_qspi_api_s);
 
-CFN_HAL_CREATE_DRIVER_TYPE(qspi, cfn_hal_qspi_config_t, cfn_hal_qspi_api_t,
-                           cfn_hal_qspi_phy_t, cfn_hal_qspi_callback_t);
+CFN_HAL_CREATE_DRIVER_TYPE(
+    qspi, cfn_hal_qspi_config_t, cfn_hal_qspi_api_t, cfn_hal_qspi_phy_t, cfn_hal_qspi_callback_t);
 
-#define CFN_HAL_QSPI_INITIALIZER(api_ptr, phy_ptr, config_ptr)                 \
-  CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_QSPI, api_ptr, phy_ptr,   \
-                             config_ptr)
+#define CFN_HAL_QSPI_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                         \
+    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_QSPI, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
 
@@ -161,14 +160,15 @@ CFN_HAL_CREATE_DRIVER_TYPE(qspi, cfn_hal_qspi_config_t, cfn_hal_qspi_api_t,
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_config_validate(
-    const cfn_hal_qspi_t *driver, const cfn_hal_qspi_config_t *config) {
-  if (driver == NULL || config == NULL) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_config_validate(const cfn_hal_qspi_t        *driver,
+                                                                 const cfn_hal_qspi_config_t *config)
+{
+    if (driver == NULL || config == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
 
-  return cfn_hal_base_config_validate(&driver->base,
-                                      CFN_HAL_PERIPHERAL_TYPE_QSPI, config);
+    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI, config);
 }
 
 /**
@@ -176,17 +176,19 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_config_validate(
  * @param driver Pointer to the QSPI driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_init(cfn_hal_qspi_t *driver) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  driver->base.vmt = (const struct cfn_hal_api_base_s *)driver->api;
-  cfn_hal_error_code_t error =
-      cfn_hal_qspi_config_validate(driver, driver->config);
-  if (error != CFN_HAL_ERROR_OK) {
-    return error;
-  }
-  return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_init(cfn_hal_qspi_t *driver)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    driver->base.vmt           = (const struct cfn_hal_api_base_s *) driver->api;
+    cfn_hal_error_code_t error = cfn_hal_qspi_config_validate(driver, driver->config);
+    if (error != CFN_HAL_ERROR_OK)
+    {
+        return error;
+    }
+    return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI);
 }
 
 /**
@@ -194,12 +196,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_init(cfn_hal_qspi_t *driver) {
  * @param driver Pointer to the QSPI driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_qspi_deinit(cfn_hal_qspi_t *driver) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_base_deinit(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_deinit(cfn_hal_qspi_t *driver)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_deinit(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI);
 }
 
 /**
@@ -208,18 +211,21 @@ cfn_hal_qspi_deinit(cfn_hal_qspi_t *driver) {
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_config_set(
-    cfn_hal_qspi_t *driver, const cfn_hal_qspi_config_t *config) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  cfn_hal_error_code_t error = cfn_hal_qspi_config_validate(driver, config);
-  if (error != CFN_HAL_ERROR_OK) {
-    return error;
-  }
-  { driver->config = config; }
-  return cfn_hal_base_config_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI,
-                                 (const void *)config);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_config_set(cfn_hal_qspi_t *driver, const cfn_hal_qspi_config_t *config)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    cfn_hal_error_code_t error = cfn_hal_qspi_config_validate(driver, config);
+    if (error != CFN_HAL_ERROR_OK)
+    {
+        return error;
+    }
+    {
+        driver->config = config;
+    }
+    return cfn_hal_base_config_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI, (const void *) config);
 }
 
 /**
@@ -228,13 +234,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_config_set(
  * @param config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_qspi_config_get(cfn_hal_qspi_t *driver, cfn_hal_qspi_config_t *config) {
-  if (!driver || !config || !driver->config) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  *config = *(driver->config);
-  return CFN_HAL_ERROR_OK;
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_config_get(cfn_hal_qspi_t *driver, cfn_hal_qspi_config_t *config)
+{
+    if (!driver || !config || !driver->config)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    *config = *(driver->config);
+    return CFN_HAL_ERROR_OK;
 }
 
 /**
@@ -244,19 +251,20 @@ cfn_hal_qspi_config_get(cfn_hal_qspi_t *driver, cfn_hal_qspi_config_t *config) {
  * @param user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_callback_register(
-    cfn_hal_qspi_t *driver, const cfn_hal_qspi_callback_t callback,
-    void *user_arg) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  {
-    driver->cb = callback;
-    driver->cb_user_arg = user_arg;
-  }
-  return cfn_hal_base_callback_register(&driver->base,
-                                        CFN_HAL_PERIPHERAL_TYPE_QSPI,
-                                        (cfn_hal_callback_t)callback, user_arg);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_callback_register(cfn_hal_qspi_t               *driver,
+                                                                   const cfn_hal_qspi_callback_t callback,
+                                                                   void                         *user_arg)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    {
+        driver->cb          = callback;
+        driver->cb_user_arg = user_arg;
+    }
+    return cfn_hal_base_callback_register(
+        &driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI, (cfn_hal_callback_t) callback, user_arg);
 }
 
 /**
@@ -265,13 +273,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_callback_register(
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_power_state_set(
-    cfn_hal_qspi_t *driver, cfn_hal_power_state_t state) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_power_state_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI,
-                                 state);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_power_state_set(cfn_hal_qspi_t *driver, cfn_hal_power_state_t state)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_power_state_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI, state);
 }
 
 /**
@@ -280,13 +288,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_power_state_set(
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_qspi_event_enable(cfn_hal_qspi_t *driver, uint32_t event_mask) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_base_event_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI,
-                                   event_mask);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_event_enable(cfn_hal_qspi_t *driver, uint32_t event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI, event_mask);
 }
 
 /**
@@ -295,13 +303,13 @@ cfn_hal_qspi_event_enable(cfn_hal_qspi_t *driver, uint32_t event_mask) {
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_qspi_event_disable(cfn_hal_qspi_t *driver, uint32_t event_mask) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_base_event_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI,
-                                    event_mask);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_event_disable(cfn_hal_qspi_t *driver, uint32_t event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI, event_mask);
 }
 
 /**
@@ -310,13 +318,13 @@ cfn_hal_qspi_event_disable(cfn_hal_qspi_t *driver, uint32_t event_mask) {
  * @param event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_qspi_event_get(cfn_hal_qspi_t *driver, uint32_t *event_mask) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_base_event_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI,
-                                event_mask);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_event_get(cfn_hal_qspi_t *driver, uint32_t *event_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_event_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI, event_mask);
 }
 
 /**
@@ -325,13 +333,13 @@ cfn_hal_qspi_event_get(cfn_hal_qspi_t *driver, uint32_t *event_mask) {
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_qspi_error_enable(cfn_hal_qspi_t *driver, uint32_t error_mask) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_base_error_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI,
-                                   error_mask);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_error_enable(cfn_hal_qspi_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI, error_mask);
 }
 
 /**
@@ -340,13 +348,13 @@ cfn_hal_qspi_error_enable(cfn_hal_qspi_t *driver, uint32_t error_mask) {
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_qspi_error_disable(cfn_hal_qspi_t *driver, uint32_t error_mask) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_base_error_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI,
-                                    error_mask);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_error_disable(cfn_hal_qspi_t *driver, uint32_t error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI, error_mask);
 }
 
 /**
@@ -355,13 +363,13 @@ cfn_hal_qspi_error_disable(cfn_hal_qspi_t *driver, uint32_t error_mask) {
  * @param error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_qspi_error_get(cfn_hal_qspi_t *driver, uint32_t *error_mask) {
-  if (!driver) {
-    return CFN_HAL_ERROR_BAD_PARAM;
-  }
-  return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI,
-                                error_mask);
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_error_get(cfn_hal_qspi_t *driver, uint32_t *error_mask)
+{
+    if (!driver)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI, error_mask);
 }
 
 /* QSPI Specific Functions ------------------------------------------ */
@@ -373,12 +381,13 @@ cfn_hal_qspi_error_get(cfn_hal_qspi_t *driver, uint32_t *error_mask) {
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_command(
-    cfn_hal_qspi_t *driver, const cfn_hal_qspi_cmd_t *cmd, uint32_t timeout) {
-  cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-  CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_QSPI, command,
-                                   driver, error, cmd, timeout);
-  return error;
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_command(cfn_hal_qspi_t           *driver,
+                                                         const cfn_hal_qspi_cmd_t *cmd,
+                                                         uint32_t                  timeout)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_QSPI, command, driver, error, cmd, timeout);
+    return error;
 }
 
 /**
@@ -388,12 +397,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_command(
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_transmit(
-    cfn_hal_qspi_t *driver, const uint8_t *data, uint32_t timeout) {
-  cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-  CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_QSPI, transmit,
-                                   driver, error, data, timeout);
-  return error;
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_transmit(cfn_hal_qspi_t *driver, const uint8_t *data, uint32_t timeout)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_QSPI, transmit, driver, error, data, timeout);
+    return error;
 }
 
 /**
@@ -403,13 +411,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_transmit(
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_receive(cfn_hal_qspi_t *driver,
-                                                         uint8_t *data,
-                                                         uint32_t timeout) {
-  cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-  CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_QSPI, receive,
-                                   driver, error, data, timeout);
-  return error;
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_receive(cfn_hal_qspi_t *driver, uint8_t *data, uint32_t timeout)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_QSPI, receive, driver, error, data, timeout);
+    return error;
 }
 
 /**
@@ -418,12 +424,12 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_receive(cfn_hal_qspi_t *driver,
  * @param cmd Pointer to the read command configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_memory_mapped_enable(
-    cfn_hal_qspi_t *driver, const cfn_hal_qspi_cmd_t *cmd) {
-  cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-  CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_QSPI,
-                                   memory_mapped_enable, driver, error, cmd);
-  return error;
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_memory_mapped_enable(cfn_hal_qspi_t           *driver,
+                                                                      const cfn_hal_qspi_cmd_t *cmd)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_QSPI, memory_mapped_enable, driver, error, cmd);
+    return error;
 }
 
 /**
@@ -436,13 +442,12 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_memory_mapped_enable(
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_autopolling_enable(
-    cfn_hal_qspi_t *driver, const cfn_hal_qspi_cmd_t *cmd, uint32_t match,
-    uint32_t mask, uint32_t timeout) {
-  cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-  CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_QSPI,
-                                   autopolling_enable, driver, error, cmd,
-                                   match, mask, timeout);
-  return error;
+    cfn_hal_qspi_t *driver, const cfn_hal_qspi_cmd_t *cmd, uint32_t match, uint32_t mask, uint32_t timeout)
+{
+    cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
+        CFN_HAL_PERIPHERAL_TYPE_QSPI, autopolling_enable, driver, error, cmd, match, mask, timeout);
+    return error;
 }
 
 #ifdef __cplusplus

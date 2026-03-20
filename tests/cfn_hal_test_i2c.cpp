@@ -30,8 +30,8 @@
 class I2cTest : public ::testing::Test
 {
   protected:
-    cfn_hal_i2c_t     driver{};
-    cfn_hal_i2c_api_t api{};
+    cfn_hal_i2c_t        driver{};
+    cfn_hal_i2c_api_t    api{};
     cfn_hal_i2c_config_t dummy_config{};
 
     void SetUp() override
@@ -39,7 +39,7 @@ class I2cTest : public ::testing::Test
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
         dummy_config.speed = CFN_HAL_I2C_CONFIG_SPEED_100KHZ;
-        driver.config = &dummy_config;
+        driver.config      = &dummy_config;
         driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_I2C;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
         driver.base.vmt    = (const struct cfn_hal_api_base_s *) &api;
