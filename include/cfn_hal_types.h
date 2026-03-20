@@ -57,6 +57,7 @@ typedef enum cfn_hal_error_codes
     CFN_HAL_ERROR_NOT_SUPPORTED,
     CFN_HAL_ERROR_EXTERNAL,
     CFN_HAL_ERROR_BUSY,
+    CFN_HAL_ERROR_BAD_CONFIG,
 
     CFN_HAL_ERROR_PERIPHERAL_FAIL =
         0x100, /*!< Generic peripheral hardware failure. Use peripheral-specific error masks for details. */

@@ -79,6 +79,8 @@ typedef enum
     CFN_HAL_UART_CONFIG_PARITY_NONE, /*!< No parity */
     CFN_HAL_UART_CONFIG_PARITY_EVEN, /*!< Even parity */
     CFN_HAL_UART_CONFIG_PARITY_ODD,  /*!< Odd parity */
+
+    CFN_HAL_UART_CONFIG_PARITY_MAX
 } cfn_hal_uart_config_parity_t;
 
 /**
@@ -88,6 +90,8 @@ typedef enum
 {
     CFN_HAL_UART_CONFIG_STOP_ONE_BIT,  /*!< 1 stop bit */
     CFN_HAL_UART_CONFIG_STOP_TWO_BITS, /*!< 2 stop bits */
+
+    CFN_HAL_UART_CONFIG_STOP_MAX
 } cfn_hal_uart_config_stop_bits_t;
 
 /**
@@ -100,6 +104,8 @@ typedef enum
     CFN_HAL_UART_CONFIG_DATA_LEN_7, /*!< 7 bits per word */
     CFN_HAL_UART_CONFIG_DATA_LEN_8, /*!< 8 bits per word */
     CFN_HAL_UART_CONFIG_DATA_LEN_9, /*!< 9 bits per word */
+
+    CFN_HAL_UART_CONFIG_DATA_LEN_MAX
 } cfn_hal_uart_config_data_len_t;
 
 /**
@@ -111,9 +117,8 @@ typedef enum
     CFN_HAL_UART_CONFIG_FLOW_CTRL_CTS,     /*!< Hardware CTS only */
     CFN_HAL_UART_CONFIG_FLOW_CTRL_RTS,     /*!< Hardware RTS only */
     CFN_HAL_UART_CONFIG_FLOW_CTRL_RTS_CTS, /*!< Hardware RTS and CTS */
-    CFN_HAL_UART_CONFIG_FLOW_CTRL_DTR,     /*!< Hardware DTR only */
-    CFN_HAL_UART_CONFIG_FLOW_CTRL_DCD,     /*!< Hardware DCD only */
-    CFN_HAL_UART_CONFIG_FLOW_CTRL_DE,      /*!< RS-485 Driver Enable */
+
+    CFN_HAL_UART_CONFIG_FLOW_CTRL_MAX
 } cfn_hal_uart_config_flow_ctrl_t;
 
 /**
@@ -125,8 +130,22 @@ typedef enum
     CFN_HAL_UART_CONFIG_MODE_BLOCKING,  /*!< Polling based */
     CFN_HAL_UART_CONFIG_MODE_INTERRUPT, /*!< Interrupt based */
     CFN_HAL_UART_CONFIG_MODE_DMA,       /*!< DMA based */
+
+    CFN_HAL_UART_CONFIG_MODE_MAX
 } cfn_hal_uart_config_mode_t;
 
+/**
+* @brief UART I/O operation mode.
+*/
+typedef enum
+{
+    CFN_HAL_UART_CONFIG_DIRECTION_NONE,
+    CFN_HAL_UART_CONFIG_DIRECTION_TX_ONLY,
+    CFN_HAL_UART_CONFIG_DIRECTION_RX_ONLY,
+    CFN_HAL_UART_CONFIG_DIRECTION_TX_RX,
+
+    CFN_HAL_UART_CONFIG_DIRECTION_MAX
+} cfn_hal_uart_config_direction_t;
 /* Types Structs ----------------------------------------------------*/
 
 /**
@@ -139,9 +158,6 @@ typedef struct
     cfn_hal_gpio_pin_handle_t *rx;        /*!< RX pin driver mapping */
     cfn_hal_gpio_pin_handle_t *cts;       /*!< CTS pin driver mapping */
     cfn_hal_gpio_pin_handle_t *rts;       /*!< RTS pin driver mapping */
-    cfn_hal_gpio_pin_handle_t *dtr;       /*!< DTR pin driver mapping */
-    cfn_hal_gpio_pin_handle_t *dcd;       /*!< DCD pin driver mapping */
-    cfn_hal_gpio_pin_handle_t *de;        /*!< RS-485 DE pin driver mapping */
     void                      *user_data; /*!< Peripheral instance user argument */
 } cfn_hal_uart_phy_t;
 
@@ -158,6 +174,7 @@ typedef struct
     cfn_hal_uart_config_stop_bits_t stop_bits;  /*!< Stop bits */
     cfn_hal_uart_config_parity_t    parity;     /*!< Parity check mode */
     cfn_hal_uart_config_flow_ctrl_t flow_ctrl;  /*!< Hardware flow control */
+    cfn_hal_uart_config_direction_t direction;
     void                           *custom;     /*!< Vendor-specific custom configuration */
 } cfn_hal_uart_config_t;
 
