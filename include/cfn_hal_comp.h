@@ -35,6 +35,7 @@ extern "C"
 #include "cfn_hal_types.h"
 #include "cfn_hal.h"
 #include "cfn_hal_base.h"
+#include "cfn_hal_gpio.h"
 
 /* Defines ----------------------------------------------------------*/
 
@@ -74,8 +75,11 @@ typedef enum
  */
 typedef struct
 {
-    void *instance; /*!< Peripheral base instance */
-    void *user_arg; /*!< Peripheral instance user argument */
+    void                      *instance;    /*!< Peripheral base instance */
+    cfn_hal_gpio_pin_handle_t *input_plus;  /*!< Non-inverting input pin mapping */
+    cfn_hal_gpio_pin_handle_t *input_minus; /*!< Inverting input pin mapping */
+    cfn_hal_gpio_pin_handle_t *output;      /*!< Comparator output pin mapping */
+    void                      *user_arg;    /*!< Peripheral instance user argument */
 } cfn_hal_comp_phy_t;
 
 /**

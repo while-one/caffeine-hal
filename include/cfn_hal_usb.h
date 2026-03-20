@@ -37,6 +37,7 @@ extern "C"
 #include "cfn_hal_types.h"
 #include "cfn_hal.h"
 #include "cfn_hal_base.h"
+#include "cfn_hal_gpio.h"
 
 /* Defines ----------------------------------------------------------*/
 
@@ -94,8 +95,12 @@ typedef struct
  */
 typedef struct
 {
-    void *instance; /*!< Peripheral base instance (e.g. USB_OTG_FS) */
-    void *user_arg; /*!< Peripheral instance user argument */
+    void                      *instance; /*!< Peripheral base instance (e.g. USB_OTG_FS) */
+    cfn_hal_gpio_pin_handle_t *dp;       /*!< Data+ pin mapping */
+    cfn_hal_gpio_pin_handle_t *dm;       /*!< Data- pin mapping */
+    cfn_hal_gpio_pin_handle_t *id;       /*!< ID pin mapping (OTG) */
+    cfn_hal_gpio_pin_handle_t *vbus;     /*!< VBUS sensing pin mapping */
+    void                      *user_arg; /*!< Peripheral instance user argument */
 } cfn_hal_usb_phy_t;
 
 typedef struct cfn_hal_usb_s     cfn_hal_usb_t;

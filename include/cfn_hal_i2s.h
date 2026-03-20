@@ -35,6 +35,7 @@ extern "C"
 #include "cfn_hal_types.h"
 #include "cfn_hal.h"
 #include "cfn_hal_base.h"
+#include "cfn_hal_gpio.h"
 
 /* Defines ----------------------------------------------------------*/
 
@@ -78,8 +79,13 @@ typedef struct
  */
 typedef struct
 {
-    void *instance; /*!< Peripheral base instance */
-    void *user_arg; /*!< Peripheral instance user argument */
+    void                      *instance; /*!< Peripheral base instance */
+    cfn_hal_gpio_pin_handle_t *ck;       /*!< Continuous Serial Clock mapping */
+    cfn_hal_gpio_pin_handle_t *ws;       /*!< Word Select mapping */
+    cfn_hal_gpio_pin_handle_t *sd;       /*!< Serial Data mapping */
+    cfn_hal_gpio_pin_handle_t *ext_sd;   /*!< Full-duplex Serial Data mapping */
+    cfn_hal_gpio_pin_handle_t *mck;      /*!< Master Clock mapping */
+    void                      *user_arg; /*!< Peripheral instance user argument */
 } cfn_hal_i2s_phy_t;
 
 typedef struct cfn_hal_i2s_s     cfn_hal_i2s_t;
