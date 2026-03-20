@@ -45,11 +45,11 @@ extern "C"
  */
 typedef enum
 {
-    CFN_HAL_ETH_EVENT_NONE = 0,
+    CFN_HAL_ETH_EVENT_NONE        = 0,
     CFN_HAL_ETH_EVENT_RX_COMPLETE = CFN_HAL_BIT(0), /*!< Frame received */
     CFN_HAL_ETH_EVENT_TX_COMPLETE = CFN_HAL_BIT(1), /*!< Frame transmitted */
-    CFN_HAL_ETH_EVENT_LINK_UP = CFN_HAL_BIT(2),     /*!< Ethernet link established */
-    CFN_HAL_ETH_EVENT_LINK_DOWN = CFN_HAL_BIT(3),   /*!< Ethernet link lost */
+    CFN_HAL_ETH_EVENT_LINK_UP     = CFN_HAL_BIT(2), /*!< Ethernet link established */
+    CFN_HAL_ETH_EVENT_LINK_DOWN   = CFN_HAL_BIT(3), /*!< Ethernet link lost */
 } cfn_hal_eth_event_t;
 
 /**
@@ -57,9 +57,9 @@ typedef enum
  */
 typedef enum
 {
-    CFN_HAL_ETH_ERROR_NONE = 0,
-    CFN_HAL_ETH_ERROR_MAC = CFN_HAL_BIT(0),     /*!< MAC layer error (CRC, jabber, etc) */
-    CFN_HAL_ETH_ERROR_PHY = CFN_HAL_BIT(1),     /*!< PHY layer or MDIO error */
+    CFN_HAL_ETH_ERROR_NONE    = 0,
+    CFN_HAL_ETH_ERROR_MAC     = CFN_HAL_BIT(0), /*!< MAC layer error (CRC, jabber, etc) */
+    CFN_HAL_ETH_ERROR_PHY     = CFN_HAL_BIT(1), /*!< PHY layer or MDIO error */
     CFN_HAL_ETH_ERROR_GENERAL = CFN_HAL_BIT(2), /*!< General hardware error */
 } cfn_hal_eth_error_t;
 
@@ -232,7 +232,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_callback_register(cfn_hal_eth_t 
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->cb = callback;
+        driver->cb          = callback;
         driver->cb_user_arg = user_arg;
     }
     return cfn_hal_base_callback_register(

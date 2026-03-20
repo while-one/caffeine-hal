@@ -53,7 +53,7 @@ typedef enum
  */
 typedef enum
 {
-    CFN_HAL_IRQ_ERROR_NONE = 0,
+    CFN_HAL_IRQ_ERROR_NONE    = 0,
     CFN_HAL_IRQ_ERROR_GENERAL = CFN_HAL_BIT(0), /*!< Controller fault or access error */
 } cfn_hal_irq_error_t;
 
@@ -191,7 +191,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_irq_callback_register(cfn_hal_irq_t 
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->cb = callback;
+        driver->cb          = callback;
         driver->cb_user_arg = user_arg;
     }
     return cfn_hal_base_callback_register(

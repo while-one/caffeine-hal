@@ -46,11 +46,11 @@ extern "C"
  */
 typedef enum
 {
-    CFN_HAL_UART_EVENT_NONE = 0,
+    CFN_HAL_UART_EVENT_NONE        = 0,
     CFN_HAL_UART_EVENT_TX_COMPLETE = CFN_HAL_BIT(0), /*!< Data transmission finished */
-    CFN_HAL_UART_EVENT_RX_READY = CFN_HAL_BIT(1),    /*!< Data reception finished */
-    CFN_HAL_UART_EVENT_BUS_IDLE = CFN_HAL_BIT(2),    /*!< UART bus idle detected */
-    CFN_HAL_UART_EVENT_RX_BYTE = CFN_HAL_BIT(3),     /*!< Single byte received (continuous mode) */
+    CFN_HAL_UART_EVENT_RX_READY    = CFN_HAL_BIT(1), /*!< Data reception finished */
+    CFN_HAL_UART_EVENT_BUS_IDLE    = CFN_HAL_BIT(2), /*!< UART bus idle detected */
+    CFN_HAL_UART_EVENT_RX_BYTE     = CFN_HAL_BIT(3), /*!< Single byte received (continuous mode) */
 } cfn_hal_uart_event_t;
 
 /**
@@ -63,9 +63,9 @@ typedef enum
  */
 typedef enum
 {
-    CFN_HAL_UART_ERROR_NONE = 0,
+    CFN_HAL_UART_ERROR_NONE    = 0,
     CFN_HAL_UART_ERROR_FRAMING = CFN_HAL_BIT(0), /*!< Start/stop bit synchronization error */
-    CFN_HAL_UART_ERROR_PARITY = CFN_HAL_BIT(1),  /*!< Parity check failed */
+    CFN_HAL_UART_ERROR_PARITY  = CFN_HAL_BIT(1), /*!< Parity check failed */
     CFN_HAL_UART_ERROR_OVERRUN = CFN_HAL_BIT(2), /*!< Buffer overflow error */
     CFN_HAL_UART_ERROR_TIMEOUT = CFN_HAL_BIT(3), /*!< Data reception timeout */
     CFN_HAL_UART_ERROR_GENERAL = CFN_HAL_BIT(4), /*!< General hardware error */
@@ -135,8 +135,8 @@ typedef enum
 } cfn_hal_uart_config_mode_t;
 
 /**
-* @brief UART I/O operation mode.
-*/
+ * @brief UART I/O operation mode.
+ */
 typedef enum
 {
     CFN_HAL_UART_CONFIG_DIRECTION_NONE,
@@ -175,7 +175,7 @@ typedef struct
     cfn_hal_uart_config_parity_t    parity;     /*!< Parity check mode */
     cfn_hal_uart_config_flow_ctrl_t flow_ctrl;  /*!< Hardware flow control */
     cfn_hal_uart_config_direction_t direction;
-    void                           *custom;     /*!< Vendor-specific custom configuration */
+    void                           *custom; /*!< Vendor-specific custom configuration */
 } cfn_hal_uart_config_t;
 
 typedef struct cfn_hal_uart_s     cfn_hal_uart_t;
@@ -310,7 +310,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_callback_register(cfn_hal_uart_
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->cb = callback;
+        driver->cb          = callback;
         driver->cb_user_arg = user_arg;
     }
     return cfn_hal_base_callback_register(

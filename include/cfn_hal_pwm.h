@@ -46,9 +46,9 @@ extern "C"
  */
 typedef enum
 {
-    CFN_HAL_PWM_EVENT_NONE = 0,
+    CFN_HAL_PWM_EVENT_NONE         = 0,
     CFN_HAL_PWM_EVENT_PERIOD_MATCH = CFN_HAL_BIT(0), /*!< Timer period reached (cycle end) */
-    CFN_HAL_PWM_EVENT_PULSE_MATCH = CFN_HAL_BIT(1),  /*!< Compare match reached (duty transition) */
+    CFN_HAL_PWM_EVENT_PULSE_MATCH  = CFN_HAL_BIT(1), /*!< Compare match reached (duty transition) */
 } cfn_hal_pwm_event_t;
 
 /**
@@ -56,8 +56,8 @@ typedef enum
  */
 typedef enum
 {
-    CFN_HAL_PWM_ERROR_NONE = 0,
-    CFN_HAL_PWM_ERROR_FAULT = CFN_HAL_BIT(0),   /*!< External break or safety fault */
+    CFN_HAL_PWM_ERROR_NONE    = 0,
+    CFN_HAL_PWM_ERROR_FAULT   = CFN_HAL_BIT(0), /*!< External break or safety fault */
     CFN_HAL_PWM_ERROR_GENERAL = CFN_HAL_BIT(1), /*!< General hardware error */
 } cfn_hal_pwm_error_t;
 
@@ -208,7 +208,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_callback_register(cfn_hal_pwm_t 
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->cb = callback;
+        driver->cb          = callback;
         driver->cb_user_arg = user_arg;
     }
     return cfn_hal_base_callback_register(

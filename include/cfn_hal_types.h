@@ -47,7 +47,7 @@ typedef enum
 
 typedef enum cfn_hal_error_codes
 {
-    CFN_HAL_ERROR_OK = 0x00,
+    CFN_HAL_ERROR_OK   = 0x00,
 
     CFN_HAL_ERROR_FAIL = 0x01,
     CFN_HAL_ERROR_BAD_PARAM,

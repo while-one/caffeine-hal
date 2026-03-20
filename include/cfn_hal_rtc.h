@@ -46,11 +46,11 @@ extern "C"
  */
 typedef enum
 {
-    CFN_HAL_RTC_EVENT_NONE = 0,
-    CFN_HAL_RTC_EVENT_ALARM = CFN_HAL_BIT(0),     /*!< Alarm time reached */
-    CFN_HAL_RTC_EVENT_WAKEUP = CFN_HAL_BIT(1),    /*!< Periodic wakeup timer event */
+    CFN_HAL_RTC_EVENT_NONE      = 0,
+    CFN_HAL_RTC_EVENT_ALARM     = CFN_HAL_BIT(0), /*!< Alarm time reached */
+    CFN_HAL_RTC_EVENT_WAKEUP    = CFN_HAL_BIT(1), /*!< Periodic wakeup timer event */
     CFN_HAL_RTC_EVENT_TIMESTAMP = CFN_HAL_BIT(2), /*!< External timestamp capture event */
-    CFN_HAL_RTC_EVENT_TAMPER = CFN_HAL_BIT(3),    /*!< Security tamper event */
+    CFN_HAL_RTC_EVENT_TAMPER    = CFN_HAL_BIT(3), /*!< Security tamper event */
 } cfn_hal_rtc_event_t;
 
 /**
@@ -58,8 +58,8 @@ typedef enum
  */
 typedef enum
 {
-    CFN_HAL_RTC_ERROR_NONE = 0,
-    CFN_HAL_RTC_ERROR_INIT = CFN_HAL_BIT(0),    /*!< Synchronization or oscillator error */
+    CFN_HAL_RTC_ERROR_NONE    = 0,
+    CFN_HAL_RTC_ERROR_INIT    = CFN_HAL_BIT(0), /*!< Synchronization or oscillator error */
     CFN_HAL_RTC_ERROR_GENERAL = CFN_HAL_BIT(1), /*!< General hardware error */
 } cfn_hal_rtc_error_t;
 
@@ -226,7 +226,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_rtc_callback_register(cfn_hal_rtc_t 
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->cb = callback;
+        driver->cb          = callback;
         driver->cb_user_arg = user_arg;
     }
     return cfn_hal_base_callback_register(

@@ -45,8 +45,8 @@ extern "C"
  */
 typedef enum
 {
-    CFN_HAL_GPIO_EVENT_NONE = 0,
-    CFN_HAL_GPIO_EVENT_RISING = CFN_HAL_BIT(0),  /*!< Rising edge detected */
+    CFN_HAL_GPIO_EVENT_NONE    = 0,
+    CFN_HAL_GPIO_EVENT_RISING  = CFN_HAL_BIT(0), /*!< Rising edge detected */
     CFN_HAL_GPIO_EVENT_FALLING = CFN_HAL_BIT(1), /*!< Falling edge detected */
 } cfn_hal_gpio_event_t;
 
@@ -55,7 +55,7 @@ typedef enum
  */
 typedef enum
 {
-    CFN_HAL_GPIO_ERROR_NONE = 0,
+    CFN_HAL_GPIO_ERROR_NONE    = 0,
     CFN_HAL_GPIO_ERROR_GENERAL = CFN_HAL_BIT(0), /*!< General GPIO hardware error */
 } cfn_hal_gpio_error_t;
 
@@ -247,7 +247,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_callback_register(cfn_hal_gpio_
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->cb = callback;
+        driver->cb          = callback;
         driver->cb_user_arg = user_arg;
     }
 

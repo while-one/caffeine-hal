@@ -45,10 +45,10 @@ extern "C"
  */
 typedef enum
 {
-    CFN_HAL_QSPI_EVENT_NONE = 0,
+    CFN_HAL_QSPI_EVENT_NONE        = 0,
     CFN_HAL_QSPI_EVENT_TX_COMPLETE = CFN_HAL_BIT(0), /*!< Data transmission finished */
-    CFN_HAL_QSPI_EVENT_RX_READY = CFN_HAL_BIT(1),    /*!< Data reception finished */
-    CFN_HAL_QSPI_EVENT_CMD_DONE = CFN_HAL_BIT(2),    /*!< Command phase complete */
+    CFN_HAL_QSPI_EVENT_RX_READY    = CFN_HAL_BIT(1), /*!< Data reception finished */
+    CFN_HAL_QSPI_EVENT_CMD_DONE    = CFN_HAL_BIT(2), /*!< Command phase complete */
 } cfn_hal_qspi_event_t;
 
 /**
@@ -56,7 +56,7 @@ typedef enum
  */
 typedef enum
 {
-    CFN_HAL_QSPI_ERROR_NONE = 0,
+    CFN_HAL_QSPI_ERROR_NONE    = 0,
     CFN_HAL_QSPI_ERROR_TIMEOUT = CFN_HAL_BIT(0), /*!< Peripheral or memory timeout */
     CFN_HAL_QSPI_ERROR_GENERAL = CFN_HAL_BIT(1), /*!< General hardware error */
 } cfn_hal_qspi_error_t;
@@ -66,10 +66,10 @@ typedef enum
  */
 typedef enum
 {
-    CFN_HAL_QSPI_BUS_WIDTH_NONE = 0,
+    CFN_HAL_QSPI_BUS_WIDTH_NONE   = 0,
     CFN_HAL_QSPI_BUS_WIDTH_SINGLE = 1,
-    CFN_HAL_QSPI_BUS_WIDTH_DUAL = 2,
-    CFN_HAL_QSPI_BUS_WIDTH_QUAD = 3,
+    CFN_HAL_QSPI_BUS_WIDTH_DUAL   = 2,
+    CFN_HAL_QSPI_BUS_WIDTH_QUAD   = 3,
 } cfn_hal_qspi_bus_width_t;
 
 /* Types Structs ----------------------------------------------------*/
@@ -227,7 +227,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_callback_register(cfn_hal_qspi_
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->cb = callback;
+        driver->cb          = callback;
         driver->cb_user_arg = user_arg;
     }
     return cfn_hal_base_callback_register(

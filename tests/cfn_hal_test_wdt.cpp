@@ -37,10 +37,10 @@ class WdtTest : public ::testing::Test
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
-        driver.base.type = CFN_HAL_PERIPHERAL_TYPE_WDT;
+        driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_WDT;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
-        driver.base.vmt = (const struct cfn_hal_api_base_s *) &api;
-        driver.api = &api;
+        driver.base.vmt    = (const struct cfn_hal_api_base_s *) &api;
+        driver.api         = &api;
     }
 };
 
@@ -87,14 +87,14 @@ TEST_F(WdtTest, InitSuccess)
 TEST_F(WdtTest, DeinitSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.deinit = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.deinit    = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_wdt_deinit(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
 }
 
 TEST_F(WdtTest, ConfigSetSuccess)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status  = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.config_set = [](cfn_hal_driver_t *b, const void *config) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     cfn_hal_wdt_config_t config{};
@@ -113,7 +113,7 @@ TEST_F(WdtTest, ConfigGetSuccess)
 
 TEST_F(WdtTest, CallbackRegisterSuccess)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status         = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.callback_register = [](cfn_hal_driver_t *b, cfn_hal_callback_t cb, void *arg) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     cfn_hal_wdt_callback_t callback = [](cfn_hal_wdt_t *d, uint32_t ev, uint32_t err, void *arg) {};
@@ -123,7 +123,7 @@ TEST_F(WdtTest, CallbackRegisterSuccess)
 
 TEST_F(WdtTest, PowerStateSetSuccess)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status       = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.power_state_set = [](cfn_hal_driver_t *b, cfn_hal_power_state_t state) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_wdt_power_state_set(&driver, CFN_HAL_POWER_STATE_ON), CFN_HAL_ERROR_OK);
@@ -131,7 +131,7 @@ TEST_F(WdtTest, PowerStateSetSuccess)
 
 TEST_F(WdtTest, EventEnableDisableSuccess)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status    = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.event_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     api.base.event_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
@@ -154,7 +154,7 @@ TEST_F(WdtTest, EventGetSuccess)
 
 TEST_F(WdtTest, ErrorEnableDisableSuccess)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status    = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.error_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     api.base.error_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
@@ -180,28 +180,28 @@ TEST_F(WdtTest, ErrorGetSuccess)
 TEST_F(WdtTest, FeedSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.feed = [](cfn_hal_wdt_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.feed           = [](cfn_hal_wdt_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_wdt_feed(&driver), CFN_HAL_ERROR_OK);
 }
 
 TEST_F(WdtTest, StartSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.start = [](cfn_hal_wdt_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.start          = [](cfn_hal_wdt_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_wdt_start(&driver), CFN_HAL_ERROR_OK);
 }
 
 TEST_F(WdtTest, StopSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.stop = [](cfn_hal_wdt_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.stop           = [](cfn_hal_wdt_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_wdt_stop(&driver), CFN_HAL_ERROR_OK);
 }
 
 TEST_F(WdtTest, WithLockMacroWorks)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.feed = [](cfn_hal_wdt_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.feed           = [](cfn_hal_wdt_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     cfn_hal_error_code_t result;
     CFN_HAL_WITH_LOCK(&driver, 100, result, cfn_hal_wdt_feed);
     EXPECT_EQ(result, CFN_HAL_ERROR_OK);

@@ -37,10 +37,10 @@ class TimerTest : public ::testing::Test
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
-        driver.base.type = CFN_HAL_PERIPHERAL_TYPE_TIMER;
+        driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_TIMER;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
-        driver.api = &api;
-        driver.base.vmt = (const struct cfn_hal_api_base_s *) &api;
+        driver.api         = &api;
+        driver.base.vmt    = (const struct cfn_hal_api_base_s *) &api;
     }
 };
 
@@ -87,7 +87,7 @@ TEST_F(TimerTest, InitSuccess)
 TEST_F(TimerTest, DeinitSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.deinit = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.deinit    = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_timer_deinit(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
 }
@@ -106,7 +106,7 @@ TEST_F(TimerTest, ConfigSetGet)
 
 TEST_F(TimerTest, CallbackRegister)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status         = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.callback_register = [](cfn_hal_driver_t *b, cfn_hal_callback_t cb, void *arg) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
 
@@ -118,8 +118,8 @@ TEST_F(TimerTest, CallbackRegister)
 TEST_F(TimerTest, StartStopSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.start = [](cfn_hal_timer_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    api.stop = [](cfn_hal_timer_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.start          = [](cfn_hal_timer_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.stop           = [](cfn_hal_timer_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_timer_start(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_timer_stop(&driver), CFN_HAL_ERROR_OK);
@@ -128,7 +128,7 @@ TEST_F(TimerTest, StartStopSuccess)
 TEST_F(TimerTest, GetTicksSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.get_ticks = [](cfn_hal_timer_t *d, uint32_t ch, uint32_t *t) -> cfn_hal_error_code_t
+    api.get_ticks      = [](cfn_hal_timer_t *d, uint32_t ch, uint32_t *t) -> cfn_hal_error_code_t
     {
         *t = 1234;
         return CFN_HAL_ERROR_OK;
@@ -142,7 +142,7 @@ TEST_F(TimerTest, GetTicksSuccess)
 TEST_F(TimerTest, GetTicksU64Success)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.get_ticks_u64 = [](cfn_hal_timer_t *d, uint32_t ch, uint64_t *t) -> cfn_hal_error_code_t
+    api.get_ticks_u64  = [](cfn_hal_timer_t *d, uint32_t ch, uint64_t *t) -> cfn_hal_error_code_t
     {
         *t = 0x123456789ABCDEF0ULL;
         return CFN_HAL_ERROR_OK;
@@ -156,7 +156,7 @@ TEST_F(TimerTest, GetTicksU64Success)
 TEST_F(TimerTest, SetPeriodSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.set_period = [](cfn_hal_timer_t *d, const cfn_hal_timer_period_t *p) -> cfn_hal_error_code_t
+    api.set_period     = [](cfn_hal_timer_t *d, const cfn_hal_timer_period_t *p) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
 
     cfn_hal_timer_period_t period = { .channel = 1, .ticks = 5000 };
@@ -165,7 +165,7 @@ TEST_F(TimerTest, SetPeriodSuccess)
 
 TEST_F(TimerTest, EventEnableDisable)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status    = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.event_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     api.base.event_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
@@ -176,7 +176,7 @@ TEST_F(TimerTest, EventEnableDisable)
 
 TEST_F(TimerTest, ErrorEnableDisable)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status    = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.error_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     api.base.error_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
@@ -188,7 +188,7 @@ TEST_F(TimerTest, ErrorEnableDisable)
 TEST_F(TimerTest, WithLockMacroWorks)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.start = [](cfn_hal_timer_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.start          = [](cfn_hal_timer_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     cfn_hal_error_code_t result;
     CFN_HAL_WITH_LOCK(&driver, 100, result, cfn_hal_timer_start);
     EXPECT_EQ(result, CFN_HAL_ERROR_OK);

@@ -46,8 +46,8 @@ extern "C"
  */
 typedef enum
 {
-    CFN_HAL_DAC_EVENT_NONE = 0,
-    CFN_HAL_DAC_EVENT_DMA_HALF = CFN_HAL_BIT(0),     /*!< DMA half transfer complete */
+    CFN_HAL_DAC_EVENT_NONE         = 0,
+    CFN_HAL_DAC_EVENT_DMA_HALF     = CFN_HAL_BIT(0), /*!< DMA half transfer complete */
     CFN_HAL_DAC_EVENT_DMA_COMPLETE = CFN_HAL_BIT(1), /*!< DMA transfer complete */
 } cfn_hal_dac_event_t;
 
@@ -56,9 +56,9 @@ typedef enum
  */
 typedef enum
 {
-    CFN_HAL_DAC_ERROR_NONE = 0,
+    CFN_HAL_DAC_ERROR_NONE     = 0,
     CFN_HAL_DAC_ERROR_UNDERRUN = CFN_HAL_BIT(0), /*!< Output buffer underrun */
-    CFN_HAL_DAC_ERROR_GENERAL = CFN_HAL_BIT(1),  /*!< General hardware error */
+    CFN_HAL_DAC_ERROR_GENERAL  = CFN_HAL_BIT(1), /*!< General hardware error */
 } cfn_hal_dac_error_t;
 
 /* Types Structs ----------------------------------------------------*/
@@ -198,7 +198,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dac_callback_register(cfn_hal_dac_t 
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->cb = callback;
+        driver->cb          = callback;
         driver->cb_user_arg = user_arg;
     }
     return cfn_hal_base_callback_register(

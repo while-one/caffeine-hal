@@ -37,10 +37,10 @@ class IrqTest : public ::testing::Test
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
-        driver.base.type = CFN_HAL_PERIPHERAL_TYPE_IRQ;
+        driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_IRQ;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
-        driver.base.vmt = (const struct cfn_hal_api_base_s *) &api;
-        driver.api = &api;
+        driver.base.vmt    = (const struct cfn_hal_api_base_s *) &api;
+        driver.api         = &api;
     }
 };
 
@@ -87,14 +87,14 @@ TEST_F(IrqTest, InitSuccess)
 TEST_F(IrqTest, DeinitSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.deinit = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.deinit    = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_irq_deinit(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
 }
 
 TEST_F(IrqTest, ConfigSetSuccess)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status  = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.config_set = [](cfn_hal_driver_t *b, const void *config) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     cfn_hal_irq_config_t config{};
@@ -113,7 +113,7 @@ TEST_F(IrqTest, ConfigGetSuccess)
 
 TEST_F(IrqTest, CallbackRegisterSuccess)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status         = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.callback_register = [](cfn_hal_driver_t *b, cfn_hal_callback_t cb, void *arg) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     cfn_hal_irq_callback_t callback = [](cfn_hal_irq_t *d, uint32_t ev, uint32_t err, void *arg) {};
@@ -123,7 +123,7 @@ TEST_F(IrqTest, CallbackRegisterSuccess)
 
 TEST_F(IrqTest, PowerStateSetSuccess)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status       = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.power_state_set = [](cfn_hal_driver_t *b, cfn_hal_power_state_t state) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_irq_power_state_set(&driver, CFN_HAL_POWER_STATE_ON), CFN_HAL_ERROR_OK);
@@ -131,7 +131,7 @@ TEST_F(IrqTest, PowerStateSetSuccess)
 
 TEST_F(IrqTest, ErrorEnableDisableSuccess)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status    = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.error_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     api.base.error_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
@@ -157,7 +157,7 @@ TEST_F(IrqTest, ErrorGetSuccess)
 TEST_F(IrqTest, GlobalEnableSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.global_enable = [](cfn_hal_irq_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.global_enable  = [](cfn_hal_irq_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_irq_global_enable(&driver), CFN_HAL_ERROR_OK);
 }
 
@@ -171,7 +171,7 @@ TEST_F(IrqTest, GlobalDisableSuccess)
 TEST_F(IrqTest, EnableVectorSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.enable_vector = [](cfn_hal_irq_t *d, uint32_t id) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.enable_vector  = [](cfn_hal_irq_t *d, uint32_t id) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_irq_enable_vector(&driver, 1), CFN_HAL_ERROR_OK);
 }
 
@@ -185,7 +185,7 @@ TEST_F(IrqTest, DisableVectorSuccess)
 TEST_F(IrqTest, SetPrioritySuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.set_priority = [](cfn_hal_irq_t *d, uint32_t id, uint32_t prio) -> cfn_hal_error_code_t
+    api.set_priority   = [](cfn_hal_irq_t *d, uint32_t id, uint32_t prio) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_irq_set_priority(&driver, 1, 5), CFN_HAL_ERROR_OK);
 }
@@ -193,14 +193,14 @@ TEST_F(IrqTest, SetPrioritySuccess)
 TEST_F(IrqTest, ClearPendingSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.clear_pending = [](cfn_hal_irq_t *d, uint32_t id) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.clear_pending  = [](cfn_hal_irq_t *d, uint32_t id) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_irq_clear_pending(&driver, 1), CFN_HAL_ERROR_OK);
 }
 
 TEST_F(IrqTest, WithLockMacroWorks)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
-    api.base.init = [](cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.init      = [](cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     cfn_hal_error_code_t result;
     CFN_HAL_WITH_LOCK(&driver, 100, result, cfn_hal_irq_init);
     EXPECT_EQ(result, CFN_HAL_ERROR_OK);

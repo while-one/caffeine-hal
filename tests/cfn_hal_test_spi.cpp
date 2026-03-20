@@ -37,10 +37,10 @@ class SpiTest : public ::testing::Test
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
-        driver.base.type = CFN_HAL_PERIPHERAL_TYPE_SPI;
+        driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_SPI;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
-        driver.base.vmt = (const struct cfn_hal_api_base_s *) &api;
-        driver.api = &api;
+        driver.base.vmt    = (const struct cfn_hal_api_base_s *) &api;
+        driver.api         = &api;
     }
 };
 
@@ -87,14 +87,14 @@ TEST_F(SpiTest, InitSuccess)
 TEST_F(SpiTest, DeinitSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.deinit = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.deinit    = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_spi_deinit(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
 }
 
 TEST_F(SpiTest, ConfigSetSuccess)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status  = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.config_set = [](cfn_hal_driver_t *b, const void *config) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     cfn_hal_spi_config_t config{};
@@ -113,7 +113,7 @@ TEST_F(SpiTest, ConfigGetSuccess)
 
 TEST_F(SpiTest, CallbackRegisterSuccess)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status         = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.callback_register = [](cfn_hal_driver_t *b, cfn_hal_callback_t cb, void *arg) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     cfn_hal_spi_callback_t callback =
@@ -124,7 +124,7 @@ TEST_F(SpiTest, CallbackRegisterSuccess)
 
 TEST_F(SpiTest, PowerStateSetSuccess)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status       = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.power_state_set = [](cfn_hal_driver_t *b, cfn_hal_power_state_t state) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_spi_power_state_set(&driver, CFN_HAL_POWER_STATE_ON), CFN_HAL_ERROR_OK);
@@ -132,7 +132,7 @@ TEST_F(SpiTest, PowerStateSetSuccess)
 
 TEST_F(SpiTest, EventEnableDisableSuccess)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status    = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.event_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     api.base.event_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
@@ -155,7 +155,7 @@ TEST_F(SpiTest, EventGetSuccess)
 
 TEST_F(SpiTest, ErrorEnableDisableSuccess)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status    = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.error_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     api.base.error_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
@@ -180,8 +180,8 @@ TEST_F(SpiTest, ErrorGetSuccess)
 
 TEST_F(SpiTest, XfrPollingSuccess)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.xfr_polling = [](cfn_hal_spi_t                   *d,
+    driver.base.status            = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    api.xfr_polling               = [](cfn_hal_spi_t                   *d,
                          const cfn_hal_spi_transaction_t *xfr,
                          uint32_t                         timeout) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     cfn_hal_spi_transaction_t xfr = {};
@@ -191,7 +191,7 @@ TEST_F(SpiTest, XfrPollingSuccess)
 TEST_F(SpiTest, XfrIrqSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.xfr_irq = [](cfn_hal_spi_t *d, const cfn_hal_spi_transaction_t *xfr) -> cfn_hal_error_code_t
+    api.xfr_irq        = [](cfn_hal_spi_t *d, const cfn_hal_spi_transaction_t *xfr) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     cfn_hal_spi_transaction_t xfr = {};
     EXPECT_EQ(cfn_hal_spi_xfr_irq(&driver, &xfr), CFN_HAL_ERROR_OK);
@@ -200,14 +200,14 @@ TEST_F(SpiTest, XfrIrqSuccess)
 TEST_F(SpiTest, XfrIrqAbortSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.xfr_irq_abort = [](cfn_hal_spi_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.xfr_irq_abort  = [](cfn_hal_spi_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_spi_xfr_irq_abort(&driver), CFN_HAL_ERROR_OK);
 }
 
 TEST_F(SpiTest, XfrDmaSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.xfr_dma = [](cfn_hal_spi_t *d, const cfn_hal_spi_transaction_t *xfr) -> cfn_hal_error_code_t
+    api.xfr_dma        = [](cfn_hal_spi_t *d, const cfn_hal_spi_transaction_t *xfr) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     cfn_hal_spi_transaction_t xfr = {};
     EXPECT_EQ(cfn_hal_spi_xfr_dma(&driver, &xfr), CFN_HAL_ERROR_OK);
@@ -216,7 +216,7 @@ TEST_F(SpiTest, XfrDmaSuccess)
 TEST_F(SpiTest, WithLockMacroWorks)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
-    api.base.init = [](cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.init      = [](cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     cfn_hal_error_code_t result;
     CFN_HAL_WITH_LOCK(&driver, 100, result, cfn_hal_spi_init);
     EXPECT_EQ(result, CFN_HAL_ERROR_OK);

@@ -45,7 +45,7 @@ extern "C"
  */
 typedef enum
 {
-    CFN_HAL_WDT_EVENT_NONE = 0,
+    CFN_HAL_WDT_EVENT_NONE    = 0,
     CFN_HAL_WDT_EVENT_WARNING = CFN_HAL_BIT(0), /*!< Early warning interrupt (before reset) */
 } cfn_hal_wdt_event_t;
 
@@ -54,7 +54,7 @@ typedef enum
  */
 typedef enum
 {
-    CFN_HAL_WDT_ERROR_NONE = 0,
+    CFN_HAL_WDT_ERROR_NONE    = 0,
     CFN_HAL_WDT_ERROR_GENERAL = CFN_HAL_BIT(0), /*!< General hardware error */
 } cfn_hal_wdt_error_t;
 
@@ -210,7 +210,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_wdt_callback_register(cfn_hal_wdt_t 
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->cb = callback;
+        driver->cb          = callback;
         driver->cb_user_arg = user_arg;
     }
     return cfn_hal_base_callback_register(

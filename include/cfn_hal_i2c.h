@@ -46,14 +46,14 @@ extern "C"
  */
 typedef enum
 {
-    CFN_HAL_I2C_EVENT_NONE = 0,
+    CFN_HAL_I2C_EVENT_NONE        = 0,
     CFN_HAL_I2C_EVENT_TX_COMPLETE = CFN_HAL_BIT(0), /*!< Transmission complete */
-    CFN_HAL_I2C_EVENT_RX_READY = CFN_HAL_BIT(1),    /*!< Data received and ready */
-    CFN_HAL_I2C_EVENT_START_SENT = CFN_HAL_BIT(2),  /*!< Start condition generated */
-    CFN_HAL_I2C_EVENT_ADDR_SENT = CFN_HAL_BIT(3),   /*!< Address phase complete */
+    CFN_HAL_I2C_EVENT_RX_READY    = CFN_HAL_BIT(1), /*!< Data received and ready */
+    CFN_HAL_I2C_EVENT_START_SENT  = CFN_HAL_BIT(2), /*!< Start condition generated */
+    CFN_HAL_I2C_EVENT_ADDR_SENT   = CFN_HAL_BIT(3), /*!< Address phase complete */
     CFN_HAL_I2C_EVENT_HEADER_SENT = CFN_HAL_BIT(4), /*!< 10-bit header sent */
-    CFN_HAL_I2C_EVENT_DATA_SENT = CFN_HAL_BIT(5),   /*!< Single byte transfer complete */
-    CFN_HAL_I2C_EVENT_STOP_DET = CFN_HAL_BIT(6),    /*!< Stop condition detected */
+    CFN_HAL_I2C_EVENT_DATA_SENT   = CFN_HAL_BIT(5), /*!< Single byte transfer complete */
+    CFN_HAL_I2C_EVENT_STOP_DET    = CFN_HAL_BIT(6), /*!< Stop condition detected */
 } cfn_hal_i2c_event_t;
 
 /**
@@ -61,14 +61,14 @@ typedef enum
  */
 typedef enum
 {
-    CFN_HAL_I2C_ERROR_NONE = 0,
+    CFN_HAL_I2C_ERROR_NONE        = 0,
     CFN_HAL_I2C_ERROR_ARBITRATION = CFN_HAL_BIT(0), /*!< Arbitration lost */
-    CFN_HAL_I2C_ERROR_ACK = CFN_HAL_BIT(1),         /*!< Acknowledge failure */
-    CFN_HAL_I2C_ERROR_OVERRUN = CFN_HAL_BIT(2),     /*!< Data overrun/underrun */
-    CFN_HAL_I2C_ERROR_PEC = CFN_HAL_BIT(3),         /*!< Packet Error Checking mismatch */
-    CFN_HAL_I2C_ERROR_TIMEOUT = CFN_HAL_BIT(4),     /*!< Bus timeout */
-    CFN_HAL_I2C_ERROR_SMB = CFN_HAL_BIT(5),         /*!< SMBus alert/error */
-    CFN_HAL_I2C_ERROR_GENERAL = CFN_HAL_BIT(6),     /*!< General hardware error */
+    CFN_HAL_I2C_ERROR_ACK         = CFN_HAL_BIT(1), /*!< Acknowledge failure */
+    CFN_HAL_I2C_ERROR_OVERRUN     = CFN_HAL_BIT(2), /*!< Data overrun/underrun */
+    CFN_HAL_I2C_ERROR_PEC         = CFN_HAL_BIT(3), /*!< Packet Error Checking mismatch */
+    CFN_HAL_I2C_ERROR_TIMEOUT     = CFN_HAL_BIT(4), /*!< Bus timeout */
+    CFN_HAL_I2C_ERROR_SMB         = CFN_HAL_BIT(5), /*!< SMBus alert/error */
+    CFN_HAL_I2C_ERROR_GENERAL     = CFN_HAL_BIT(6), /*!< General hardware error */
 } cfn_hal_i2c_error_t;
 
 /**
@@ -259,7 +259,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_callback_register(cfn_hal_i2c_t 
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->cb = callback;
+        driver->cb          = callback;
         driver->cb_user_arg = user_arg;
     }
     return cfn_hal_base_callback_register(
