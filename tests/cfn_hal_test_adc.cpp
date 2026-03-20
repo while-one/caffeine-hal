@@ -94,6 +94,86 @@ TEST_F(AdcTest, DeinitSuccess)
 
 // --- Configuration & Callback Tests ---
 
+TEST_F(AdcTest, ConfigValidation)
+{
+    cfn_hal_adc_config_t config = { .resolution = CFN_HAL_ADC_RESOLUTION_BIT_12, .alignment = CFN_HAL_ADC_ALIGN_RIGHT, .scan = CFN_HAL_SCAN_DISABLED, .mode = CFN_HAL_ADC_MODE_SINGLE };
+
+    // Valid config
+    EXPECT_EQ(cfn_hal_adc_config_validate(&driver, &config), CFN_HAL_ERROR_OK);
+
+    // NULL driver
+    EXPECT_EQ(cfn_hal_adc_config_validate(nullptr, &config), CFN_HAL_ERROR_BAD_PARAM);
+
+    // NULL config
+    EXPECT_EQ(cfn_hal_adc_config_validate(&driver, nullptr), CFN_HAL_ERROR_BAD_PARAM);
+
+    // Invalid enum (Resolution)
+    config.resolution = CFN_HAL_ADC_RESOLUTION_BIT_MAX;
+    EXPECT_EQ(cfn_hal_adc_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.resolution = CFN_HAL_ADC_RESOLUTION_BIT_12;
+
+    // Invalid enum (Alignment)
+    config.alignment = CFN_HAL_ADC_ALIGN_MAX;
+    EXPECT_EQ(cfn_hal_adc_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.alignment = CFN_HAL_ADC_ALIGN_RIGHT;
+
+    // Invalid enum (Scan)
+    config.scan = CFN_HAL_SCAN_MAX;
+    EXPECT_EQ(cfn_hal_adc_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.scan = CFN_HAL_SCAN_DISABLED;
+
+    // Invalid enum (Mode)
+    config.mode = CFN_HAL_ADC_MODE_MAX;
+    EXPECT_EQ(cfn_hal_adc_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+}
+
+TEST_F(AdcTest, VmtConfigValidateCalled)
+{
+    cfn_hal_adc_config_t config = { .resolution = CFN_HAL_ADC_RESOLUTION_BIT_12 };
+    bool                 vmt_validate_called = false;
+
+    api.base.config_validate = [](const cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t {
+        cfn_hal_adc_t *d = (cfn_hal_adc_t *) b;
+        *(bool *) d->phy->user_arg = true;
+        return CFN_HAL_ERROR_OK;
+    };
+
+    // In our mock setup, we must manually call config_validate in our lambda if we want to simulate the port behavior
+    api.base.init = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t {
+        if (b->vmt->config_validate != nullptr) {
+            cfn_hal_adc_t *d = (cfn_hal_adc_t *) b;
+            return b->vmt->config_validate(b, d->config);
+        }
+        return CFN_HAL_ERROR_OK;
+    };
+
+    cfn_hal_adc_phy_t phy = { .user_arg = &vmt_validate_called };
+    driver.phy = &phy;
+    driver.config = &config;
+
+    EXPECT_EQ(cfn_hal_adc_init(&driver), CFN_HAL_ERROR_OK);
+    EXPECT_TRUE(vmt_validate_called);
+}
+
+TEST_F(AdcTest, VmtConfigValidateFailsInit)
+{
+    cfn_hal_adc_config_t config = { .resolution = CFN_HAL_ADC_RESOLUTION_BIT_12 };
+    api.base.config_validate = [](const cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    };
+
+    api.base.init = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t {
+        if (b->vmt->config_validate != nullptr) {
+            cfn_hal_adc_t *d = (cfn_hal_adc_t *) b;
+            return b->vmt->config_validate(b, d->config);
+        }
+        return CFN_HAL_ERROR_OK;
+    };
+
+    driver.config = &config;
+    EXPECT_EQ(cfn_hal_adc_init(&driver), CFN_HAL_ERROR_BAD_CONFIG);
+}
+
 TEST_F(AdcTest, ConfigSetGet)
 {
     cfn_hal_adc_config_t config = { .resolution = CFN_HAL_ADC_RESOLUTION_BIT_12 };

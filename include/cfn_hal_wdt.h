@@ -140,24 +140,20 @@ CFN_HAL_CREATE_DRIVER_TYPE(wdt, cfn_hal_wdt_config_t, cfn_hal_wdt_api_t, cfn_hal
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_wdt_config_validate(const cfn_hal_wdt_config_t *config)
+static inline cfn_hal_error_code_t cfn_hal_wdt_config_validate(cfn_hal_wdt_t              *driver,
+                                                               const cfn_hal_wdt_config_t *config)
 {
-    if (config == NULL)
+    if (driver == NULL || config == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+
+    if (config->sleep >= CFN_HAL_WDT_CONFIG_SLEEP_MAX || config->reset >= CFN_HAL_WDT_CONFIG_RESET_MAX)
     {
         return CFN_HAL_ERROR_BAD_CONFIG;
     }
 
-    if (config->sleep >= CFN_HAL_WDT_CONFIG_SLEEP_MAX)
-    {
-        return CFN_HAL_ERROR_BAD_CONFIG;
-    }
-
-    if (config->reset >= CFN_HAL_WDT_CONFIG_RESET_MAX)
-    {
-        return CFN_HAL_ERROR_BAD_CONFIG;
-    }
-
-    return CFN_HAL_ERROR_OK;
+    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_WDT, config);
 }
 
 /**

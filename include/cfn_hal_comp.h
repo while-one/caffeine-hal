@@ -134,14 +134,15 @@ CFN_HAL_CREATE_DRIVER_TYPE(
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_comp_config_validate(const cfn_hal_comp_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_comp_config_validate(const cfn_hal_comp_t        *driver,
+                                                                 const cfn_hal_comp_config_t *config)
 {
-    if (config == NULL)
+    if (driver == NULL || config == NULL)
     {
-        return CFN_HAL_ERROR_BAD_CONFIG;
+        return CFN_HAL_ERROR_BAD_PARAM;
     }
 
-    return CFN_HAL_ERROR_OK;
+    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_COMP, config);
 }
 
 /**

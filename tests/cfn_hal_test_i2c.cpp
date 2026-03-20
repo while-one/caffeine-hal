@@ -92,6 +92,27 @@ TEST_F(I2cTest, DeinitSuccess)
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
 }
 
+TEST_F(I2cTest, ConfigValidation)
+{
+    cfn_hal_i2c_config_t config = {
+        .speed = CFN_HAL_I2C_CONFIG_SPEED_100KHZ,
+        .custom = nullptr,
+    };
+
+    // Valid config
+    EXPECT_EQ(cfn_hal_i2c_config_validate(&driver, &config), CFN_HAL_ERROR_OK);
+
+    // NULL driver
+    EXPECT_EQ(cfn_hal_i2c_config_validate(nullptr, &config), CFN_HAL_ERROR_BAD_PARAM);
+
+    // NULL config
+    EXPECT_EQ(cfn_hal_i2c_config_validate(&driver, nullptr), CFN_HAL_ERROR_BAD_PARAM);
+
+    // Invalid enum (Speed Mode)
+    config.speed = CFN_HAL_I2C_CONFIG_SPEED_MAX;
+    EXPECT_EQ(cfn_hal_i2c_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+}
+
 TEST_F(I2cTest, ConfigSetSuccess)
 {
     driver.base.status  = CFN_HAL_DRIVER_STATUS_INITIALIZED;

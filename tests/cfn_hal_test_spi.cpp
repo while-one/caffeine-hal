@@ -92,6 +92,35 @@ TEST_F(SpiTest, DeinitSuccess)
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
 }
 
+TEST_F(SpiTest, ConfigValidation)
+{
+    cfn_hal_spi_config_t config = {
+        .bitrate   = 1000000,
+        .data_size = 8,
+        .fmt       = CFN_HAL_SPI_CONFIG_FMT_POL0_PHA0,
+        .cs_mode   = CFN_HAL_SPI_CONFIG_CS_HW_CONTROLLED,
+        .custom    = nullptr,
+    };
+
+    // Valid config
+    EXPECT_EQ(cfn_hal_spi_config_validate(&driver, &config), CFN_HAL_ERROR_OK);
+
+    // NULL driver
+    EXPECT_EQ(cfn_hal_spi_config_validate(nullptr, &config), CFN_HAL_ERROR_BAD_PARAM);
+
+    // NULL config
+    EXPECT_EQ(cfn_hal_spi_config_validate(&driver, nullptr), CFN_HAL_ERROR_BAD_PARAM);
+
+    // Invalid enum (Format)
+    config.fmt = CFN_HAL_SPI_CONFIG_FMT_MAX;
+    EXPECT_EQ(cfn_hal_spi_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.fmt = CFN_HAL_SPI_CONFIG_FMT_POL0_PHA0;
+
+    // Invalid enum (CS Mode)
+    config.cs_mode = CFN_HAL_SPI_CONFIG_CS_MAX;
+    EXPECT_EQ(cfn_hal_spi_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+}
+
 TEST_F(SpiTest, ConfigSetSuccess)
 {
     driver.base.status  = CFN_HAL_DRIVER_STATUS_INITIALIZED;

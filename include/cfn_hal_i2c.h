@@ -82,7 +82,9 @@ typedef enum
     CFN_HAL_I2C_CONFIG_SPEED_3330KHZ, /*!< High Speed (3.33 MHz) */
     CFN_HAL_I2C_CONFIG_SPEED_3400KHZ, /*!< High Speed (3.40 MHz) */
     CFN_HAL_I2C_CONFIG_SPEED_5000KHZ, /*!< Ultra Fast Mode */
-    CFN_HAL_I2C_CONFIG_SPEED_CUSTOM   /*!< Vendor-specific speed */
+    CFN_HAL_I2C_CONFIG_SPEED_CUSTOM,  /*!< Vendor-specific speed */
+
+    CFN_HAL_I2C_CONFIG_SPEED_MAX
 } cfn_hal_i2c_config_speed_t;
 
 /* Types Structs ----------------------------------------------------*/
@@ -185,19 +187,20 @@ CFN_HAL_CREATE_DRIVER_TYPE(i2c, cfn_hal_i2c_config_t, cfn_hal_i2c_api_t, cfn_hal
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_i2c_config_validate(const cfn_hal_i2c_config_t *config)
+static inline cfn_hal_error_code_t cfn_hal_i2c_config_validate(const cfn_hal_i2c_t        *driver,
+                                                               const cfn_hal_i2c_config_t *config)
 {
-    if (config == NULL)
+    if (driver == NULL || config == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+
+    if (config->speed >= CFN_HAL_I2C_CONFIG_SPEED_MAX)
     {
         return CFN_HAL_ERROR_BAD_CONFIG;
     }
 
-    if (config->speed > CFN_HAL_I2C_CONFIG_SPEED_CUSTOM)
-    {
-        return CFN_HAL_ERROR_BAD_CONFIG;
-    }
-
-    return CFN_HAL_ERROR_OK;
+    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C, config);
 }
 
 /**

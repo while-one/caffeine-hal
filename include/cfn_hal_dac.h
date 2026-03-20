@@ -61,6 +61,27 @@ typedef enum
     CFN_HAL_DAC_ERROR_GENERAL  = CFN_HAL_BIT(1), /*!< General hardware error */
 } cfn_hal_dac_error_t;
 
+typedef enum
+{
+    CFN_HAL_DAC_RESOLUTION_BIT_4 = 0,
+    CFN_HAL_DAC_RESOLUTION_BIT_6,
+    CFN_HAL_DAC_RESOLUTION_BIT_8,
+    CFN_HAL_DAC_RESOLUTION_BIT_10,
+    CFN_HAL_DAC_RESOLUTION_BIT_12,
+    CFN_HAL_DAC_RESOLUTION_BIT_14,
+    CFN_HAL_DAC_RESOLUTION_BIT_16,
+    CFN_HAL_DAC_RESOLUTION_BIT_24,
+
+    CFN_HAL_DAC_RESOLUTION_BIT_MAX
+} cfn_hal_dac_resolution_t;
+
+typedef enum
+{
+    CFN_HAL_DAC_ALIGN_RIGHT = 0,
+    CFN_HAL_DAC_ALIGN_LEFT,
+
+    CFN_HAL_DAC_ALIGN_MAX
+} cfn_hal_dac_align_t;
 /* Types Structs ----------------------------------------------------*/
 
 /**
@@ -79,9 +100,9 @@ typedef struct
  */
 typedef struct
 {
-    uint32_t resolution; /*!< DAC resolution in bits */
-    uint32_t alignment;  /*!< Data alignment (Left/Right) */
-    void    *custom;     /*!< Vendor-specific custom configuration */
+    cfn_hal_dac_align_t      alignment;  /*!< Data alignment (Left/Right) */
+    cfn_hal_dac_resolution_t resolution; /*!< DAC resolution in bits */
+    void                    *custom;     /*!< Vendor-specific custom configuration */
 } cfn_hal_dac_config_t;
 
 typedef struct cfn_hal_dac_s     cfn_hal_dac_t;
@@ -124,14 +145,20 @@ CFN_HAL_CREATE_DRIVER_TYPE(dac, cfn_hal_dac_config_t, cfn_hal_dac_api_t, cfn_hal
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_dac_config_validate(const cfn_hal_dac_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dac_config_validate(const cfn_hal_dac_t        *driver,
+                                                                const cfn_hal_dac_config_t *config)
 {
-    if (config == NULL)
+    if (driver == NULL || config == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+
+    if ((config->resolution >= CFN_HAL_DAC_RESOLUTION_BIT_MAX) || (config->alignment >= CFN_HAL_DAC_ALIGN_MAX))
     {
         return CFN_HAL_ERROR_BAD_CONFIG;
     }
 
-    return CFN_HAL_ERROR_OK;
+    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DAC, config);
 }
 
 /**

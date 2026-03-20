@@ -94,6 +94,65 @@ TEST_F(UartTest, DeinitSuccess)
 
 // --- Configuration & Callback Tests ---
 
+TEST_F(UartTest, ConfigValidation)
+{
+    cfn_hal_uart_config_t config = {
+        .echo       = false,
+        .baudrate   = 115200,
+        .read_mode  = CFN_HAL_UART_CONFIG_MODE_BLOCKING,
+        .write_mode = CFN_HAL_UART_CONFIG_MODE_BLOCKING,
+        .data_len   = CFN_HAL_UART_CONFIG_DATA_LEN_8,
+        .stop_bits  = CFN_HAL_UART_CONFIG_STOP_ONE_BIT,
+        .parity     = CFN_HAL_UART_CONFIG_PARITY_NONE,
+        .flow_ctrl  = CFN_HAL_UART_CONFIG_FLOW_CTRL_NONE,
+        .direction  = CFN_HAL_UART_CONFIG_DIRECTION_TX_RX,
+        .custom     = nullptr,
+    };
+
+    // Valid config
+    EXPECT_EQ(cfn_hal_uart_config_validate(&driver, &config), CFN_HAL_ERROR_OK);
+
+    // NULL driver
+    EXPECT_EQ(cfn_hal_uart_config_validate(nullptr, &config), CFN_HAL_ERROR_BAD_PARAM);
+
+    // NULL config
+    EXPECT_EQ(cfn_hal_uart_config_validate(&driver, nullptr), CFN_HAL_ERROR_BAD_PARAM);
+
+    // Invalid enum (Read Mode)
+    config.read_mode = CFN_HAL_UART_CONFIG_MODE_MAX;
+    EXPECT_EQ(cfn_hal_uart_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.read_mode = CFN_HAL_UART_CONFIG_MODE_BLOCKING;
+
+    // Invalid enum (Write Mode)
+    config.write_mode = CFN_HAL_UART_CONFIG_MODE_MAX;
+    EXPECT_EQ(cfn_hal_uart_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.write_mode = CFN_HAL_UART_CONFIG_MODE_BLOCKING;
+
+    // Invalid enum (Data Len)
+    config.data_len = CFN_HAL_UART_CONFIG_DATA_LEN_MAX;
+    EXPECT_EQ(cfn_hal_uart_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.data_len = CFN_HAL_UART_CONFIG_DATA_LEN_8;
+
+    // Invalid enum (Stop Bits)
+    config.stop_bits = CFN_HAL_UART_CONFIG_STOP_MAX;
+    EXPECT_EQ(cfn_hal_uart_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.stop_bits = CFN_HAL_UART_CONFIG_STOP_ONE_BIT;
+
+    // Invalid enum (Parity)
+    config.parity = CFN_HAL_UART_CONFIG_PARITY_MAX;
+    EXPECT_EQ(cfn_hal_uart_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.parity = CFN_HAL_UART_CONFIG_PARITY_NONE;
+
+    // Invalid enum (Flow Control)
+    config.flow_ctrl = CFN_HAL_UART_CONFIG_FLOW_CTRL_MAX;
+    EXPECT_EQ(cfn_hal_uart_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.flow_ctrl = CFN_HAL_UART_CONFIG_FLOW_CTRL_NONE;
+
+    // Invalid enum (Direction)
+    config.direction = CFN_HAL_UART_CONFIG_DIRECTION_MAX;
+    EXPECT_EQ(cfn_hal_uart_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+}
+
 TEST_F(UartTest, ConfigSetGet)
 {
     cfn_hal_uart_config_t config = { .baudrate = 115200 };

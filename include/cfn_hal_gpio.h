@@ -217,39 +217,22 @@ CFN_HAL_CREATE_DRIVER_TYPE(gpio, void, cfn_hal_gpio_api_t, cfn_hal_gpio_phy_t, c
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_gpio_pin_config_validate(const cfn_hal_gpio_pin_config_t *config)
+static inline cfn_hal_error_code_t cfn_hal_gpio_pin_config_validate(const cfn_hal_gpio_t            *driver,
+                                                                    const cfn_hal_gpio_pin_config_t *pin_cfg)
 {
-    if (config == NULL)
+    if (driver == NULL || pin_cfg == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+
+    if (pin_cfg->mode >= CFN_HAL_GPIO_CONFIG_MODE_MAX || pin_cfg->pull >= CFN_HAL_GPIO_CONFIG_PULL_MAX ||
+        pin_cfg->speed >= CFN_HAL_GPIO_CONFIG_SPEED_MAX || pin_cfg->strength >= CFN_HAL_GPIO_CONFIG_STRENGTH_MAX ||
+        pin_cfg->default_state >= CFN_HAL_GPIO_STATE_MAX)
     {
         return CFN_HAL_ERROR_BAD_CONFIG;
     }
 
-    if (config->mode >= CFN_HAL_GPIO_CONFIG_MODE_MAX)
-    {
-        return CFN_HAL_ERROR_BAD_CONFIG;
-    }
-
-    if (config->pull >= CFN_HAL_GPIO_CONFIG_PULL_MAX)
-    {
-        return CFN_HAL_ERROR_BAD_CONFIG;
-    }
-
-    if (config->speed >= CFN_HAL_GPIO_CONFIG_SPEED_MAX)
-    {
-        return CFN_HAL_ERROR_BAD_CONFIG;
-    }
-
-    if (config->strength >= CFN_HAL_GPIO_CONFIG_STRENGTH_MAX)
-    {
-        return CFN_HAL_ERROR_BAD_CONFIG;
-    }
-
-    if (config->default_state >= CFN_HAL_GPIO_STATE_MAX)
-    {
-        return CFN_HAL_ERROR_BAD_CONFIG;
-    }
-
-    return CFN_HAL_ERROR_OK;
+    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, pin_cfg);
 }
 
 /**

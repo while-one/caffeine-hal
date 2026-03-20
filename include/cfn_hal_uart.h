@@ -236,49 +236,23 @@ CFN_HAL_CREATE_DRIVER_TYPE(
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_uart_config_validate(const cfn_hal_uart_config_t *config)
+static inline cfn_hal_error_code_t cfn_hal_uart_config_validate(const cfn_hal_uart_t        *driver,
+                                                                const cfn_hal_uart_config_t *config)
 {
-    if (config == NULL)
+    if (driver == NULL || config == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+
+    if (config->read_mode >= CFN_HAL_UART_CONFIG_MODE_MAX || config->write_mode >= CFN_HAL_UART_CONFIG_MODE_MAX ||
+        config->data_len >= CFN_HAL_UART_CONFIG_DATA_LEN_MAX || config->stop_bits >= CFN_HAL_UART_CONFIG_STOP_MAX ||
+        config->parity >= CFN_HAL_UART_CONFIG_PARITY_MAX || config->flow_ctrl >= CFN_HAL_UART_CONFIG_FLOW_CTRL_MAX ||
+        config->direction >= CFN_HAL_UART_CONFIG_DIRECTION_MAX)
     {
         return CFN_HAL_ERROR_BAD_CONFIG;
     }
 
-    if (config->read_mode >= CFN_HAL_UART_CONFIG_MODE_MAX)
-    {
-        return CFN_HAL_ERROR_BAD_CONFIG;
-    }
-
-    if (config->write_mode >= CFN_HAL_UART_CONFIG_MODE_MAX)
-    {
-        return CFN_HAL_ERROR_BAD_CONFIG;
-    }
-
-    if (config->data_len >= CFN_HAL_UART_CONFIG_DATA_LEN_MAX)
-    {
-        return CFN_HAL_ERROR_BAD_CONFIG;
-    }
-
-    if (config->stop_bits >= CFN_HAL_UART_CONFIG_STOP_MAX)
-    {
-        return CFN_HAL_ERROR_BAD_CONFIG;
-    }
-
-    if (config->parity >= CFN_HAL_UART_CONFIG_PARITY_MAX)
-    {
-        return CFN_HAL_ERROR_BAD_CONFIG;
-    }
-
-    if (config->flow_ctrl >= CFN_HAL_UART_CONFIG_FLOW_CTRL_MAX)
-    {
-        return CFN_HAL_ERROR_BAD_CONFIG;
-    }
-
-    if (config->direction >= CFN_HAL_UART_CONFIG_DIRECTION_MAX)
-    {
-        return CFN_HAL_ERROR_BAD_CONFIG;
-    }
-
-    return CFN_HAL_ERROR_OK;
+    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_UART, config);
 }
 
 /**

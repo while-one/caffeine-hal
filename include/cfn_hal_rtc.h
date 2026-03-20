@@ -156,24 +156,21 @@ CFN_HAL_CREATE_DRIVER_TYPE(rtc, cfn_hal_rtc_config_t, cfn_hal_rtc_api_t, cfn_hal
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_rtc_config_validate(const cfn_hal_rtc_config_t *config)
+static inline cfn_hal_error_code_t cfn_hal_rtc_config_validate(const cfn_hal_rtc_t        *driver,
+                                                               const cfn_hal_rtc_config_t *config)
 {
-    if (config == NULL)
+    if (driver == NULL || config == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+
+    if (config->format >= CFN_HAL_RTC_CONFIG_FORMAT_MAX || config->mode >= CFN_HAL_RTC_CONFIG_MODE_MAX)
     {
         return CFN_HAL_ERROR_BAD_CONFIG;
     }
 
-    if (config->format >= CFN_HAL_RTC_CONFIG_FORMAT_MAX)
-    {
-        return CFN_HAL_ERROR_BAD_CONFIG;
-    }
-
-    if (config->mode >= CFN_HAL_RTC_CONFIG_MODE_MAX)
-    {
-        return CFN_HAL_ERROR_BAD_CONFIG;
-    }
-
-    return CFN_HAL_ERROR_OK;
+    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_RTC, config);
+    ;
 }
 
 /**

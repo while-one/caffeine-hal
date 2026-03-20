@@ -96,12 +96,12 @@ TEST_F(DacTest, DeinitSuccess)
 
 TEST_F(DacTest, ConfigSetGet)
 {
-    cfn_hal_dac_config_t config = { .resolution = 12 };
+    cfn_hal_dac_config_t config = { .resolution = CFN_HAL_DAC_RESOLUTION_BIT_12 };
     cfn_hal_dac_config_t read_config{};
 
     EXPECT_EQ(cfn_hal_dac_config_set(&driver, &config), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_dac_config_get(&driver, &read_config), CFN_HAL_ERROR_OK);
-    EXPECT_EQ(read_config.resolution, 12);
+    EXPECT_EQ(read_config.resolution, CFN_HAL_DAC_RESOLUTION_BIT_12);
 }
 
 TEST_F(DacTest, CallbackRegister)

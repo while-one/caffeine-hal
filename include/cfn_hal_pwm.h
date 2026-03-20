@@ -134,24 +134,20 @@ CFN_HAL_CREATE_DRIVER_TYPE(pwm, cfn_hal_pwm_config_t, cfn_hal_pwm_api_t, cfn_hal
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_pwm_config_validate(const cfn_hal_pwm_config_t *config)
+static inline cfn_hal_error_code_t cfn_hal_pwm_config_validate(const cfn_hal_pwm_t        *driver,
+                                                               const cfn_hal_pwm_config_t *config)
 {
-    if (config == NULL)
+    if (driver == NULL || config == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+
+    if (config->polarity > CFN_HAL_PWM_CONFIG_POLARITY_INVERTED || config->duty_cycle_percent > 100)
     {
         return CFN_HAL_ERROR_BAD_CONFIG;
     }
 
-    if (config->polarity > CFN_HAL_PWM_CONFIG_POLARITY_INVERTED)
-    {
-        return CFN_HAL_ERROR_BAD_CONFIG;
-    }
-
-    if (config->duty_cycle_percent > 100)
-    {
-        return CFN_HAL_ERROR_BAD_CONFIG;
-    }
-
-    return CFN_HAL_ERROR_OK;
+    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM, config);
 }
 
 /**
