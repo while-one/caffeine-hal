@@ -32,11 +32,13 @@ class DacTest : public ::testing::Test
   protected:
     cfn_hal_dac_t     driver{};
     cfn_hal_dac_api_t api{};
+    cfn_hal_dac_config_t dummy_config{};
 
     void SetUp() override
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
+        driver.config = &dummy_config;
         driver.base.vmt    = (const struct cfn_hal_api_base_s *) &api;
         driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_DAC;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;

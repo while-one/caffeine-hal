@@ -32,11 +32,13 @@ class UsbTest : public ::testing::Test
   protected:
     cfn_hal_usb_t     driver{};
     cfn_hal_usb_api_t api{};
+    cfn_hal_usb_config_t dummy_config{};
 
     void SetUp() override
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
+        driver.config = &dummy_config;
         driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_USB;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
         driver.api         = &api;
