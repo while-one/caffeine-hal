@@ -181,6 +181,26 @@ CFN_HAL_CREATE_DRIVER_TYPE(i2c, cfn_hal_i2c_config_t, cfn_hal_i2c_api_t, cfn_hal
 /* Functions inline ------------------------------------------------- */
 
 /**
+ * @brief Validates the I2C configuration.
+ * @param config Pointer to the configuration structure.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_i2c_config_validate(const cfn_hal_i2c_config_t *config)
+{
+    if (config == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    if (config->speed > CFN_HAL_I2C_CONFIG_SPEED_CUSTOM)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    return CFN_HAL_ERROR_OK;
+}
+
+/**
  * @brief Initializes the I2C driver.
  * @param driver Pointer to the I2C driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.

@@ -65,6 +65,8 @@ typedef enum
 {
     CFN_HAL_WDT_CONFIG_SLEEP_RUN,   /*!< Continue counting during sleep */
     CFN_HAL_WDT_CONFIG_SLEEP_PAUSE, /*!< Freeze counter during sleep */
+
+    CFN_HAL_WDT_CONFIG_SLEEP_MAX
 } cfn_hal_wdt_config_sleep_t;
 
 /**
@@ -75,6 +77,8 @@ typedef enum
     CFN_HAL_WDT_CONFIG_RESET_NONE, /*!< No reset (interrupt only) */
     CFN_HAL_WDT_CONFIG_RESET_IRQ,  /*!< Generate interrupt then reset */
     CFN_HAL_WDT_CONFIG_RESET_CPU,  /*!< Immediate CPU reset */
+
+    CFN_HAL_WDT_CONFIG_RESET_MAX
 } cfn_hal_wdt_config_reset_t;
 
 /* Types Structs ----------------------------------------------------*/
@@ -130,6 +134,31 @@ CFN_HAL_CREATE_DRIVER_TYPE(wdt, cfn_hal_wdt_config_t, cfn_hal_wdt_api_t, cfn_hal
     CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_WDT, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
+
+/**
+ * @brief Validates the Watchdog configuration.
+ * @param config Pointer to the configuration structure.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_wdt_config_validate(const cfn_hal_wdt_config_t *config)
+{
+    if (config == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    if (config->sleep >= CFN_HAL_WDT_CONFIG_SLEEP_MAX)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    if (config->reset >= CFN_HAL_WDT_CONFIG_RESET_MAX)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    return CFN_HAL_ERROR_OK;
+}
 
 /**
  * @brief Initializes the Watchdog driver.

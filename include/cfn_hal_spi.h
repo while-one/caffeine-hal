@@ -72,6 +72,8 @@ typedef enum
     CFN_HAL_SPI_CONFIG_FMT_POL0_PHA1, /*!< CPOL=0, CPHA=1 */
     CFN_HAL_SPI_CONFIG_FMT_POL1_PHA0, /*!< CPOL=1, CPHA=0 */
     CFN_HAL_SPI_CONFIG_FMT_POL1_PHA1, /*!< CPOL=1, CPHA=1 */
+
+    CFN_HAL_SPI_CONFIG_FMT_MAX
 } cfn_hal_spi_config_format_t;
 
 /**
@@ -82,6 +84,8 @@ typedef enum
     CFN_HAL_SPI_CONFIG_CS_USER_CONTROLLED, /*!< CS toggled manually by application */
     CFN_HAL_SPI_CONFIG_CS_HAL_CONTROLLED,  /*!< CS toggled by HAL during xfr */
     CFN_HAL_SPI_CONFIG_CS_HW_CONTROLLED,   /*!< CS toggled by hardware peripheral */
+
+    CFN_HAL_SPI_CONFIG_CS_MAX
 } cfn_hal_spi_config_cs_mode_t;
 
 /* Types Structs ----------------------------------------------------*/
@@ -162,6 +166,31 @@ CFN_HAL_CREATE_DRIVER_TYPE(spi, cfn_hal_spi_config_t, cfn_hal_spi_api_t, cfn_hal
     CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_SPI, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
+
+/**
+ * @brief Validates the SPI configuration.
+ * @param config Pointer to the configuration structure.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_spi_config_validate(const cfn_hal_spi_config_t *config)
+{
+    if (config == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    if (config->fmt >= CFN_HAL_SPI_CONFIG_FMT_MAX)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    if (config->cs_mode >= CFN_HAL_SPI_CONFIG_CS_MAX)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    return CFN_HAL_ERROR_OK;
+}
 
 /**
  * @brief Initializes the SPI driver.

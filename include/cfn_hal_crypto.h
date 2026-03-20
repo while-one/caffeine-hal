@@ -69,6 +69,8 @@ typedef enum
     CFN_HAL_CRYPTO_ALGO_AES_GCM,
     CFN_HAL_CRYPTO_ALGO_SHA256,
     CFN_HAL_CRYPTO_ALGO_SHA512,
+
+    CFN_HAL_CRYPTO_ALGO_MAX
 } cfn_hal_crypto_algo_t;
 
 /* Types Structs ----------------------------------------------------*/
@@ -131,6 +133,26 @@ CFN_HAL_CREATE_DRIVER_TYPE(
     CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
+
+/**
+ * @brief Validates the Crypto configuration.
+ * @param config Pointer to the configuration structure.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_crypto_config_validate(const cfn_hal_crypto_config_t *config)
+{
+    if (config == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    if (config->algo >= CFN_HAL_CRYPTO_ALGO_MAX)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    return CFN_HAL_ERROR_OK;
+}
 
 /**
  * @brief Initializes the Crypto driver.

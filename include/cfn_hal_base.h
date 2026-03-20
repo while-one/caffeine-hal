@@ -66,6 +66,7 @@ typedef struct cfn_hal_api_base_s
 
     cfn_hal_error_code_t (*power_state_set)(cfn_hal_driver_t *base, cfn_hal_power_state_t state);
     cfn_hal_error_code_t (*config_set)(cfn_hal_driver_t *base, const void *config);
+    cfn_hal_error_code_t (*config_validate)(cfn_hal_driver_t *base, const void *config);
     cfn_hal_error_code_t (*callback_register)(cfn_hal_driver_t *base, cfn_hal_callback_t callback, void *user_arg);
 
     cfn_hal_error_code_t (*event_enable)(cfn_hal_driver_t *base, uint32_t event_mask);

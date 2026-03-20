@@ -70,6 +70,8 @@ typedef enum
 {
     CFN_HAL_RTC_CONFIG_FORMAT_12H, /*!< 12-hour clock (AM/PM) */
     CFN_HAL_RTC_CONFIG_FORMAT_24H, /*!< 24-hour clock */
+
+    CFN_HAL_RTC_CONFIG_FORMAT_MAX
 } cfn_hal_rtc_config_format_t;
 
 /**
@@ -80,6 +82,8 @@ typedef enum
     CFN_HAL_RTC_CONFIG_MODE_BCD,        /*!< Binary Coded Decimal format */
     CFN_HAL_RTC_CONFIG_MODE_BINARY,     /*!< Standard binary format */
     CFN_HAL_RTC_CONFIG_MODE_BINARY_BCD, /*!< Mixed mode support */
+
+    CFN_HAL_RTC_CONFIG_MODE_MAX
 } cfn_hal_rtc_config_mode_t;
 
 /* Types Structs ----------------------------------------------------*/
@@ -146,6 +150,31 @@ CFN_HAL_CREATE_DRIVER_TYPE(rtc, cfn_hal_rtc_config_t, cfn_hal_rtc_api_t, cfn_hal
     CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_RTC, api_ptr, phy_ptr, config_ptr)
 
 /* Functions inline ------------------------------------------------- */
+
+/**
+ * @brief Validates the RTC configuration.
+ * @param config Pointer to the configuration structure.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_rtc_config_validate(const cfn_hal_rtc_config_t *config)
+{
+    if (config == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    if (config->format >= CFN_HAL_RTC_CONFIG_FORMAT_MAX)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    if (config->mode >= CFN_HAL_RTC_CONFIG_MODE_MAX)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    return CFN_HAL_ERROR_OK;
+}
 
 /**
  * @brief Initializes the RTC driver.

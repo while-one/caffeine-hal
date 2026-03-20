@@ -96,13 +96,13 @@ TEST_F(AdcTest, DeinitSuccess)
 
 TEST_F(AdcTest, ConfigSetGet)
 {
-    cfn_hal_adc_config_t config = { .resolution = 12 };
+    cfn_hal_adc_config_t config = { .resolution = CFN_HAL_ADC_RESOLUTION_BIT_12 };
     cfn_hal_adc_config_t read_config{};
 
     // Config set should work even if not initialized (shadowing)
     EXPECT_EQ(cfn_hal_adc_config_set(&driver, &config), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_adc_config_get(&driver, &read_config), CFN_HAL_ERROR_OK);
-    EXPECT_EQ(read_config.resolution, 12);
+    EXPECT_EQ(read_config.resolution, CFN_HAL_ADC_RESOLUTION_BIT_12);
 }
 
 TEST_F(AdcTest, CallbackRegister)

@@ -62,7 +62,9 @@ typedef enum
 typedef enum
 {
     CFN_HAL_GPIO_STATE_LOW = 0,
-    CFN_HAL_GPIO_STATE_HIGH
+    CFN_HAL_GPIO_STATE_HIGH,
+
+    CFN_HAL_GPIO_STATE_MAX
 } cfn_hal_gpio_state_t;
 
 typedef enum
@@ -73,13 +75,17 @@ typedef enum
     CFN_HAL_GPIO_CONFIG_MODE_OUTPUT_OD,
     CFN_HAL_GPIO_CONFIG_MODE_ALTERNATE_PP,
     CFN_HAL_GPIO_CONFIG_MODE_ALTERNATE_OD,
+
+    CFN_HAL_GPIO_CONFIG_MODE_MAX
 } cfn_hal_gpio_config_mode_t;
 
 typedef enum
 {
     CFN_HAL_GPIO_CONFIG_PULL_NOPULL,
     CFN_HAL_GPIO_CONFIG_PULL_PULLUP,
-    CFN_HAL_GPIO_CONFIG_PULL_PULLDOWN
+    CFN_HAL_GPIO_CONFIG_PULL_PULLDOWN,
+
+    CFN_HAL_GPIO_CONFIG_PULL_MAX
 } cfn_hal_gpio_config_pull_t;
 
 typedef enum
@@ -87,7 +93,9 @@ typedef enum
     CFN_HAL_GPIO_CONFIG_SPEED_LOW,      /**< GPIO low speed         */
     CFN_HAL_GPIO_CONFIG_SPEED_MEDIUM,   /**< GPIO medium speed      */
     CFN_HAL_GPIO_CONFIG_SPEED_HIGH,     /**< GPIO high speed        */
-    CFN_HAL_GPIO_CONFIG_SPEED_VERY_HIGH /**< GPIO very high speed   */
+    CFN_HAL_GPIO_CONFIG_SPEED_VERY_HIGH, /**< GPIO very high speed   */
+
+    CFN_HAL_GPIO_CONFIG_SPEED_MAX
 } cfn_hal_gpio_config_speed_t;
 
 typedef enum
@@ -95,6 +103,8 @@ typedef enum
     CFN_HAL_GPIO_CONFIG_STRENGTH_LOW,    /**< GPIO low strength */
     CFN_HAL_GPIO_CONFIG_STRENGTH_MEDIUM, /**< GPIO medium strength */
     CFN_HAL_GPIO_CONFIG_STRENGTH_HIGH,   /**< GPIO high strength */
+
+    CFN_HAL_GPIO_CONFIG_STRENGTH_MAX
 } cfn_hal_gpio_config_strength_t;
 
 typedef uint32_t cfn_hal_gpio_pin_t;
@@ -201,6 +211,46 @@ CFN_HAL_CREATE_DRIVER_TYPE(gpio, void, cfn_hal_gpio_api_t, cfn_hal_gpio_phy_t, c
     CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_GPIO, api_ptr, phy_ptr, NULL)
 
 /* Functions inline ------------------------------------------------- */
+
+/**
+ * @brief Validates the GPIO pin configuration.
+ * @param config Pointer to the configuration structure.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+static inline cfn_hal_error_code_t cfn_hal_gpio_pin_config_validate(const cfn_hal_gpio_pin_config_t *config)
+{
+    if (config == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    if (config->mode >= CFN_HAL_GPIO_CONFIG_MODE_MAX)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    if (config->pull >= CFN_HAL_GPIO_CONFIG_PULL_MAX)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    if (config->speed >= CFN_HAL_GPIO_CONFIG_SPEED_MAX)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    if (config->strength >= CFN_HAL_GPIO_CONFIG_STRENGTH_MAX)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    if (config->default_state >= CFN_HAL_GPIO_STATE_MAX)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    return CFN_HAL_ERROR_OK;
+}
 
 /**
  * @brief Initializes the GPIO driver.
