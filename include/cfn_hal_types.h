@@ -158,6 +158,8 @@ typedef enum
     CFN_HAL_POWER_STATE_OFF        /*!< Physically unpowered or fully disabled */
 } cfn_hal_power_state_t;
 
+struct cfn_hal_clock_s;
+
 /**
  * @brief Base structure for all peripheral drivers.
  * Contains common state and polymorphic interface linkage.
@@ -167,6 +169,8 @@ typedef struct cfn_hal_driver_s
     cfn_hal_peripheral_type_t type;        /*!< FourCC peripheral type code (e.g. 'UART') */
     cfn_hal_driver_status_t   status;      /*!< Current software state of the driver */
     cfn_hal_power_state_t     power_state; /*!< Current power/clocking state of the hardware */
+
+    struct cfn_hal_clock_s *clock_driver; /*!< Pointer to the clock driver instance */
 
 #if (CFN_HAL_USE_LOCK == 1)
     void *lock_obj; /*!< Opaque pointer to an RTOS mutex or critical section
@@ -188,7 +192,7 @@ typedef struct cfn_hal_driver_s
                          implementation state */
 
     uint32_t flags; /*!< Generic generic state tracking flags for the peripheral */
-
+    uint32_t peripheral_id;
     const struct cfn_hal_api_base_s *vmt; /*!< Pointer to the peripheral-specific Virtual Method Table (API) */
 } cfn_hal_driver_t;
 /* Functions prototypes ---------------------------------------------*/

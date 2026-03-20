@@ -151,6 +151,23 @@ CFN_HAL_CREATE_DRIVER_TYPE(
     qspi, cfn_hal_qspi_config_t, cfn_hal_qspi_api_t, cfn_hal_qspi_phy_t, cfn_hal_qspi_callback_t);
 
 /* Functions inline ------------------------------------------------- */
+CFN_HAL_INLINE void cfn_hal_qspi_populate(cfn_hal_qspi_t *driver,
+                                          struct cfn_hal_clock_s *clock,
+                                          const cfn_hal_qspi_api_t *api,
+                                          const cfn_hal_qspi_phy_t *phy,
+                                          const cfn_hal_qspi_config_t *config,
+                                          cfn_hal_qspi_callback_t callback,
+                                          void *user_arg) {
+  if (!driver) return;
+  cfn_hal_base_populate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_QSPI,
+                        &api->base, clock);
+  driver->api = api;
+  driver->phy = phy;
+  driver->config = config;
+  driver->cb = callback;
+  driver->cb_user_arg = user_arg;
+}
+
 
 /**
  * @brief Validates the QSPI configuration.
@@ -448,12 +465,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_qspi_autopolling_enable(
     return error;
 }
 
-cfn_hal_error_code_t cfn_hal_qspi_construct(cfn_hal_qspi_t              *driver,
-                                            const cfn_hal_qspi_config_t *config,
-                                            const cfn_hal_qspi_phy_t    *phy,
-                                            struct cfn_hal_clock_s      *clock,
-                                            cfn_hal_qspi_callback_t      callback,
-                                            void                        *user_arg);
+cfn_hal_error_code_t cfn_hal_qspi_construct(cfn_hal_qspi_t *driver, const cfn_hal_qspi_config_t *config, const cfn_hal_qspi_phy_t *phy, struct cfn_hal_clock_s *clock, cfn_hal_qspi_callback_t callback, void *user_arg);
 cfn_hal_error_code_t cfn_hal_qspi_destruct(cfn_hal_qspi_t *driver);
 #ifdef __cplusplus
 }
