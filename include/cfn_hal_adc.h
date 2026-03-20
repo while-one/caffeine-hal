@@ -102,7 +102,7 @@ typedef enum
 typedef enum
 {
     CFN_HAL_ADC_EOC_SINGLE   = CFN_HAL_BIT(0),
-    CFN_HAL_ADC_EOC_SEQUENCE  = CFN_HAL_BIT(1),
+    CFN_HAL_ADC_EOC_SEQUENCE = CFN_HAL_BIT(1),
 } cfn_hal_adc_eoc_t;
 /* Types Structs ----------------------------------------------------*/
 
@@ -120,7 +120,7 @@ typedef struct
     cfn_hal_adc_align_t      alignment;
     cfn_hal_adc_scan_t       scan;
     cfn_hal_adc_mode_t       mode;
-    uint32_t        eoc;
+    uint32_t                 eoc;
     void                    *custom;
 } cfn_hal_adc_config_t;
 

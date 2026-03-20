@@ -90,9 +90,9 @@ typedef enum
 
 typedef enum
 {
-    CFN_HAL_GPIO_CONFIG_SPEED_LOW,      /**< GPIO low speed         */
-    CFN_HAL_GPIO_CONFIG_SPEED_MEDIUM,   /**< GPIO medium speed      */
-    CFN_HAL_GPIO_CONFIG_SPEED_HIGH,     /**< GPIO high speed        */
+    CFN_HAL_GPIO_CONFIG_SPEED_LOW,       /**< GPIO low speed         */
+    CFN_HAL_GPIO_CONFIG_SPEED_MEDIUM,    /**< GPIO medium speed      */
+    CFN_HAL_GPIO_CONFIG_SPEED_HIGH,      /**< GPIO high speed        */
     CFN_HAL_GPIO_CONFIG_SPEED_VERY_HIGH, /**< GPIO very high speed   */
 
     CFN_HAL_GPIO_CONFIG_SPEED_MAX
