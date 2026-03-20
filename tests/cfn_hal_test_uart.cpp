@@ -121,7 +121,7 @@ TEST_F(UartTest, ConfigValidation)
     // Invalid enum (Read Mode)
     config.read_mode = CFN_HAL_UART_CONFIG_MODE_MAX;
     EXPECT_EQ(cfn_hal_uart_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
-    config.read_mode = CFN_HAL_UART_CONFIG_MODE_BLOCKING;
+    config.read_mode  = CFN_HAL_UART_CONFIG_MODE_BLOCKING;
 
     // Invalid enum (Write Mode)
     config.write_mode = CFN_HAL_UART_CONFIG_MODE_MAX;
@@ -129,9 +129,9 @@ TEST_F(UartTest, ConfigValidation)
     config.write_mode = CFN_HAL_UART_CONFIG_MODE_BLOCKING;
 
     // Invalid enum (Data Len)
-    config.data_len = CFN_HAL_UART_CONFIG_DATA_LEN_MAX;
+    config.data_len   = CFN_HAL_UART_CONFIG_DATA_LEN_MAX;
     EXPECT_EQ(cfn_hal_uart_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
-    config.data_len = CFN_HAL_UART_CONFIG_DATA_LEN_8;
+    config.data_len  = CFN_HAL_UART_CONFIG_DATA_LEN_8;
 
     // Invalid enum (Stop Bits)
     config.stop_bits = CFN_HAL_UART_CONFIG_STOP_MAX;
@@ -139,9 +139,9 @@ TEST_F(UartTest, ConfigValidation)
     config.stop_bits = CFN_HAL_UART_CONFIG_STOP_ONE_BIT;
 
     // Invalid enum (Parity)
-    config.parity = CFN_HAL_UART_CONFIG_PARITY_MAX;
+    config.parity    = CFN_HAL_UART_CONFIG_PARITY_MAX;
     EXPECT_EQ(cfn_hal_uart_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
-    config.parity = CFN_HAL_UART_CONFIG_PARITY_NONE;
+    config.parity    = CFN_HAL_UART_CONFIG_PARITY_NONE;
 
     // Invalid enum (Flow Control)
     config.flow_ctrl = CFN_HAL_UART_CONFIG_FLOW_CTRL_MAX;

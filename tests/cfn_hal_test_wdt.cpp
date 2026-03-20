@@ -92,6 +92,33 @@ TEST_F(WdtTest, DeinitSuccess)
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
 }
 
+TEST_F(WdtTest, ConfigValidation)
+{
+    cfn_hal_wdt_config_t config = {
+        .sleep      = CFN_HAL_WDT_CONFIG_SLEEP_RUN,
+        .reset      = CFN_HAL_WDT_CONFIG_RESET_CPU,
+        .custom     = nullptr,
+    };
+
+    // Valid config
+    EXPECT_EQ(cfn_hal_wdt_config_validate(&driver, &config), CFN_HAL_ERROR_OK);
+
+    // NULL driver
+    EXPECT_EQ(cfn_hal_wdt_config_validate(nullptr, &config), CFN_HAL_ERROR_BAD_PARAM);
+
+    // NULL config
+    EXPECT_EQ(cfn_hal_wdt_config_validate(&driver, nullptr), CFN_HAL_ERROR_BAD_PARAM);
+
+    // Invalid enum (Sleep)
+    config.sleep = CFN_HAL_WDT_CONFIG_SLEEP_MAX;
+    EXPECT_EQ(cfn_hal_wdt_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.sleep = CFN_HAL_WDT_CONFIG_SLEEP_RUN;
+
+    // Invalid enum (Reset)
+    config.reset = CFN_HAL_WDT_CONFIG_RESET_MAX;
+    EXPECT_EQ(cfn_hal_wdt_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+}
+
 TEST_F(WdtTest, ConfigSetSuccess)
 {
     driver.base.status  = CFN_HAL_DRIVER_STATUS_INITIALIZED;

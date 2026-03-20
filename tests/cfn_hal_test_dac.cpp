@@ -94,6 +94,29 @@ TEST_F(DacTest, DeinitSuccess)
 
 // --- Configuration & Callback Tests ---
 
+TEST_F(DacTest, ConfigValidation)
+{
+    cfn_hal_dac_config_t config = { .alignment = CFN_HAL_DAC_ALIGN_RIGHT, .resolution = CFN_HAL_DAC_RESOLUTION_BIT_12 };
+
+    // Valid config
+    EXPECT_EQ(cfn_hal_dac_config_validate(&driver, &config), CFN_HAL_ERROR_OK);
+
+    // NULL driver
+    EXPECT_EQ(cfn_hal_dac_config_validate(nullptr, &config), CFN_HAL_ERROR_BAD_PARAM);
+
+    // NULL config
+    EXPECT_EQ(cfn_hal_dac_config_validate(&driver, nullptr), CFN_HAL_ERROR_BAD_PARAM);
+
+    // Invalid enum (Resolution)
+    config.resolution = CFN_HAL_DAC_RESOLUTION_BIT_MAX;
+    EXPECT_EQ(cfn_hal_dac_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.resolution = CFN_HAL_DAC_RESOLUTION_BIT_12;
+
+    // Invalid enum (Alignment)
+    config.alignment = CFN_HAL_DAC_ALIGN_MAX;
+    EXPECT_EQ(cfn_hal_dac_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+}
+
 TEST_F(DacTest, ConfigSetGet)
 {
     cfn_hal_dac_config_t config = { .resolution = CFN_HAL_DAC_RESOLUTION_BIT_12 };

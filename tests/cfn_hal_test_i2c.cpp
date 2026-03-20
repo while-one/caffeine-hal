@@ -95,7 +95,7 @@ TEST_F(I2cTest, DeinitSuccess)
 TEST_F(I2cTest, ConfigValidation)
 {
     cfn_hal_i2c_config_t config = {
-        .speed = CFN_HAL_I2C_CONFIG_SPEED_100KHZ,
+        .speed  = CFN_HAL_I2C_CONFIG_SPEED_100KHZ,
         .custom = nullptr,
     };
 

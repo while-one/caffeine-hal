@@ -114,7 +114,7 @@ TEST_F(SpiTest, ConfigValidation)
     // Invalid enum (Format)
     config.fmt = CFN_HAL_SPI_CONFIG_FMT_MAX;
     EXPECT_EQ(cfn_hal_spi_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
-    config.fmt = CFN_HAL_SPI_CONFIG_FMT_POL0_PHA0;
+    config.fmt     = CFN_HAL_SPI_CONFIG_FMT_POL0_PHA0;
 
     // Invalid enum (CS Mode)
     config.cs_mode = CFN_HAL_SPI_CONFIG_CS_MAX;

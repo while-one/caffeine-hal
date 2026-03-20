@@ -217,8 +217,8 @@ CFN_HAL_CREATE_DRIVER_TYPE(gpio, void, cfn_hal_gpio_api_t, cfn_hal_gpio_phy_t, c
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-static inline cfn_hal_error_code_t cfn_hal_gpio_pin_config_validate(const cfn_hal_gpio_t            *driver,
-                                                                    const cfn_hal_gpio_pin_config_t *pin_cfg)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_pin_config_validate(const cfn_hal_gpio_t            *driver,
+                                                                     const cfn_hal_gpio_pin_config_t *pin_cfg)
 {
     if (driver == NULL || pin_cfg == NULL)
     {

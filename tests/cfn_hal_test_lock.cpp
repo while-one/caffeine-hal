@@ -194,11 +194,12 @@ class BaseTest : public LockTest
 
 TEST_F(BaseTest, ConfigSetCallsVmtValidate)
 {
-    api.config_validate = [](const cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t {
+    api.config_validate = [](const cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t
+    {
         static_cast<MockState *>(b->extension)->func_calls++;
         return CFN_HAL_ERROR_OK;
     };
-    api.config_set = [](cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.config_set   = [](cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
     int dummy_config = 42;
     EXPECT_EQ(cfn_hal_base_config_set(&base, CFN_HAL_PERIPHERAL_TYPE_GPIO, &dummy_config), CFN_HAL_ERROR_OK);
@@ -207,10 +208,10 @@ TEST_F(BaseTest, ConfigSetCallsVmtValidate)
 
 TEST_F(BaseTest, ConfigSetAbortsOnVmtValidateFailure)
 {
-    api.config_validate = [](const cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t {
-        return CFN_HAL_ERROR_BAD_CONFIG;
-    };
-    api.config_set = [](cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t {
+    api.config_validate = [](const cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t
+    { return CFN_HAL_ERROR_BAD_CONFIG; };
+    api.config_set = [](cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t
+    {
         static_cast<MockState *>(b->extension)->func_calls++;
         return CFN_HAL_ERROR_OK;
     };
@@ -222,9 +223,8 @@ TEST_F(BaseTest, ConfigSetAbortsOnVmtValidateFailure)
 
 TEST_F(BaseTest, ConfigValidateGeneric)
 {
-    api.config_validate = [](const cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t {
-        return CFN_HAL_ERROR_OK;
-    };
+    api.config_validate = [](const cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t
+    { return CFN_HAL_ERROR_OK; };
     int dummy_config = 42;
     EXPECT_EQ(cfn_hal_base_config_validate(&base, CFN_HAL_PERIPHERAL_TYPE_GPIO, &dummy_config), CFN_HAL_ERROR_OK);
 }
