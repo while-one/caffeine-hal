@@ -125,6 +125,7 @@ CFN_HAL_CREATE_DRIVER_TYPE(dma, cfn_hal_dma_config_t, cfn_hal_dma_api_t, cfn_hal
 
 /**
  * @brief Validates the DMA configuration.
+ * @param driver Pointer to the DMA driver instance.
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */

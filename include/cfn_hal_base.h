@@ -129,6 +129,7 @@ CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_config_set(cfn_hal_driver_t  
  * @brief Generic validation for a configuration
  * @param base Pointer to the base driver structure.
  * @param expected_type FourCC code for peripheral type validation.
+ * @param config Pointer to the configuration structure.
  * @return cfn_hal_error_code_t status code.
  */
 CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_config_validate(const cfn_hal_driver_t   *base,

@@ -122,6 +122,7 @@ CFN_HAL_CREATE_DRIVER_TYPE(
 
 /**
  * @brief Validates the Clock configuration.
+ * @param driver Pointer to the CLOCK driver instance.
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */

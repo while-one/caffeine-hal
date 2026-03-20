@@ -61,16 +61,7 @@ extern "C"
 #define CFN_HAL_INLINE static inline
 #endif
 
-/* Defines ----------------------------------------------------------*/ // #define
-                                                                        // CFN_HAL_CAFFEINE_VERSION
-                                                                        // CAFFEINE_HAL_VERSION
-                                                                        // /*!<
-                                                                        // Managed
-                                                                        // by
-                                                                        // the
-                                                                        // build
-                                                                        // system
-                                                                        // */
+/* Defines ----------------------------------------------------------*/
 #define CFN_HAL_MAX_DELAY (UINT32_MAX)
 
 /* Macro ------------------------------------------------------------*/

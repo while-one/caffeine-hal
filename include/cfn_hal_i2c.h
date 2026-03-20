@@ -184,6 +184,7 @@ CFN_HAL_CREATE_DRIVER_TYPE(i2c, cfn_hal_i2c_config_t, cfn_hal_i2c_api_t, cfn_hal
 
 /**
  * @brief Validates the I2C configuration.
+ * @param driver Pointer to the I2C driver instance.
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */

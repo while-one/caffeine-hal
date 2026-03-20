@@ -165,6 +165,7 @@ CFN_HAL_CREATE_DRIVER_TYPE(eth, cfn_hal_eth_config_t, cfn_hal_eth_api_t, cfn_hal
 
 /**
  * @brief Validates the Ethernet configuration.
+ * @param driver Pointer to the ETH driver instance.
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */

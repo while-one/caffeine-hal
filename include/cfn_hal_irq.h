@@ -114,6 +114,7 @@ CFN_HAL_CREATE_DRIVER_TYPE(irq, cfn_hal_irq_config_t, cfn_hal_irq_api_t, cfn_hal
 
 /**
  * @brief Validates the IRQ configuration.
+ * @param driver Pointer to the IRQ driver instance.
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */

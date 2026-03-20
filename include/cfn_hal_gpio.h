@@ -215,7 +215,8 @@ CFN_HAL_CREATE_DRIVER_TYPE(gpio, void, cfn_hal_gpio_api_t, cfn_hal_gpio_phy_t, c
 
 /**
  * @brief Validates the GPIO pin configuration.
- * @param config Pointer to the configuration structure.
+ * @param driver Pointer to the GPIO driver instance.
+ * @param pin_cfg Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_pin_config_validate(const cfn_hal_gpio_t            *driver,

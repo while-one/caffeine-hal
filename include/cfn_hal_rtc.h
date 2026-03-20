@@ -153,6 +153,7 @@ CFN_HAL_CREATE_DRIVER_TYPE(rtc, cfn_hal_rtc_config_t, cfn_hal_rtc_api_t, cfn_hal
 
 /**
  * @brief Validates the RTC configuration.
+ * @param driver Pointer to the RTC driver instance.
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */

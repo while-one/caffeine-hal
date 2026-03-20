@@ -129,6 +129,7 @@ CFN_HAL_CREATE_DRIVER_TYPE(nvm, cfn_hal_nvm_config_t, cfn_hal_nvm_api_t, cfn_hal
 
 /**
  * @brief Validates the NVM configuration.
+ * @param driver Pointer to the NVM driver instance.
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
