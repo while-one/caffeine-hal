@@ -45,7 +45,7 @@ extern "C"
  */
 typedef enum
 {
-    CFN_HAL_NVM_EVENT_NONE = 0,
+    CFN_HAL_NVM_EVENT_NONE           = 0,
     CFN_HAL_NVM_EVENT_WRITE_COMPLETE = CFN_HAL_BIT(0), /*!< Page or byte write finished */
     CFN_HAL_NVM_EVENT_ERASE_COMPLETE = CFN_HAL_BIT(1), /*!< Sector or chip erase finished */
 } cfn_hal_nvm_event_t;
@@ -55,10 +55,10 @@ typedef enum
  */
 typedef enum
 {
-    CFN_HAL_NVM_ERROR_NONE = 0,
+    CFN_HAL_NVM_ERROR_NONE      = 0,
     CFN_HAL_NVM_ERROR_PROTECTED = CFN_HAL_BIT(0), /*!< Access to protected area denied */
     CFN_HAL_NVM_ERROR_ALIGNMENT = CFN_HAL_BIT(1), /*!< Invalid address or size alignment */
-    CFN_HAL_NVM_ERROR_GENERAL = CFN_HAL_BIT(2),   /*!< General hardware error */
+    CFN_HAL_NVM_ERROR_GENERAL   = CFN_HAL_BIT(2), /*!< General hardware error */
 } cfn_hal_nvm_error_t;
 
 /* Types Structs ----------------------------------------------------*/
@@ -206,7 +206,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_nvm_callback_register(cfn_hal_nvm_t 
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->cb = callback;
+        driver->cb          = callback;
         driver->cb_user_arg = user_arg;
     }
     return cfn_hal_base_callback_register(

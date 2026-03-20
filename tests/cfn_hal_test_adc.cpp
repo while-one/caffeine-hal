@@ -37,10 +37,10 @@ class AdcTest : public ::testing::Test
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
-        driver.base.vmt = (const struct cfn_hal_api_base_s *) &api;
-        driver.base.type = CFN_HAL_PERIPHERAL_TYPE_ADC;
+        driver.base.vmt    = (const struct cfn_hal_api_base_s *) &api;
+        driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_ADC;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
-        driver.api = &api;
+        driver.api         = &api;
     }
 };
 
@@ -87,7 +87,7 @@ TEST_F(AdcTest, InitSuccess)
 TEST_F(AdcTest, DeinitSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.deinit = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.deinit    = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_adc_deinit(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
 }
@@ -107,7 +107,7 @@ TEST_F(AdcTest, ConfigSetGet)
 
 TEST_F(AdcTest, CallbackRegister)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status         = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.callback_register = [](cfn_hal_driver_t *b, cfn_hal_callback_t cb, void *arg) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
 
@@ -131,7 +131,7 @@ TEST_F(AdcTest, ReadSuccess)
 TEST_F(AdcTest, StartStopSuccess)
 {
     api.start = [](cfn_hal_adc_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    api.stop = [](cfn_hal_adc_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.stop  = [](cfn_hal_adc_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_adc_start(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_adc_stop(&driver), CFN_HAL_ERROR_OK);
@@ -147,7 +147,7 @@ TEST_F(AdcTest, ReadDmaSuccess)
 
 TEST_F(AdcTest, EventEnableDisable)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status    = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.event_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     api.base.event_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
@@ -158,7 +158,7 @@ TEST_F(AdcTest, EventEnableDisable)
 
 TEST_F(AdcTest, ErrorEnableDisable)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status    = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.error_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     api.base.error_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };

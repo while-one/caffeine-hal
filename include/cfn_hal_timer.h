@@ -45,12 +45,12 @@ extern "C"
  */
 typedef enum
 {
-    CFN_HAL_TIMER_EVENT_NONE = 0,
-    CFN_HAL_TIMER_EVENT_UPDATE = CFN_HAL_BIT(0),  /*!< Counter rollover/update */
-    CFN_HAL_TIMER_EVENT_CC1 = CFN_HAL_BIT(1),     /*!< Capture/Compare channel 1 */
-    CFN_HAL_TIMER_EVENT_CC2 = CFN_HAL_BIT(2),     /*!< Capture/Compare channel 2 */
-    CFN_HAL_TIMER_EVENT_CC3 = CFN_HAL_BIT(3),     /*!< Capture/Compare channel 3 */
-    CFN_HAL_TIMER_EVENT_CC4 = CFN_HAL_BIT(4),     /*!< Capture/Compare channel 4 */
+    CFN_HAL_TIMER_EVENT_NONE    = 0,
+    CFN_HAL_TIMER_EVENT_UPDATE  = CFN_HAL_BIT(0), /*!< Counter rollover/update */
+    CFN_HAL_TIMER_EVENT_CC1     = CFN_HAL_BIT(1), /*!< Capture/Compare channel 1 */
+    CFN_HAL_TIMER_EVENT_CC2     = CFN_HAL_BIT(2), /*!< Capture/Compare channel 2 */
+    CFN_HAL_TIMER_EVENT_CC3     = CFN_HAL_BIT(3), /*!< Capture/Compare channel 3 */
+    CFN_HAL_TIMER_EVENT_CC4     = CFN_HAL_BIT(4), /*!< Capture/Compare channel 4 */
     CFN_HAL_TIMER_EVENT_TRIGGER = CFN_HAL_BIT(5), /*!< Trigger input event */
 } cfn_hal_timer_event_t;
 
@@ -59,8 +59,8 @@ typedef enum
  */
 typedef enum
 {
-    CFN_HAL_TIMER_ERROR_NONE = 0,
-    CFN_HAL_TIMER_ERROR_BREAK = CFN_HAL_BIT(0),   /*!< Safety break input triggered */
+    CFN_HAL_TIMER_ERROR_NONE    = 0,
+    CFN_HAL_TIMER_ERROR_BREAK   = CFN_HAL_BIT(0), /*!< Safety break input triggered */
     CFN_HAL_TIMER_ERROR_GENERAL = CFN_HAL_BIT(1), /*!< General hardware error */
 } cfn_hal_timer_error_t;
 
@@ -213,7 +213,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_timer_callback_register(cfn_hal_time
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->cb = callback;
+        driver->cb          = callback;
         driver->cb_user_arg = user_arg;
     }
     return cfn_hal_base_callback_register(

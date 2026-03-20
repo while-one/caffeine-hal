@@ -46,9 +46,9 @@ extern "C"
  */
 typedef enum
 {
-    CFN_HAL_CAN_EVENT_NONE = 0,
+    CFN_HAL_CAN_EVENT_NONE        = 0,
     CFN_HAL_CAN_EVENT_TX_COMPLETE = CFN_HAL_BIT(0), /*!< Transmission complete */
-    CFN_HAL_CAN_EVENT_RX_READY = CFN_HAL_BIT(1),    /*!< Message received and ready */
+    CFN_HAL_CAN_EVENT_RX_READY    = CFN_HAL_BIT(1), /*!< Message received and ready */
 } cfn_hal_can_event_t;
 
 /**
@@ -56,7 +56,7 @@ typedef enum
  */
 typedef enum
 {
-    CFN_HAL_CAN_ERROR_NONE = 0,
+    CFN_HAL_CAN_ERROR_NONE    = 0,
     CFN_HAL_CAN_ERROR_BUS_OFF = CFN_HAL_BIT(0), /*!< CAN bus-off state detected */
     CFN_HAL_CAN_ERROR_GENERAL = CFN_HAL_BIT(1), /*!< General CAN hardware error */
 } cfn_hal_can_error_t;
@@ -217,7 +217,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_can_callback_register(cfn_hal_can_t 
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->cb = callback;
+        driver->cb          = callback;
         driver->cb_user_arg = user_arg;
     }
     return cfn_hal_base_callback_register(

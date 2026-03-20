@@ -45,7 +45,7 @@ extern "C"
  */
 typedef enum
 {
-    CFN_HAL_COMP_EVENT_NONE = 0,
+    CFN_HAL_COMP_EVENT_NONE    = 0,
     CFN_HAL_COMP_EVENT_TRIGGER = CFN_HAL_BIT(0), /*!< Comparator output triggered (crossed threshold) */
 } cfn_hal_comp_event_t;
 
@@ -54,7 +54,7 @@ typedef enum
  */
 typedef enum
 {
-    CFN_HAL_COMP_ERROR_NONE = 0,
+    CFN_HAL_COMP_ERROR_NONE    = 0,
     CFN_HAL_COMP_ERROR_GENERAL = CFN_HAL_BIT(0), /*!< General hardware error */
 } cfn_hal_comp_error_t;
 
@@ -204,7 +204,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_comp_callback_register(cfn_hal_comp_
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->cb = callback;
+        driver->cb          = callback;
         driver->cb_user_arg = user_arg;
     }
     return cfn_hal_base_callback_register(

@@ -45,10 +45,10 @@ extern "C"
  */
 typedef enum
 {
-    CFN_HAL_SDIO_EVENT_NONE = 0,
+    CFN_HAL_SDIO_EVENT_NONE        = 0,
     CFN_HAL_SDIO_EVENT_TX_COMPLETE = CFN_HAL_BIT(0), /*!< Block transmission finished */
-    CFN_HAL_SDIO_EVENT_RX_READY = CFN_HAL_BIT(1),    /*!< Block reception finished */
-    CFN_HAL_SDIO_EVENT_CMD_SENT = CFN_HAL_BIT(2),    /*!< Command sent and response received */
+    CFN_HAL_SDIO_EVENT_RX_READY    = CFN_HAL_BIT(1), /*!< Block reception finished */
+    CFN_HAL_SDIO_EVENT_CMD_SENT    = CFN_HAL_BIT(2), /*!< Command sent and response received */
 } cfn_hal_sdio_event_t;
 
 /**
@@ -56,8 +56,8 @@ typedef enum
  */
 typedef enum
 {
-    CFN_HAL_SDIO_ERROR_NONE = 0,
-    CFN_HAL_SDIO_ERROR_CRC = CFN_HAL_BIT(0),     /*!< CRC mismatch in command or data */
+    CFN_HAL_SDIO_ERROR_NONE    = 0,
+    CFN_HAL_SDIO_ERROR_CRC     = CFN_HAL_BIT(0), /*!< CRC mismatch in command or data */
     CFN_HAL_SDIO_ERROR_TIMEOUT = CFN_HAL_BIT(1), /*!< Command or data timeout */
     CFN_HAL_SDIO_ERROR_GENERAL = CFN_HAL_BIT(2), /*!< General hardware error */
 } cfn_hal_sdio_error_t;
@@ -229,7 +229,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_callback_register(cfn_hal_sdio_
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->cb = callback;
+        driver->cb          = callback;
         driver->cb_user_arg = user_arg;
     }
     return cfn_hal_base_callback_register(

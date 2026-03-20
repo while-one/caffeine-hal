@@ -46,9 +46,9 @@ extern "C"
  */
 typedef enum
 {
-    CFN_HAL_SPI_EVENT_NONE = 0,
+    CFN_HAL_SPI_EVENT_NONE        = 0,
     CFN_HAL_SPI_EVENT_TX_COMPLETE = CFN_HAL_BIT(0), /*!< Data transmission finished */
-    CFN_HAL_SPI_EVENT_RX_READY = CFN_HAL_BIT(1),    /*!< Data reception finished */
+    CFN_HAL_SPI_EVENT_RX_READY    = CFN_HAL_BIT(1), /*!< Data reception finished */
 } cfn_hal_spi_event_t;
 
 /**
@@ -56,10 +56,10 @@ typedef enum
  */
 typedef enum
 {
-    CFN_HAL_SPI_ERROR_NONE = 0,
+    CFN_HAL_SPI_ERROR_NONE    = 0,
     CFN_HAL_SPI_ERROR_FRAMING = CFN_HAL_BIT(0), /*!< Frame synchronization error */
     CFN_HAL_SPI_ERROR_OVERRUN = CFN_HAL_BIT(1), /*!< Rx overrun or Tx underrun */
-    CFN_HAL_SPI_ERROR_CRC = CFN_HAL_BIT(2),     /*!< CRC checksum mismatch */
+    CFN_HAL_SPI_ERROR_CRC     = CFN_HAL_BIT(2), /*!< CRC checksum mismatch */
     CFN_HAL_SPI_ERROR_GENERAL = CFN_HAL_BIT(3), /*!< General hardware error */
 } cfn_hal_spi_error_t;
 
@@ -242,7 +242,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_callback_register(cfn_hal_spi_t 
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->cb = callback;
+        driver->cb          = callback;
         driver->cb_user_arg = user_arg;
     }
     return cfn_hal_base_callback_register(

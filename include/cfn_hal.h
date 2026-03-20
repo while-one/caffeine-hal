@@ -108,15 +108,15 @@ extern "C"
  */
 #define CFN_HAL_DRIVER_INITIALIZER(type_code, api_ptr, phy_ptr, config_ptr)                                            \
     {                                                                                                                  \
-        .base = { .type = (type_code),                                                                                 \
-                  .status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED,                                                         \
-                  .power_state = CFN_HAL_POWER_STATE_UNKNOWN,                                                          \
-                  .on_config = NULL,                                                                                   \
-                  .on_config_arg = NULL,                                                                               \
-                  .dependency = NULL,                                                                                  \
-                  .extension = NULL,                                                                                   \
-                  .flags = 0,                                                                                          \
-                  .vmt = (const struct cfn_hal_api_base_s *) (api_ptr) },                                              \
+        .base   = { .type          = (type_code),                                                                      \
+                    .status        = CFN_HAL_DRIVER_STATUS_CONSTRUCTED,                                                \
+                    .power_state   = CFN_HAL_POWER_STATE_UNKNOWN,                                                      \
+                    .on_config     = NULL,                                                                             \
+                    .on_config_arg = NULL,                                                                             \
+                    .dependency    = NULL,                                                                             \
+                    .extension     = NULL,                                                                             \
+                    .flags         = 0,                                                                                \
+                    .vmt           = (const struct cfn_hal_api_base_s *) (api_ptr) },                                            \
         .config = (config_ptr), .api = (api_ptr), .phy = (phy_ptr), .cb = NULL, .cb_user_arg = NULL                    \
     }
 

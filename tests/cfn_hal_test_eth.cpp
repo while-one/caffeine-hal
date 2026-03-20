@@ -37,10 +37,10 @@ class EthTest : public ::testing::Test
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
-        driver.base.vmt = (const struct cfn_hal_api_base_s *) &api;
-        driver.base.type = CFN_HAL_PERIPHERAL_TYPE_ETH;
+        driver.base.vmt    = (const struct cfn_hal_api_base_s *) &api;
+        driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_ETH;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
-        driver.api = &api;
+        driver.api         = &api;
     }
 };
 
@@ -87,7 +87,7 @@ TEST_F(EthTest, InitSuccess)
 TEST_F(EthTest, DeinitSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.deinit = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.deinit    = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_eth_deinit(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
 }
@@ -96,7 +96,9 @@ TEST_F(EthTest, DeinitSuccess)
 
 TEST_F(EthTest, ConfigSetGet)
 {
-    cfn_hal_eth_config_t config = { .mac_addr = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED } };
+    cfn_hal_eth_config_t config = {
+        .mac_addr = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED }
+    };
     cfn_hal_eth_config_t read_config{};
 
     EXPECT_EQ(cfn_hal_eth_config_set(&driver, &config), CFN_HAL_ERROR_OK);
@@ -106,7 +108,7 @@ TEST_F(EthTest, ConfigSetGet)
 
 TEST_F(EthTest, CallbackRegister)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status         = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.callback_register = [](cfn_hal_driver_t *b, cfn_hal_callback_t cb, void *arg) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
 
@@ -118,7 +120,7 @@ TEST_F(EthTest, CallbackRegister)
 TEST_F(EthTest, StartStopSuccess)
 {
     api.start = [](cfn_hal_eth_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    api.stop = [](cfn_hal_eth_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.stop  = [](cfn_hal_eth_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_eth_start(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_eth_stop(&driver), CFN_HAL_ERROR_OK);
@@ -135,7 +137,7 @@ TEST_F(EthTest, TransmitReceiveSuccess)
     };
 
     uint8_t frame[64] = { 0 };
-    size_t  rx_len = 0;
+    size_t  rx_len    = 0;
     EXPECT_EQ(cfn_hal_eth_transmit_frame(&driver, frame, 64), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_eth_receive_frame(&driver, frame, 64, &rx_len), CFN_HAL_ERROR_OK);
     EXPECT_EQ(rx_len, 64);
@@ -171,7 +173,7 @@ TEST_F(EthTest, LinkStatusSuccess)
 
 TEST_F(EthTest, EventEnableDisable)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status    = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.event_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     api.base.event_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
@@ -182,7 +184,7 @@ TEST_F(EthTest, EventEnableDisable)
 
 TEST_F(EthTest, ErrorEnableDisable)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status    = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.error_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     api.base.error_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };

@@ -37,10 +37,10 @@ class SdioTest : public ::testing::Test
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
-        driver.base.vmt = (const struct cfn_hal_api_base_s *) &api;
+        driver.base.vmt    = (const struct cfn_hal_api_base_s *) &api;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
-        driver.base.type = CFN_HAL_PERIPHERAL_TYPE_SDIO;
-        driver.api = &api;
+        driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_SDIO;
+        driver.api         = &api;
     }
 };
 
@@ -81,7 +81,7 @@ TEST_F(SdioTest, InitSuccess)
 
 TEST_F(SdioTest, DeinitSuccess)
 {
-    api.base.deinit = [](cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.deinit    = [](cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     EXPECT_EQ(cfn_hal_sdio_deinit(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
@@ -97,8 +97,8 @@ TEST_F(SdioTest, SendCommand)
         return CFN_HAL_ERROR_OK;
     };
 
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    cfn_hal_sdio_cmd_t cmd = {};
+    driver.base.status          = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    cfn_hal_sdio_cmd_t cmd      = {};
     uint32_t           response = 0;
     EXPECT_EQ(cfn_hal_sdio_send_command(&driver, &cmd, &response), CFN_HAL_ERROR_OK);
     EXPECT_EQ(response, 0xAA55);
@@ -113,7 +113,7 @@ TEST_F(SdioTest, ReadWriteBlocks)
         [](cfn_hal_sdio_t *d, const uint8_t *data, uint32_t addr, uint32_t count, uint32_t to) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
 
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status  = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     uint8_t buffer[512] = { 0 };
     EXPECT_EQ(cfn_hal_sdio_read_blocks(&driver, buffer, 0, 1, 100), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_sdio_write_blocks(&driver, buffer, 0, 1, 100), CFN_HAL_ERROR_OK);
@@ -127,7 +127,7 @@ TEST_F(SdioTest, GetCardInfo)
         return CFN_HAL_ERROR_OK;
     };
 
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status            = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     cfn_hal_sdio_card_info_t info = {};
     EXPECT_EQ(cfn_hal_sdio_get_card_info(&driver, &info), CFN_HAL_ERROR_OK);
     EXPECT_EQ(info.block_size, 512);
@@ -137,7 +137,7 @@ TEST_F(SdioTest, WaitCardReady)
 {
     api.wait_card_ready = [](cfn_hal_sdio_t *d, uint32_t to) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status  = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     EXPECT_EQ(cfn_hal_sdio_wait_card_ready(&driver, 100), CFN_HAL_ERROR_OK);
 }
 

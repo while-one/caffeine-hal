@@ -37,10 +37,10 @@ class PwmTest : public ::testing::Test
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
-        driver.base.vmt = (const struct cfn_hal_api_base_s *) &api;
+        driver.base.vmt    = (const struct cfn_hal_api_base_s *) &api;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
-        driver.base.type = CFN_HAL_PERIPHERAL_TYPE_PWM;
-        driver.api = &api;
+        driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_PWM;
+        driver.api         = &api;
     }
 };
 
@@ -82,7 +82,7 @@ TEST_F(PwmTest, InitSuccess)
 
 TEST_F(PwmTest, DeinitSuccess)
 {
-    api.base.deinit = [](cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.deinit    = [](cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     EXPECT_EQ(cfn_hal_pwm_deinit(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
@@ -92,7 +92,7 @@ TEST_F(PwmTest, DeinitSuccess)
 
 TEST_F(PwmTest, ConfigSetGet)
 {
-    cfn_hal_pwm_config_t config = { 1000, 50, CFN_HAL_PWM_CONFIG_POLARITY_NORMAL, nullptr };
+    cfn_hal_pwm_config_t config   = { 1000, 50, CFN_HAL_PWM_CONFIG_POLARITY_NORMAL, nullptr };
     cfn_hal_pwm_config_t readback = {};
 
     EXPECT_EQ(cfn_hal_pwm_config_set(&driver, &config), CFN_HAL_ERROR_OK);
@@ -113,8 +113,8 @@ TEST_F(PwmTest, CallbackRegister)
 
 TEST_F(PwmTest, StartStop)
 {
-    api.start = [](cfn_hal_pwm_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    api.stop = [](cfn_hal_pwm_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.start          = [](cfn_hal_pwm_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.stop           = [](cfn_hal_pwm_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     EXPECT_EQ(cfn_hal_pwm_start(&driver), CFN_HAL_ERROR_OK);
@@ -123,7 +123,7 @@ TEST_F(PwmTest, StartStop)
 
 TEST_F(PwmTest, SetFrequencyAndDuty)
 {
-    api.set_frequency = [](cfn_hal_pwm_t *d, uint32_t freq) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.set_frequency  = [](cfn_hal_pwm_t *d, uint32_t freq) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     api.set_duty_cycle = [](cfn_hal_pwm_t *d, uint32_t duty) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;

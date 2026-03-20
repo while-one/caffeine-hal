@@ -37,10 +37,10 @@ class I2cTest : public ::testing::Test
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
-        driver.base.type = CFN_HAL_PERIPHERAL_TYPE_I2C;
+        driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_I2C;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
-        driver.base.vmt = (const struct cfn_hal_api_base_s *) &api;
-        driver.api = &api;
+        driver.base.vmt    = (const struct cfn_hal_api_base_s *) &api;
+        driver.api         = &api;
     }
 };
 
@@ -87,14 +87,14 @@ TEST_F(I2cTest, InitSuccess)
 TEST_F(I2cTest, DeinitSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.deinit = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.deinit    = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_i2c_deinit(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
 }
 
 TEST_F(I2cTest, ConfigSetSuccess)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status  = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.config_set = [](cfn_hal_driver_t *b, const void *config) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     cfn_hal_i2c_config_t config{};
@@ -113,7 +113,7 @@ TEST_F(I2cTest, ConfigGetSuccess)
 
 TEST_F(I2cTest, CallbackRegisterSuccess)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status         = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.callback_register = [](cfn_hal_driver_t *b, cfn_hal_callback_t cb, void *arg) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     cfn_hal_i2c_callback_t callback = [](cfn_hal_i2c_t *d, uint32_t ev, uint32_t err, uint8_t *p, size_t n, void *arg) {
@@ -124,7 +124,7 @@ TEST_F(I2cTest, CallbackRegisterSuccess)
 
 TEST_F(I2cTest, PowerStateSetSuccess)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status       = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.power_state_set = [](cfn_hal_driver_t *b, cfn_hal_power_state_t state) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_i2c_power_state_set(&driver, CFN_HAL_POWER_STATE_ON), CFN_HAL_ERROR_OK);
@@ -132,7 +132,7 @@ TEST_F(I2cTest, PowerStateSetSuccess)
 
 TEST_F(I2cTest, EventEnableDisableSuccess)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status    = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.event_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     api.base.event_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
@@ -155,7 +155,7 @@ TEST_F(I2cTest, EventGetSuccess)
 
 TEST_F(I2cTest, ErrorEnableDisableSuccess)
 {
-    driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    driver.base.status    = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.error_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     api.base.error_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
@@ -181,7 +181,7 @@ TEST_F(I2cTest, ErrorGetSuccess)
 TEST_F(I2cTest, XfrIrqSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.xfr_irq = [](cfn_hal_i2c_t *d, const cfn_hal_i2c_transaction_t *xfr) -> cfn_hal_error_code_t
+    api.xfr_irq        = [](cfn_hal_i2c_t *d, const cfn_hal_i2c_transaction_t *xfr) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     cfn_hal_i2c_transaction_t xfr{};
     EXPECT_EQ(cfn_hal_i2c_xfr_irq(&driver, &xfr), CFN_HAL_ERROR_OK);
@@ -190,14 +190,14 @@ TEST_F(I2cTest, XfrIrqSuccess)
 TEST_F(I2cTest, XfrIrqAbortSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.xfr_irq_abort = [](cfn_hal_i2c_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.xfr_irq_abort  = [](cfn_hal_i2c_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_i2c_xfr_irq_abort(&driver), CFN_HAL_ERROR_OK);
 }
 
 TEST_F(I2cTest, XfrPollingSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.xfr_polling = [](cfn_hal_i2c_t                   *d,
+    api.xfr_polling    = [](cfn_hal_i2c_t                   *d,
                          const cfn_hal_i2c_transaction_t *xfr,
                          uint32_t                         timeout) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     cfn_hal_i2c_transaction_t xfr{};
@@ -207,7 +207,7 @@ TEST_F(I2cTest, XfrPollingSuccess)
 TEST_F(I2cTest, MemReadSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.mem_read = [](cfn_hal_i2c_t                       *d,
+    api.mem_read       = [](cfn_hal_i2c_t                       *d,
                       const cfn_hal_i2c_mem_transaction_t *mem_xfr,
                       uint32_t timeout) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     cfn_hal_i2c_mem_transaction_t mem_xfr{};
@@ -217,7 +217,7 @@ TEST_F(I2cTest, MemReadSuccess)
 TEST_F(I2cTest, MemWriteSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.mem_write = [](cfn_hal_i2c_t                       *d,
+    api.mem_write      = [](cfn_hal_i2c_t                       *d,
                        const cfn_hal_i2c_mem_transaction_t *mem_xfr,
                        uint32_t timeout) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     cfn_hal_i2c_mem_transaction_t mem_xfr{};
@@ -227,7 +227,7 @@ TEST_F(I2cTest, MemWriteSuccess)
 TEST_F(I2cTest, XfrDmaSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.xfr_dma = [](cfn_hal_i2c_t *d, const cfn_hal_i2c_transaction_t *xfr) -> cfn_hal_error_code_t
+    api.xfr_dma        = [](cfn_hal_i2c_t *d, const cfn_hal_i2c_transaction_t *xfr) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     cfn_hal_i2c_transaction_t xfr{};
     EXPECT_EQ(cfn_hal_i2c_xfr_dma(&driver, &xfr), CFN_HAL_ERROR_OK);

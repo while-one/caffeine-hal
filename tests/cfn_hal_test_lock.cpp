@@ -35,10 +35,10 @@ class LockTest : public ::testing::Test
 
     struct MockState
     {
-        int      lock_calls = 0;
+        int      lock_calls   = 0;
         int      unlock_calls = 0;
         uint32_t last_timeout = 0;
-        int      func_calls = 0;
+        int      func_calls   = 0;
         int      func_arg_val = 0;
     } mock_state;
 
@@ -47,9 +47,9 @@ class LockTest : public ::testing::Test
         memset(&base, 0, sizeof(base));
         memset(&api, 0, sizeof(api));
         memset(&mock_state, 0, sizeof(mock_state));
-        base.type = CFN_HAL_PERIPHERAL_TYPE_GPIO;
-        base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-        base.vmt = &api;
+        base.type      = CFN_HAL_PERIPHERAL_TYPE_GPIO;
+        base.status    = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+        base.vmt       = &api;
         base.extension = &mock_state;
     }
 };
@@ -152,7 +152,7 @@ TEST_F(LockTest, WithLockMacroSuccess)
 
 TEST_F(LockTest, WithLockMacroFailureInLock)
 {
-    api.lock = [](cfn_hal_driver_t *b, uint32_t timeout) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_BUSY; };
+    api.lock        = [](cfn_hal_driver_t *b, uint32_t timeout) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_BUSY; };
 
     auto dummy_func = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t
     {
@@ -169,7 +169,7 @@ TEST_F(LockTest, WithLockMacroFailureInLock)
 
 TEST_F(LockTest, WithLockMacroWithArguments)
 {
-    api.lock = [](cfn_hal_driver_t *b, uint32_t timeout) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.lock   = [](cfn_hal_driver_t *b, uint32_t timeout) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     api.unlock = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
     auto dummy_func_args = [](cfn_hal_driver_t *b, int arg1, int arg2) -> cfn_hal_error_code_t

@@ -48,13 +48,13 @@ extern "C"
  */
 typedef enum
 {
-    CFN_HAL_USB_EVENT_NONE = 0,
-    CFN_HAL_USB_EVENT_SUSPEND = CFN_HAL_BIT(0),     /*!< Bus entered low power state */
-    CFN_HAL_USB_EVENT_RESUME = CFN_HAL_BIT(1),      /*!< Bus activity resumed */
-    CFN_HAL_USB_EVENT_RESET = CFN_HAL_BIT(2),       /*!< USB bus reset detected */
+    CFN_HAL_USB_EVENT_NONE        = 0,
+    CFN_HAL_USB_EVENT_SUSPEND     = CFN_HAL_BIT(0), /*!< Bus entered low power state */
+    CFN_HAL_USB_EVENT_RESUME      = CFN_HAL_BIT(1), /*!< Bus activity resumed */
+    CFN_HAL_USB_EVENT_RESET       = CFN_HAL_BIT(2), /*!< USB bus reset detected */
     CFN_HAL_USB_EVENT_SETUP_READY = CFN_HAL_BIT(3), /*!< Setup packet received on EP0 */
     CFN_HAL_USB_EVENT_EP_DATA_OUT = CFN_HAL_BIT(4), /*!< Data received on endpoint (Host -> Device) */
-    CFN_HAL_USB_EVENT_EP_DATA_IN = CFN_HAL_BIT(5),  /*!< Data transmitted on endpoint (Device -> Host) */
+    CFN_HAL_USB_EVENT_EP_DATA_IN  = CFN_HAL_BIT(5), /*!< Data transmitted on endpoint (Device -> Host) */
 } cfn_hal_usb_event_t;
 
 /**
@@ -62,9 +62,9 @@ typedef enum
  */
 typedef enum
 {
-    CFN_HAL_USB_ERROR_NONE = 0,
+    CFN_HAL_USB_ERROR_NONE    = 0,
     CFN_HAL_USB_ERROR_ISO_OUT = CFN_HAL_BIT(0), /*!< Isochronous OUT data lost */
-    CFN_HAL_USB_ERROR_ISO_IN = CFN_HAL_BIT(1),  /*!< Isochronous IN data lost */
+    CFN_HAL_USB_ERROR_ISO_IN  = CFN_HAL_BIT(1), /*!< Isochronous IN data lost */
     CFN_HAL_USB_ERROR_GENERAL = CFN_HAL_BIT(2), /*!< General hardware error */
 } cfn_hal_usb_error_t;
 
@@ -226,7 +226,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_usb_callback_register(cfn_hal_usb_t 
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->cb = callback;
+        driver->cb          = callback;
         driver->cb_user_arg = user_arg;
     }
     return cfn_hal_base_callback_register(
