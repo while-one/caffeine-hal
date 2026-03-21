@@ -30,8 +30,9 @@
 class ClockTest : public ::testing::Test
 {
   protected:
-    cfn_hal_clock_t     driver{};
-    cfn_hal_clock_api_t api{};
+    cfn_hal_clock_t        driver{};
+    cfn_hal_clock_api_t    api{};
+    cfn_hal_clock_config_t dummy_config{};
 
     void SetUp() override
     {
@@ -41,6 +42,7 @@ class ClockTest : public ::testing::Test
         driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_CLOCK;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
         driver.api         = &api;
+        driver.config      = &dummy_config;
     }
 };
 

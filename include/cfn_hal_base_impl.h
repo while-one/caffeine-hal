@@ -38,6 +38,32 @@ extern "C"
 
 /* Functions Implementation -----------------------------------------*/
 
+CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_init(cfn_hal_driver_t         *base,
+                                                        cfn_hal_peripheral_type_t expected_type);
+
+CFN_HAL_INLINE void cfn_hal_base_populate(cfn_hal_driver_t                *base,
+                                          cfn_hal_peripheral_type_t        type,
+                                          uint32_t                         peripheral_id,
+                                          const struct cfn_hal_api_base_s *vmt,
+                                          struct cfn_hal_clock_s          *clock)
+{
+    if (!base)
+    {
+        return;
+    }
+    base->type          = type;
+    base->peripheral_id = peripheral_id;
+    base->vmt           = vmt;
+    base->clock_driver  = clock;
+    base->status        = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
+    base->power_state   = CFN_HAL_POWER_STATE_UNKNOWN;
+    base->on_config     = NULL;
+    base->on_config_arg = NULL;
+    base->dependency    = NULL;
+    base->extension     = NULL;
+    base->flags         = 0;
+}
+
 CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_init(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expected_type)
 {
     if (!base || base->type != expected_type || !base->vmt)
@@ -73,7 +99,11 @@ CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_init(cfn_hal_driver_t *base, 
     {
         error = api->init(base);
     }
-
+    else
+    {
+        // Requires port implmentation
+        error = CFN_HAL_ERROR_NOT_SUPPORTED;
+    }
     /* 4. Final State Update (Phase C)
      * If all stages passed, we mark the driver as ready for functional use.
      */
@@ -121,14 +151,19 @@ CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_deinit(cfn_hal_driver_t      
     {
         error = api->deinit(base);
     }
-
+    else
+    {
+        // Requires port implmentation
+        error = CFN_HAL_ERROR_NOT_SUPPORTED;
+    }
     /* Board-level Deinitialization Hook (Phase B)
      * Only after the peripheral logic is stopped do we release clocks and pins.
      * We use CFN_HAL_CONFIG_PHASE_DEINIT to signify teardown to the hook.
      */
     if (error == CFN_HAL_ERROR_OK)
     {
-        /* Mark as constructed (not live) before releasing clocks to prevent race conditions */
+        /* Mark as constructed (not live) before releasing clocks to prevent race
+         * conditions */
         base->status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
 
         if (base->on_config)
@@ -154,14 +189,45 @@ CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_config_set(cfn_hal_driver_t  
     if (base->status == CFN_HAL_DRIVER_STATUS_INITIALIZED)
     {
         const cfn_hal_api_base_t *api = (const cfn_hal_api_base_t *) base->vmt;
-        if (api && api->config_set)
+        if (api)
         {
-            error = api->config_set(base, config);
+            if (api->config_validate)
+            {
+                error = api->config_validate(base, config);
+            }
+
+            if (error == CFN_HAL_ERROR_OK)
+            {
+                if (api->config_set)
+                {
+                    error = api->config_set(base, config);
+                }
+                else
+                {
+                    error = CFN_HAL_ERROR_NOT_SUPPORTED;
+                }
+            }
         }
-        else
-        {
-            error = CFN_HAL_ERROR_NOT_SUPPORTED;
-        }
+    }
+
+    return error;
+}
+
+CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_config_validate(const cfn_hal_driver_t   *base,
+                                                                   cfn_hal_peripheral_type_t expected_type,
+                                                                   const void               *config)
+{
+    if (!base || base->type != expected_type)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+
+    cfn_hal_error_code_t error    = CFN_HAL_ERROR_OK;
+
+    const cfn_hal_api_base_t *api = (const cfn_hal_api_base_t *) base->vmt;
+    if (api && api->config_validate)
+    {
+        error = api->config_validate(base, config);
     }
 
     return error;
@@ -186,10 +252,6 @@ CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_callback_register(cfn_hal_dri
         if (api && api->callback_register)
         {
             error = api->callback_register(base, callback, user_arg);
-        }
-        else
-        {
-            error = CFN_HAL_ERROR_NOT_SUPPORTED;
         }
     }
 
@@ -226,6 +288,7 @@ CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_power_state_set(cfn_hal_driver_t  
         }
         else
         {
+            // Requires port implmentation
             error = CFN_HAL_ERROR_NOT_SUPPORTED;
         }
     }
@@ -270,6 +333,7 @@ CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_event_enable(cfn_hal_driver_t
     }
     else
     {
+        // event enable requires port implmentation
         error = CFN_HAL_ERROR_NOT_SUPPORTED;
     }
 
@@ -297,10 +361,6 @@ CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_event_disable(cfn_hal_driver_
     {
         error = api->event_disable(base, event_mask);
     }
-    else
-    {
-        error = CFN_HAL_ERROR_NOT_SUPPORTED;
-    }
 
     return error;
 }
@@ -325,10 +385,6 @@ CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_event_get(cfn_hal_driver_t   
     if (api->event_get)
     {
         error = api->event_get(base, event_mask);
-    }
-    else
-    {
-        error = CFN_HAL_ERROR_NOT_SUPPORTED;
     }
 
     return error;
@@ -355,10 +411,6 @@ CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_error_enable(cfn_hal_driver_t
     {
         error = api->error_enable(base, error_mask);
     }
-    else
-    {
-        error = CFN_HAL_ERROR_NOT_SUPPORTED;
-    }
 
     return error;
 }
@@ -384,10 +436,6 @@ CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_error_disable(cfn_hal_driver_
     {
         error = api->error_disable(base, error_mask);
     }
-    else
-    {
-        error = CFN_HAL_ERROR_NOT_SUPPORTED;
-    }
 
     return error;
 }
@@ -412,10 +460,6 @@ CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_error_get(cfn_hal_driver_t   
     if (api->error_get)
     {
         error = api->error_get(base, error_mask);
-    }
-    else
-    {
-        error = CFN_HAL_ERROR_NOT_SUPPORTED;
     }
 
     return error;

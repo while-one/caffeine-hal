@@ -71,13 +71,15 @@ int main(void)
 {
     /* 1. Test Static Initializer Macros */
     cfn_hal_gpio_phy_t phy = { .port = (void*)0x40000000 };
-    cfn_hal_gpio_t gpio = CFN_HAL_GPIO_INITIALIZER(&DUMMY_GPIO_API, &phy);
+    cfn_hal_gpio_t gpio = {0};
+    gpio.phy = &phy;
+    gpio.api = &DUMMY_GPIO_API;
 
     /* 2. Test Base Initialization (Macro Expansion) */
-    cfn_hal_error_code_t err = cfn_hal_gpio_init(&gpio);
-    if (err != CFN_HAL_ERROR_OK)
+    cfn_hal_error_code_t error = cfn_hal_gpio_init(&gpio);
+    if (error != CFN_HAL_ERROR_OK)
     {
-        return (int)err;
+        return (int)error;
     }
 
     /* 3. Test Complex Variadic Macro Expansion (CFN_HAL_CHECK_AND_CALL_FUNC_VARG) */
@@ -85,11 +87,11 @@ int main(void)
         .pin_mask = CFN_HAL_GPIO_PIN_0,
         .mode = CFN_HAL_GPIO_CONFIG_MODE_OUTPUT_PP
     };
-    err = cfn_hal_gpio_pin_config(&gpio, &pin_cfg);
+    error = cfn_hal_gpio_pin_config(&gpio, &pin_cfg);
 
     /* 4. Test Lock Macro Expansion (CFN_HAL_WITH_LOCK) */
     cfn_hal_error_code_t lock_result;
     CFN_HAL_WITH_LOCK(&gpio, 100, lock_result, cfn_hal_gpio_pin_config, &pin_cfg);
 
-    return (int)(lock_result + err);
+    return (int)(lock_result + error);
 }

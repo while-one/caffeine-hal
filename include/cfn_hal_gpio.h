@@ -32,9 +32,9 @@ extern "C"
 #endif
 
 /* Includes ---------------------------------------------------------*/
-#include "cfn_hal_types.h"
 #include "cfn_hal.h"
 #include "cfn_hal_base.h"
+#include "cfn_hal_types.h"
 
 /* Defines ----------------------------------------------------------*/
 
@@ -62,7 +62,9 @@ typedef enum
 typedef enum
 {
     CFN_HAL_GPIO_STATE_LOW = 0,
-    CFN_HAL_GPIO_STATE_HIGH
+    CFN_HAL_GPIO_STATE_HIGH,
+
+    CFN_HAL_GPIO_STATE_MAX
 } cfn_hal_gpio_state_t;
 
 typedef enum
@@ -73,21 +75,27 @@ typedef enum
     CFN_HAL_GPIO_CONFIG_MODE_OUTPUT_OD,
     CFN_HAL_GPIO_CONFIG_MODE_ALTERNATE_PP,
     CFN_HAL_GPIO_CONFIG_MODE_ALTERNATE_OD,
+
+    CFN_HAL_GPIO_CONFIG_MODE_MAX
 } cfn_hal_gpio_config_mode_t;
 
 typedef enum
 {
     CFN_HAL_GPIO_CONFIG_PULL_NOPULL,
     CFN_HAL_GPIO_CONFIG_PULL_PULLUP,
-    CFN_HAL_GPIO_CONFIG_PULL_PULLDOWN
+    CFN_HAL_GPIO_CONFIG_PULL_PULLDOWN,
+
+    CFN_HAL_GPIO_CONFIG_PULL_MAX
 } cfn_hal_gpio_config_pull_t;
 
 typedef enum
 {
-    CFN_HAL_GPIO_CONFIG_SPEED_LOW,      /**< GPIO low speed         */
-    CFN_HAL_GPIO_CONFIG_SPEED_MEDIUM,   /**< GPIO medium speed      */
-    CFN_HAL_GPIO_CONFIG_SPEED_HIGH,     /**< GPIO high speed        */
-    CFN_HAL_GPIO_CONFIG_SPEED_VERY_HIGH /**< GPIO very high speed   */
+    CFN_HAL_GPIO_CONFIG_SPEED_LOW,       /**< GPIO low speed         */
+    CFN_HAL_GPIO_CONFIG_SPEED_MEDIUM,    /**< GPIO medium speed      */
+    CFN_HAL_GPIO_CONFIG_SPEED_HIGH,      /**< GPIO high speed        */
+    CFN_HAL_GPIO_CONFIG_SPEED_VERY_HIGH, /**< GPIO very high speed   */
+
+    CFN_HAL_GPIO_CONFIG_SPEED_MAX
 } cfn_hal_gpio_config_speed_t;
 
 typedef enum
@@ -95,6 +103,8 @@ typedef enum
     CFN_HAL_GPIO_CONFIG_STRENGTH_LOW,    /**< GPIO low strength */
     CFN_HAL_GPIO_CONFIG_STRENGTH_MEDIUM, /**< GPIO medium strength */
     CFN_HAL_GPIO_CONFIG_STRENGTH_HIGH,   /**< GPIO high strength */
+
+    CFN_HAL_GPIO_CONFIG_STRENGTH_MAX
 } cfn_hal_gpio_config_strength_t;
 
 typedef uint32_t cfn_hal_gpio_pin_t;
@@ -194,13 +204,54 @@ struct cfn_hal_gpio_api_s
 
 CFN_HAL_VMT_CHECK(struct cfn_hal_gpio_api_s);
 
-/* Note: 'void' is used for config_type because the port driver does not have a global config state */
+/* Note: 'void' is used for config_type because the port driver does not have a
+ * global config state */
 CFN_HAL_CREATE_DRIVER_TYPE(gpio, void, cfn_hal_gpio_api_t, cfn_hal_gpio_phy_t, cfn_hal_gpio_callback_t);
 
-#define CFN_HAL_GPIO_INITIALIZER(api_ptr, phy_ptr)                                                                     \
-    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_GPIO, api_ptr, phy_ptr, NULL)
-
 /* Functions inline ------------------------------------------------- */
+CFN_HAL_INLINE void cfn_hal_gpio_populate(cfn_hal_gpio_t           *driver,
+                                          uint32_t                  peripheral_id,
+                                          struct cfn_hal_clock_s   *clock,
+                                          const cfn_hal_gpio_api_t *api,
+                                          const cfn_hal_gpio_phy_t *phy,
+                                          cfn_hal_gpio_callback_t   callback,
+                                          void                     *user_arg)
+{
+    if (!driver)
+    {
+        return;
+    }
+    cfn_hal_base_populate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, peripheral_id, &api->base, clock);
+    driver->api         = api;
+    driver->phy         = phy;
+    driver->config      = NULL;
+    driver->cb          = callback;
+    driver->cb_user_arg = user_arg;
+}
+
+/**
+ * @brief Validates the GPIO pin configuration.
+ * @param driver Pointer to the GPIO driver instance.
+ * @param pin_cfg Pointer to the configuration structure.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_pin_config_validate(const cfn_hal_gpio_t            *driver,
+                                                                     const cfn_hal_gpio_pin_config_t *pin_cfg)
+{
+    if (driver == NULL || pin_cfg == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+
+    if (pin_cfg->mode >= CFN_HAL_GPIO_CONFIG_MODE_MAX || pin_cfg->pull >= CFN_HAL_GPIO_CONFIG_PULL_MAX ||
+        pin_cfg->speed >= CFN_HAL_GPIO_CONFIG_SPEED_MAX || pin_cfg->strength >= CFN_HAL_GPIO_CONFIG_STRENGTH_MAX ||
+        pin_cfg->default_state >= CFN_HAL_GPIO_STATE_MAX)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, pin_cfg);
+}
 
 /**
  * @brief Initializes the GPIO driver.
@@ -449,7 +500,12 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_port_write(cfn_hal_gpio_t *port
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_GPIO, port_write, port, error, pin_mask, port_value);
     return error;
 }
-
+cfn_hal_error_code_t cfn_hal_gpio_construct(cfn_hal_gpio_t           *driver,
+                                            const cfn_hal_gpio_phy_t *phy,
+                                            struct cfn_hal_clock_s   *clock,
+                                            cfn_hal_gpio_callback_t   callback,
+                                            void                     *user_arg);
+cfn_hal_error_code_t cfn_hal_gpio_destruct(cfn_hal_gpio_t *driver);
 #ifdef __cplusplus
 }
 #endif

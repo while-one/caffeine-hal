@@ -32,10 +32,10 @@ extern "C"
 #endif
 
 /* Includes ---------------------------------------------------------*/
-#include "cfn_hal_types.h"
 #include "cfn_hal.h"
 #include "cfn_hal_base.h"
 #include "cfn_hal_gpio.h"
+#include "cfn_hal_types.h"
 
 /* Defines ----------------------------------------------------------*/
 
@@ -225,11 +225,52 @@ CFN_HAL_VMT_CHECK(struct cfn_hal_uart_api_s);
 
 CFN_HAL_CREATE_DRIVER_TYPE(
     uart, cfn_hal_uart_config_t, cfn_hal_uart_api_t, cfn_hal_uart_phy_t, cfn_hal_uart_callback_t);
-
-#define CFN_HAL_UART_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                         \
-    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_UART, api_ptr, phy_ptr, config_ptr)
-
 /* Functions inline ------------------------------------------------- */
+CFN_HAL_INLINE void cfn_hal_uart_populate(cfn_hal_uart_t              *driver,
+                                          uint32_t                     peripheral_id,
+                                          struct cfn_hal_clock_s      *clock,
+                                          const cfn_hal_uart_api_t    *api,
+                                          const cfn_hal_uart_phy_t    *phy,
+                                          const cfn_hal_uart_config_t *config,
+                                          cfn_hal_uart_callback_t      callback,
+                                          void                        *user_arg)
+{
+    if (!driver)
+    {
+        return;
+    }
+    cfn_hal_base_populate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_UART, peripheral_id, &api->base, clock);
+    driver->api         = api;
+    driver->phy         = phy;
+    driver->config      = config;
+    driver->cb          = callback;
+    driver->cb_user_arg = user_arg;
+}
+
+/**
+ * @brief Validates the UART configuration.
+ * @param driver Pointer to the UART driver instance.
+ * @param config Pointer to the configuration structure.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_config_validate(const cfn_hal_uart_t        *driver,
+                                                                 const cfn_hal_uart_config_t *config)
+{
+    if (driver == NULL || config == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+
+    if (config->read_mode >= CFN_HAL_UART_CONFIG_MODE_MAX || config->write_mode >= CFN_HAL_UART_CONFIG_MODE_MAX ||
+        config->data_len >= CFN_HAL_UART_CONFIG_DATA_LEN_MAX || config->stop_bits >= CFN_HAL_UART_CONFIG_STOP_MAX ||
+        config->parity >= CFN_HAL_UART_CONFIG_PARITY_MAX || config->flow_ctrl >= CFN_HAL_UART_CONFIG_FLOW_CTRL_MAX ||
+        config->direction >= CFN_HAL_UART_CONFIG_DIRECTION_MAX)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_UART, config);
+}
 
 /**
  * @brief Initializes the UART driver.
@@ -242,7 +283,12 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_init(cfn_hal_uart_t *driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    driver->base.vmt = (const struct cfn_hal_api_base_s *) driver->api;
+    driver->base.vmt           = (const struct cfn_hal_api_base_s *) driver->api;
+    cfn_hal_error_code_t error = cfn_hal_uart_config_validate(driver, driver->config);
+    if (error != CFN_HAL_ERROR_OK)
+    {
+        return error;
+    }
     return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_UART);
 }
 
@@ -271,6 +317,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_config_set(cfn_hal_uart_t *driv
     if (!driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    cfn_hal_error_code_t error = cfn_hal_uart_config_validate(driver, config);
+    if (error != CFN_HAL_ERROR_OK)
+    {
+        return error;
     }
     {
         driver->config = config;
@@ -453,7 +504,8 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_tx_irq_abort(cfn_hal_uart_t *dr
 }
 
 /**
- * @brief Starts UART data reception using interrupts to receive exactly N bytes.
+ * @brief Starts UART data reception using interrupts to receive exactly N
+ * bytes.
  * @param driver Pointer to the UART driver instance.
  * @param data Pointer to the buffer to store received data.
  * @param nbr_of_bytes Number of bytes to receive.
@@ -575,7 +627,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_uart_rx_dma(cfn_hal_uart_t *driver, 
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_UART, rx_dma, driver, error, data, nbr_of_bytes);
     return error;
 }
-
+cfn_hal_error_code_t cfn_hal_uart_construct(cfn_hal_uart_t              *driver,
+                                            const cfn_hal_uart_config_t *config,
+                                            const cfn_hal_uart_phy_t    *phy,
+                                            struct cfn_hal_clock_s      *clock,
+                                            cfn_hal_uart_callback_t      callback,
+                                            void                        *user_arg);
+cfn_hal_error_code_t cfn_hal_uart_destruct(cfn_hal_uart_t *driver);
 #ifdef __cplusplus
 }
 #endif

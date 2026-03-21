@@ -32,10 +32,10 @@ extern "C"
 #endif
 
 /* Includes ---------------------------------------------------------*/
-#include "cfn_hal_types.h"
 #include "cfn_hal.h"
 #include "cfn_hal_base.h"
 #include "cfn_hal_gpio.h"
+#include "cfn_hal_types.h"
 
 /* Defines ----------------------------------------------------------*/
 
@@ -61,6 +61,27 @@ typedef enum
     CFN_HAL_DAC_ERROR_GENERAL  = CFN_HAL_BIT(1), /*!< General hardware error */
 } cfn_hal_dac_error_t;
 
+typedef enum
+{
+    CFN_HAL_DAC_RESOLUTION_BIT_4 = 0,
+    CFN_HAL_DAC_RESOLUTION_BIT_6,
+    CFN_HAL_DAC_RESOLUTION_BIT_8,
+    CFN_HAL_DAC_RESOLUTION_BIT_10,
+    CFN_HAL_DAC_RESOLUTION_BIT_12,
+    CFN_HAL_DAC_RESOLUTION_BIT_14,
+    CFN_HAL_DAC_RESOLUTION_BIT_16,
+    CFN_HAL_DAC_RESOLUTION_BIT_24,
+
+    CFN_HAL_DAC_RESOLUTION_BIT_MAX
+} cfn_hal_dac_resolution_t;
+
+typedef enum
+{
+    CFN_HAL_DAC_ALIGN_RIGHT = 0,
+    CFN_HAL_DAC_ALIGN_LEFT,
+
+    CFN_HAL_DAC_ALIGN_MAX
+} cfn_hal_dac_align_t;
 /* Types Structs ----------------------------------------------------*/
 
 /**
@@ -79,9 +100,9 @@ typedef struct
  */
 typedef struct
 {
-    uint32_t resolution; /*!< DAC resolution in bits */
-    uint32_t alignment;  /*!< Data alignment (Left/Right) */
-    void    *custom;     /*!< Vendor-specific custom configuration */
+    cfn_hal_dac_align_t      alignment;  /*!< Data alignment (Left/Right) */
+    cfn_hal_dac_resolution_t resolution; /*!< DAC resolution in bits */
+    void                    *custom;     /*!< Vendor-specific custom configuration */
 } cfn_hal_dac_config_t;
 
 typedef struct cfn_hal_dac_s     cfn_hal_dac_t;
@@ -114,10 +135,49 @@ CFN_HAL_VMT_CHECK(struct cfn_hal_dac_api_s);
 
 CFN_HAL_CREATE_DRIVER_TYPE(dac, cfn_hal_dac_config_t, cfn_hal_dac_api_t, cfn_hal_dac_phy_t, cfn_hal_dac_callback_t);
 
-#define CFN_HAL_DAC_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                          \
-    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_DAC, api_ptr, phy_ptr, config_ptr)
-
 /* Functions inline ------------------------------------------------- */
+CFN_HAL_INLINE void cfn_hal_dac_populate(cfn_hal_dac_t              *driver,
+                                         uint32_t                    peripheral_id,
+                                         struct cfn_hal_clock_s     *clock,
+                                         const cfn_hal_dac_api_t    *api,
+                                         const cfn_hal_dac_phy_t    *phy,
+                                         const cfn_hal_dac_config_t *config,
+                                         cfn_hal_dac_callback_t      callback,
+                                         void                       *user_arg)
+{
+    if (!driver)
+    {
+        return;
+    }
+    cfn_hal_base_populate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DAC, peripheral_id, &api->base, clock);
+    driver->api         = api;
+    driver->phy         = phy;
+    driver->config      = config;
+    driver->cb          = callback;
+    driver->cb_user_arg = user_arg;
+}
+
+/**
+ * @brief Validates the DAC configuration.
+ * @param driver Pointer to the DAC driver instance.
+ * @param config Pointer to the configuration structure.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dac_config_validate(const cfn_hal_dac_t        *driver,
+                                                                const cfn_hal_dac_config_t *config)
+{
+    if (driver == NULL || config == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+
+    if ((config->resolution >= CFN_HAL_DAC_RESOLUTION_BIT_MAX) || (config->alignment >= CFN_HAL_DAC_ALIGN_MAX))
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DAC, config);
+}
 
 /**
  * @brief Initializes the DAC driver.
@@ -130,7 +190,12 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dac_init(cfn_hal_dac_t *driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    driver->base.vmt = (const struct cfn_hal_api_base_s *) driver->api;
+    driver->base.vmt           = (const struct cfn_hal_api_base_s *) driver->api;
+    cfn_hal_error_code_t error = cfn_hal_dac_config_validate(driver, driver->config);
+    if (error != CFN_HAL_ERROR_OK)
+    {
+        return error;
+    }
     return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_DAC);
 }
 
@@ -159,6 +224,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dac_config_set(cfn_hal_dac_t *driver
     if (!driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    cfn_hal_error_code_t error = cfn_hal_dac_config_validate(driver, config);
+    if (error != CFN_HAL_ERROR_OK)
+    {
+        return error;
     }
     {
         driver->config = config;
@@ -364,6 +434,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dac_write_dma(cfn_hal_dac_t  *driver
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_DAC, write_dma, driver, error, data, nbr_of_samples);
     return error;
 }
+cfn_hal_error_code_t cfn_hal_dac_construct(cfn_hal_dac_t              *driver,
+                                           const cfn_hal_dac_config_t *config,
+                                           const cfn_hal_dac_phy_t    *phy,
+                                           struct cfn_hal_clock_s     *clock,
+                                           cfn_hal_dac_callback_t      callback,
+                                           void                       *user_arg);
+cfn_hal_error_code_t cfn_hal_dac_destruct(cfn_hal_dac_t *driver);
 
 #ifdef __cplusplus
 }

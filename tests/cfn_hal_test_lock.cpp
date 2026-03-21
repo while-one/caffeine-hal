@@ -20,7 +20,7 @@
  * SOFTWARE.
  *
  * @file cfn_hal_test_lock.cpp
- * @brief Unit tests for HAL locking mechanism.
+ * @brief Unit tests for HAL locking mechanism and base driver logic.
  */
 
 #include <gtest/gtest.h>
@@ -114,14 +114,6 @@ TEST_F(LockTest, NullBaseReturnsBadParam)
 
 // --- WithLock Macro Tests ---
 
-// Wrapper structure to act as a peripheral driver for the macro
-struct mock_peripheral_t
-{
-    cfn_hal_driver_t    base;
-    cfn_hal_api_base_t *api; // Macro expects ->api to exist if using peripheral types,
-                             // but cfn_hal_driver_t * works too if passed directly.
-};
-
 TEST_F(LockTest, WithLockMacroSuccess)
 {
     api.lock = [](cfn_hal_driver_t *b, uint32_t timeout) -> cfn_hal_error_code_t
@@ -192,4 +184,47 @@ TEST_F(LockTest, WithLockMacroNullDriverReturnsBadParam)
 
     CFN_HAL_WITH_LOCK((cfn_hal_driver_t *) nullptr, 100, result, dummy_func);
     EXPECT_EQ(result, CFN_HAL_ERROR_BAD_PARAM);
+}
+
+// --- Base Lifecycle & Config Tests ---
+
+class BaseTest : public LockTest
+{
+};
+
+TEST_F(BaseTest, ConfigSetCallsVmtValidate)
+{
+    api.config_validate = [](const cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t
+    {
+        static_cast<MockState *>(b->extension)->func_calls++;
+        return CFN_HAL_ERROR_OK;
+    };
+    api.config_set   = [](cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+
+    int dummy_config = 42;
+    EXPECT_EQ(cfn_hal_base_config_set(&base, CFN_HAL_PERIPHERAL_TYPE_GPIO, &dummy_config), CFN_HAL_ERROR_OK);
+    EXPECT_EQ(mock_state.func_calls, 1);
+}
+
+TEST_F(BaseTest, ConfigSetAbortsOnVmtValidateFailure)
+{
+    api.config_validate = [](const cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t
+    { return CFN_HAL_ERROR_BAD_CONFIG; };
+    api.config_set = [](cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t
+    {
+        static_cast<MockState *>(b->extension)->func_calls++;
+        return CFN_HAL_ERROR_OK;
+    };
+
+    int dummy_config = 42;
+    EXPECT_EQ(cfn_hal_base_config_set(&base, CFN_HAL_PERIPHERAL_TYPE_GPIO, &dummy_config), CFN_HAL_ERROR_BAD_CONFIG);
+    EXPECT_EQ(mock_state.func_calls, 0);
+}
+
+TEST_F(BaseTest, ConfigValidateGeneric)
+{
+    api.config_validate = [](const cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t
+    { return CFN_HAL_ERROR_OK; };
+    int dummy_config = 42;
+    EXPECT_EQ(cfn_hal_base_config_validate(&base, CFN_HAL_PERIPHERAL_TYPE_GPIO, &dummy_config), CFN_HAL_ERROR_OK);
 }

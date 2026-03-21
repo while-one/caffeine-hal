@@ -30,17 +30,20 @@
 class CanTest : public ::testing::Test
 {
   protected:
-    cfn_hal_can_t     driver{};
-    cfn_hal_can_api_t api{};
+    cfn_hal_can_t        driver{};
+    cfn_hal_can_api_t    api{};
+    cfn_hal_can_config_t dummy_config{};
 
     void SetUp() override
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
-        driver.base.vmt    = (const struct cfn_hal_api_base_s *) &api;
-        driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_CAN;
-        driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
-        driver.api         = &api;
+        dummy_config.baudrate = 500000;
+        driver.config         = &dummy_config;
+        driver.base.vmt       = (const struct cfn_hal_api_base_s *) &api;
+        driver.base.type      = CFN_HAL_PERIPHERAL_TYPE_CAN;
+        driver.base.status    = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
+        driver.api            = &api;
     }
 };
 
@@ -93,6 +96,45 @@ TEST_F(CanTest, DeinitSuccess)
 }
 
 // --- Configuration & Callback Tests ---
+
+TEST_F(CanTest, ConfigValidation)
+{
+    cfn_hal_can_config_t config = { .baudrate = 500000 };
+
+    // Valid config
+    EXPECT_EQ(cfn_hal_can_config_validate(&driver, &config), CFN_HAL_ERROR_OK);
+
+    // NULL driver
+    EXPECT_EQ(cfn_hal_can_config_validate(nullptr, &config), CFN_HAL_ERROR_BAD_PARAM);
+
+    // NULL config
+    EXPECT_EQ(cfn_hal_can_config_validate(&driver, nullptr), CFN_HAL_ERROR_BAD_PARAM);
+
+    // Invalid baudrate (0)
+    config.baudrate = 0;
+    EXPECT_EQ(cfn_hal_can_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+}
+
+TEST_F(CanTest, VmtConfigValidateCalled)
+{
+    cfn_hal_can_config_t config              = { .baudrate = 500000 };
+    bool                 vmt_validate_called = false;
+
+    api.base.config_validate                 = [](const cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t
+    {
+        cfn_hal_can_t *d           = (cfn_hal_can_t *) b;
+        *(bool *) d->phy->user_arg = true;
+        return CFN_HAL_ERROR_OK;
+    };
+    api.base.config_set   = [](cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+
+    cfn_hal_can_phy_t phy = { .user_arg = &vmt_validate_called };
+    driver.phy            = &phy;
+    driver.base.status    = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+
+    EXPECT_EQ(cfn_hal_can_config_set(&driver, &config), CFN_HAL_ERROR_OK);
+    EXPECT_TRUE(vmt_validate_called);
+}
 
 TEST_F(CanTest, ConfigSetGet)
 {

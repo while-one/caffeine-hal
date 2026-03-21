@@ -32,9 +32,9 @@ extern "C"
 #endif
 
 /* Includes ---------------------------------------------------------*/
-#include "cfn_hal_types.h"
 #include "cfn_hal.h"
 #include "cfn_hal_base.h"
+#include "cfn_hal_types.h"
 
 /* Defines ----------------------------------------------------------*/
 
@@ -65,6 +65,8 @@ typedef enum
 {
     CFN_HAL_WDT_CONFIG_SLEEP_RUN,   /*!< Continue counting during sleep */
     CFN_HAL_WDT_CONFIG_SLEEP_PAUSE, /*!< Freeze counter during sleep */
+
+    CFN_HAL_WDT_CONFIG_SLEEP_MAX
 } cfn_hal_wdt_config_sleep_t;
 
 /**
@@ -75,6 +77,8 @@ typedef enum
     CFN_HAL_WDT_CONFIG_RESET_NONE, /*!< No reset (interrupt only) */
     CFN_HAL_WDT_CONFIG_RESET_IRQ,  /*!< Generate interrupt then reset */
     CFN_HAL_WDT_CONFIG_RESET_CPU,  /*!< Immediate CPU reset */
+
+    CFN_HAL_WDT_CONFIG_RESET_MAX
 } cfn_hal_wdt_config_reset_t;
 
 /* Types Structs ----------------------------------------------------*/
@@ -125,11 +129,49 @@ struct cfn_hal_wdt_api_s
 CFN_HAL_VMT_CHECK(struct cfn_hal_wdt_api_s);
 
 CFN_HAL_CREATE_DRIVER_TYPE(wdt, cfn_hal_wdt_config_t, cfn_hal_wdt_api_t, cfn_hal_wdt_phy_t, cfn_hal_wdt_callback_t);
-
-#define CFN_HAL_WDT_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                          \
-    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_WDT, api_ptr, phy_ptr, config_ptr)
-
 /* Functions inline ------------------------------------------------- */
+CFN_HAL_INLINE void cfn_hal_wdt_populate(cfn_hal_wdt_t              *driver,
+                                         uint32_t                    peripheral_id,
+                                         struct cfn_hal_clock_s     *clock,
+                                         const cfn_hal_wdt_api_t    *api,
+                                         const cfn_hal_wdt_phy_t    *phy,
+                                         const cfn_hal_wdt_config_t *config,
+                                         cfn_hal_wdt_callback_t      callback,
+                                         void                       *user_arg)
+{
+    if (!driver)
+    {
+        return;
+    }
+    cfn_hal_base_populate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_WDT, peripheral_id, &api->base, clock);
+    driver->api         = api;
+    driver->phy         = phy;
+    driver->config      = config;
+    driver->cb          = callback;
+    driver->cb_user_arg = user_arg;
+}
+
+/**
+ * @brief Validates the Watchdog configuration.
+ * @param driver Pointer to the WDT driver instance.
+ * @param config Pointer to the configuration structure.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_wdt_config_validate(cfn_hal_wdt_t              *driver,
+                                                                const cfn_hal_wdt_config_t *config)
+{
+    if (driver == NULL || config == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+
+    if (config->sleep >= CFN_HAL_WDT_CONFIG_SLEEP_MAX || config->reset >= CFN_HAL_WDT_CONFIG_RESET_MAX)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_WDT, config);
+}
 
 /**
  * @brief Initializes the Watchdog driver.
@@ -142,7 +184,12 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_wdt_init(cfn_hal_wdt_t *driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    driver->base.vmt = (const struct cfn_hal_api_base_s *) driver->api;
+    driver->base.vmt           = (const struct cfn_hal_api_base_s *) driver->api;
+    cfn_hal_error_code_t error = cfn_hal_wdt_config_validate(driver, driver->config);
+    if (error != CFN_HAL_ERROR_OK)
+    {
+        return error;
+    }
     return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_WDT);
 }
 
@@ -171,6 +218,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_wdt_config_set(cfn_hal_wdt_t *driver
     if (!driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    cfn_hal_error_code_t error = cfn_hal_wdt_config_validate(driver, config);
+    if (error != CFN_HAL_ERROR_OK)
+    {
+        return error;
     }
     {
         driver->config = config;
@@ -359,7 +411,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_wdt_feed(cfn_hal_wdt_t *driver)
     CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_WDT, feed, driver, error);
     return error;
 }
-
+cfn_hal_error_code_t cfn_hal_wdt_construct(cfn_hal_wdt_t              *driver,
+                                           const cfn_hal_wdt_config_t *config,
+                                           const cfn_hal_wdt_phy_t    *phy,
+                                           struct cfn_hal_clock_s     *clock,
+                                           cfn_hal_wdt_callback_t      callback,
+                                           void                       *user_arg);
+cfn_hal_error_code_t cfn_hal_wdt_destruct(cfn_hal_wdt_t *driver);
 #ifdef __cplusplus
 }
 #endif

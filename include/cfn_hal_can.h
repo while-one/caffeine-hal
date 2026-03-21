@@ -32,10 +32,10 @@ extern "C"
 #endif
 
 /* Includes ---------------------------------------------------------*/
-#include "cfn_hal_types.h"
 #include "cfn_hal.h"
 #include "cfn_hal_base.h"
 #include "cfn_hal_gpio.h"
+#include "cfn_hal_types.h"
 
 /* Defines ----------------------------------------------------------*/
 
@@ -132,11 +132,49 @@ struct cfn_hal_can_api_s
 CFN_HAL_VMT_CHECK(struct cfn_hal_can_api_s);
 
 CFN_HAL_CREATE_DRIVER_TYPE(can, cfn_hal_can_config_t, cfn_hal_can_api_t, cfn_hal_can_phy_t, cfn_hal_can_callback_t);
-
-#define CFN_HAL_CAN_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                          \
-    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_CAN, api_ptr, phy_ptr, config_ptr)
-
 /* Functions inline ------------------------------------------------- */
+CFN_HAL_INLINE void cfn_hal_can_populate(cfn_hal_can_t              *driver,
+                                         uint32_t                    peripheral_id,
+                                         struct cfn_hal_clock_s     *clock,
+                                         const cfn_hal_can_api_t    *api,
+                                         const cfn_hal_can_phy_t    *phy,
+                                         const cfn_hal_can_config_t *config,
+                                         cfn_hal_can_callback_t      callback,
+                                         void                       *user_arg)
+{
+    if (!driver)
+    {
+        return;
+    }
+    cfn_hal_base_populate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CAN, peripheral_id, &api->base, clock);
+    driver->api         = api;
+    driver->phy         = phy;
+    driver->config      = config;
+    driver->cb          = callback;
+    driver->cb_user_arg = user_arg;
+}
+
+/**
+ * @brief Validates the CAN configuration.
+ * @param driver Pointer to the CAN driver instance.
+ * @param config Pointer to the configuration structure.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_can_config_validate(const cfn_hal_can_t        *driver,
+                                                                const cfn_hal_can_config_t *config)
+{
+    if (driver == NULL || config == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+
+    if (config->baudrate == 0)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CAN, config);
+}
 
 /**
  * @brief Initializes the CAN driver.
@@ -149,7 +187,12 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_can_init(cfn_hal_can_t *driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    driver->base.vmt = (const struct cfn_hal_api_base_s *) driver->api;
+    driver->base.vmt           = (const struct cfn_hal_api_base_s *) driver->api;
+    cfn_hal_error_code_t error = cfn_hal_can_config_validate(driver, driver->config);
+    if (error != CFN_HAL_ERROR_OK)
+    {
+        return error;
+    }
     return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CAN);
 }
 
@@ -178,6 +221,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_can_config_set(cfn_hal_can_t *driver
     if (!driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    cfn_hal_error_code_t error = cfn_hal_can_config_validate(driver, config);
+    if (error != CFN_HAL_ERROR_OK)
+    {
+        return error;
     }
     {
         driver->config = config;
@@ -373,7 +421,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_can_add_filter(cfn_hal_can_t *driver
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CAN, add_filter, driver, error, filter);
     return error;
 }
-
+cfn_hal_error_code_t cfn_hal_can_construct(cfn_hal_can_t              *driver,
+                                           const cfn_hal_can_config_t *config,
+                                           const cfn_hal_can_phy_t    *phy,
+                                           struct cfn_hal_clock_s     *clock,
+                                           cfn_hal_can_callback_t      callback,
+                                           void                       *user_arg);
+cfn_hal_error_code_t cfn_hal_can_destruct(cfn_hal_can_t *driver);
 #ifdef __cplusplus
 }
 #endif

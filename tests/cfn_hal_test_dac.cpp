@@ -30,13 +30,15 @@
 class DacTest : public ::testing::Test
 {
   protected:
-    cfn_hal_dac_t     driver{};
-    cfn_hal_dac_api_t api{};
+    cfn_hal_dac_t        driver{};
+    cfn_hal_dac_api_t    api{};
+    cfn_hal_dac_config_t dummy_config{};
 
     void SetUp() override
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
+        driver.config      = &dummy_config;
         driver.base.vmt    = (const struct cfn_hal_api_base_s *) &api;
         driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_DAC;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
@@ -94,14 +96,37 @@ TEST_F(DacTest, DeinitSuccess)
 
 // --- Configuration & Callback Tests ---
 
+TEST_F(DacTest, ConfigValidation)
+{
+    cfn_hal_dac_config_t config = { .alignment = CFN_HAL_DAC_ALIGN_RIGHT, .resolution = CFN_HAL_DAC_RESOLUTION_BIT_12 };
+
+    // Valid config
+    EXPECT_EQ(cfn_hal_dac_config_validate(&driver, &config), CFN_HAL_ERROR_OK);
+
+    // NULL driver
+    EXPECT_EQ(cfn_hal_dac_config_validate(nullptr, &config), CFN_HAL_ERROR_BAD_PARAM);
+
+    // NULL config
+    EXPECT_EQ(cfn_hal_dac_config_validate(&driver, nullptr), CFN_HAL_ERROR_BAD_PARAM);
+
+    // Invalid enum (Resolution)
+    config.resolution = CFN_HAL_DAC_RESOLUTION_BIT_MAX;
+    EXPECT_EQ(cfn_hal_dac_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.resolution = CFN_HAL_DAC_RESOLUTION_BIT_12;
+
+    // Invalid enum (Alignment)
+    config.alignment  = CFN_HAL_DAC_ALIGN_MAX;
+    EXPECT_EQ(cfn_hal_dac_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+}
+
 TEST_F(DacTest, ConfigSetGet)
 {
-    cfn_hal_dac_config_t config = { .resolution = 12 };
+    cfn_hal_dac_config_t config = { .resolution = CFN_HAL_DAC_RESOLUTION_BIT_12 };
     cfn_hal_dac_config_t read_config{};
 
     EXPECT_EQ(cfn_hal_dac_config_set(&driver, &config), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_dac_config_get(&driver, &read_config), CFN_HAL_ERROR_OK);
-    EXPECT_EQ(read_config.resolution, 12);
+    EXPECT_EQ(read_config.resolution, CFN_HAL_DAC_RESOLUTION_BIT_12);
 }
 
 TEST_F(DacTest, CallbackRegister)

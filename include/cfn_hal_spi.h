@@ -32,10 +32,10 @@ extern "C"
 #endif
 
 /* Includes ---------------------------------------------------------*/
-#include "cfn_hal_types.h"
 #include "cfn_hal.h"
 #include "cfn_hal_base.h"
 #include "cfn_hal_gpio.h"
+#include "cfn_hal_types.h"
 
 /* Defines ----------------------------------------------------------*/
 
@@ -72,6 +72,8 @@ typedef enum
     CFN_HAL_SPI_CONFIG_FMT_POL0_PHA1, /*!< CPOL=0, CPHA=1 */
     CFN_HAL_SPI_CONFIG_FMT_POL1_PHA0, /*!< CPOL=1, CPHA=0 */
     CFN_HAL_SPI_CONFIG_FMT_POL1_PHA1, /*!< CPOL=1, CPHA=1 */
+
+    CFN_HAL_SPI_CONFIG_FMT_MAX
 } cfn_hal_spi_config_format_t;
 
 /**
@@ -79,9 +81,12 @@ typedef enum
  */
 typedef enum
 {
-    CFN_HAL_SPI_CONFIG_CS_USER_CONTROLLED, /*!< CS toggled manually by application */
+    CFN_HAL_SPI_CONFIG_CS_USER_CONTROLLED, /*!< CS toggled manually by application
+                                            */
     CFN_HAL_SPI_CONFIG_CS_HAL_CONTROLLED,  /*!< CS toggled by HAL during xfr */
     CFN_HAL_SPI_CONFIG_CS_HW_CONTROLLED,   /*!< CS toggled by hardware peripheral */
+
+    CFN_HAL_SPI_CONFIG_CS_MAX
 } cfn_hal_spi_config_cs_mode_t;
 
 /* Types Structs ----------------------------------------------------*/
@@ -158,10 +163,49 @@ CFN_HAL_VMT_CHECK(struct cfn_hal_spi_api_s);
 
 CFN_HAL_CREATE_DRIVER_TYPE(spi, cfn_hal_spi_config_t, cfn_hal_spi_api_t, cfn_hal_spi_phy_t, cfn_hal_spi_callback_t);
 
-#define CFN_HAL_SPI_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                          \
-    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_SPI, api_ptr, phy_ptr, config_ptr)
-
 /* Functions inline ------------------------------------------------- */
+CFN_HAL_INLINE void cfn_hal_spi_populate(cfn_hal_spi_t              *driver,
+                                         uint32_t                    peripheral_id,
+                                         struct cfn_hal_clock_s     *clock,
+                                         const cfn_hal_spi_api_t    *api,
+                                         const cfn_hal_spi_phy_t    *phy,
+                                         const cfn_hal_spi_config_t *config,
+                                         cfn_hal_spi_callback_t      callback,
+                                         void                       *user_arg)
+{
+    if (!driver)
+    {
+        return;
+    }
+    cfn_hal_base_populate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SPI, peripheral_id, &api->base, clock);
+    driver->api         = api;
+    driver->phy         = phy;
+    driver->config      = config;
+    driver->cb          = callback;
+    driver->cb_user_arg = user_arg;
+}
+
+/**
+ * @brief Validates the SPI configuration.
+ * @param driver Pointer to the SPI driver instance.
+ * @param config Pointer to the configuration structure.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_config_validate(const cfn_hal_spi_t        *driver,
+                                                                const cfn_hal_spi_config_t *config)
+{
+    if (driver == NULL || config == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+
+    if (config->fmt >= CFN_HAL_SPI_CONFIG_FMT_MAX || config->cs_mode >= CFN_HAL_SPI_CONFIG_CS_MAX)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SPI, config);
+}
 
 /**
  * @brief Initializes the SPI driver.
@@ -174,7 +218,12 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_init(cfn_hal_spi_t *driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    driver->base.vmt = (const struct cfn_hal_api_base_s *) driver->api;
+    driver->base.vmt           = (const struct cfn_hal_api_base_s *) driver->api;
+    cfn_hal_error_code_t error = cfn_hal_spi_config_validate(driver, driver->config);
+    if (error != CFN_HAL_ERROR_OK)
+    {
+        return error;
+    }
     return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SPI);
 }
 
@@ -203,6 +252,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_config_set(cfn_hal_spi_t *driver
     if (!driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    cfn_hal_error_code_t error = cfn_hal_spi_config_validate(driver, config);
+    if (error != CFN_HAL_ERROR_OK)
+    {
+        return error;
     }
     {
         driver->config = config;
@@ -409,7 +463,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_spi_xfr_dma(cfn_hal_spi_t *driver, c
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SPI, xfr_dma, driver, error, xfr);
     return error;
 }
-
+cfn_hal_error_code_t cfn_hal_spi_construct(cfn_hal_spi_t              *driver,
+                                           const cfn_hal_spi_config_t *config,
+                                           const cfn_hal_spi_phy_t    *phy,
+                                           struct cfn_hal_clock_s     *clock,
+                                           cfn_hal_spi_callback_t      callback,
+                                           void                       *user_arg);
+cfn_hal_error_code_t cfn_hal_spi_destruct(cfn_hal_spi_t *driver);
 #ifdef __cplusplus
 }
 #endif

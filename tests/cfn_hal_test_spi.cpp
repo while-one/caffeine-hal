@@ -30,13 +30,15 @@
 class SpiTest : public ::testing::Test
 {
   protected:
-    cfn_hal_spi_t     driver{};
-    cfn_hal_spi_api_t api{};
+    cfn_hal_spi_t        driver{};
+    cfn_hal_spi_api_t    api{};
+    cfn_hal_spi_config_t dummy_config{};
 
     void SetUp() override
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
+        driver.config      = &dummy_config;
         driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_SPI;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
         driver.base.vmt    = (const struct cfn_hal_api_base_s *) &api;
@@ -90,6 +92,35 @@ TEST_F(SpiTest, DeinitSuccess)
     api.base.deinit    = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_spi_deinit(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
+}
+
+TEST_F(SpiTest, ConfigValidation)
+{
+    cfn_hal_spi_config_t config = {
+        .bitrate   = 1000000,
+        .data_size = 8,
+        .fmt       = CFN_HAL_SPI_CONFIG_FMT_POL0_PHA0,
+        .cs_mode   = CFN_HAL_SPI_CONFIG_CS_HW_CONTROLLED,
+        .custom    = nullptr,
+    };
+
+    // Valid config
+    EXPECT_EQ(cfn_hal_spi_config_validate(&driver, &config), CFN_HAL_ERROR_OK);
+
+    // NULL driver
+    EXPECT_EQ(cfn_hal_spi_config_validate(nullptr, &config), CFN_HAL_ERROR_BAD_PARAM);
+
+    // NULL config
+    EXPECT_EQ(cfn_hal_spi_config_validate(&driver, nullptr), CFN_HAL_ERROR_BAD_PARAM);
+
+    // Invalid enum (Format)
+    config.fmt = CFN_HAL_SPI_CONFIG_FMT_MAX;
+    EXPECT_EQ(cfn_hal_spi_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.fmt     = CFN_HAL_SPI_CONFIG_FMT_POL0_PHA0;
+
+    // Invalid enum (CS Mode)
+    config.cs_mode = CFN_HAL_SPI_CONFIG_CS_MAX;
+    EXPECT_EQ(cfn_hal_spi_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
 }
 
 TEST_F(SpiTest, ConfigSetSuccess)

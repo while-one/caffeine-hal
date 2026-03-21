@@ -30,13 +30,15 @@
 class UartTest : public ::testing::Test
 {
   protected:
-    cfn_hal_uart_t     driver{};
-    cfn_hal_uart_api_t api{};
+    cfn_hal_uart_t        driver{};
+    cfn_hal_uart_api_t    api{};
+    cfn_hal_uart_config_t dummy_config{};
 
     void SetUp() override
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
+        driver.config      = &dummy_config;
         driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_UART;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
         driver.api         = &api;
@@ -93,6 +95,65 @@ TEST_F(UartTest, DeinitSuccess)
 }
 
 // --- Configuration & Callback Tests ---
+
+TEST_F(UartTest, ConfigValidation)
+{
+    cfn_hal_uart_config_t config = {
+        .echo       = false,
+        .baudrate   = 115200,
+        .read_mode  = CFN_HAL_UART_CONFIG_MODE_BLOCKING,
+        .write_mode = CFN_HAL_UART_CONFIG_MODE_BLOCKING,
+        .data_len   = CFN_HAL_UART_CONFIG_DATA_LEN_8,
+        .stop_bits  = CFN_HAL_UART_CONFIG_STOP_ONE_BIT,
+        .parity     = CFN_HAL_UART_CONFIG_PARITY_NONE,
+        .flow_ctrl  = CFN_HAL_UART_CONFIG_FLOW_CTRL_NONE,
+        .direction  = CFN_HAL_UART_CONFIG_DIRECTION_TX_RX,
+        .custom     = nullptr,
+    };
+
+    // Valid config
+    EXPECT_EQ(cfn_hal_uart_config_validate(&driver, &config), CFN_HAL_ERROR_OK);
+
+    // NULL driver
+    EXPECT_EQ(cfn_hal_uart_config_validate(nullptr, &config), CFN_HAL_ERROR_BAD_PARAM);
+
+    // NULL config
+    EXPECT_EQ(cfn_hal_uart_config_validate(&driver, nullptr), CFN_HAL_ERROR_BAD_PARAM);
+
+    // Invalid enum (Read Mode)
+    config.read_mode = CFN_HAL_UART_CONFIG_MODE_MAX;
+    EXPECT_EQ(cfn_hal_uart_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.read_mode  = CFN_HAL_UART_CONFIG_MODE_BLOCKING;
+
+    // Invalid enum (Write Mode)
+    config.write_mode = CFN_HAL_UART_CONFIG_MODE_MAX;
+    EXPECT_EQ(cfn_hal_uart_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.write_mode = CFN_HAL_UART_CONFIG_MODE_BLOCKING;
+
+    // Invalid enum (Data Len)
+    config.data_len   = CFN_HAL_UART_CONFIG_DATA_LEN_MAX;
+    EXPECT_EQ(cfn_hal_uart_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.data_len  = CFN_HAL_UART_CONFIG_DATA_LEN_8;
+
+    // Invalid enum (Stop Bits)
+    config.stop_bits = CFN_HAL_UART_CONFIG_STOP_MAX;
+    EXPECT_EQ(cfn_hal_uart_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.stop_bits = CFN_HAL_UART_CONFIG_STOP_ONE_BIT;
+
+    // Invalid enum (Parity)
+    config.parity    = CFN_HAL_UART_CONFIG_PARITY_MAX;
+    EXPECT_EQ(cfn_hal_uart_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.parity    = CFN_HAL_UART_CONFIG_PARITY_NONE;
+
+    // Invalid enum (Flow Control)
+    config.flow_ctrl = CFN_HAL_UART_CONFIG_FLOW_CTRL_MAX;
+    EXPECT_EQ(cfn_hal_uart_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.flow_ctrl = CFN_HAL_UART_CONFIG_FLOW_CTRL_NONE;
+
+    // Invalid enum (Direction)
+    config.direction = CFN_HAL_UART_CONFIG_DIRECTION_MAX;
+    EXPECT_EQ(cfn_hal_uart_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+}
 
 TEST_F(UartTest, ConfigSetGet)
 {

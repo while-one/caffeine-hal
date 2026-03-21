@@ -30,13 +30,15 @@
 class WdtTest : public ::testing::Test
 {
   protected:
-    cfn_hal_wdt_t     driver{};
-    cfn_hal_wdt_api_t api{};
+    cfn_hal_wdt_t        driver{};
+    cfn_hal_wdt_api_t    api{};
+    cfn_hal_wdt_config_t dummy_config{};
 
     void SetUp() override
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
+        driver.config      = &dummy_config;
         driver.base.type   = CFN_HAL_PERIPHERAL_TYPE_WDT;
         driver.base.status = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
         driver.base.vmt    = (const struct cfn_hal_api_base_s *) &api;
@@ -90,6 +92,33 @@ TEST_F(WdtTest, DeinitSuccess)
     api.base.deinit    = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_wdt_deinit(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
+}
+
+TEST_F(WdtTest, ConfigValidation)
+{
+    cfn_hal_wdt_config_t config = {
+        .sleep  = CFN_HAL_WDT_CONFIG_SLEEP_RUN,
+        .reset  = CFN_HAL_WDT_CONFIG_RESET_CPU,
+        .custom = nullptr,
+    };
+
+    // Valid config
+    EXPECT_EQ(cfn_hal_wdt_config_validate(&driver, &config), CFN_HAL_ERROR_OK);
+
+    // NULL driver
+    EXPECT_EQ(cfn_hal_wdt_config_validate(nullptr, &config), CFN_HAL_ERROR_BAD_PARAM);
+
+    // NULL config
+    EXPECT_EQ(cfn_hal_wdt_config_validate(&driver, nullptr), CFN_HAL_ERROR_BAD_PARAM);
+
+    // Invalid enum (Sleep)
+    config.sleep = CFN_HAL_WDT_CONFIG_SLEEP_MAX;
+    EXPECT_EQ(cfn_hal_wdt_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.sleep = CFN_HAL_WDT_CONFIG_SLEEP_RUN;
+
+    // Invalid enum (Reset)
+    config.reset = CFN_HAL_WDT_CONFIG_RESET_MAX;
+    EXPECT_EQ(cfn_hal_wdt_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
 }
 
 TEST_F(WdtTest, ConfigSetSuccess)

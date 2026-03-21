@@ -42,8 +42,8 @@ extern "C"
  * @brief API visibility macro for the base driver.
  *
  * This macro controls whether the base functions are 'static inline' (default),
- * 'extern' (when linking against a pre-compiled library), or empty (when compiling
- * the library source).
+ * 'extern' (when linking against a pre-compiled library), or empty (when
+ * compiling the library source).
  */
 #if defined(CFN_HAL_COMPILE_BASE)
 #define CFN_HAL_BASE_API
@@ -66,6 +66,7 @@ typedef struct cfn_hal_api_base_s
 
     cfn_hal_error_code_t (*power_state_set)(cfn_hal_driver_t *base, cfn_hal_power_state_t state);
     cfn_hal_error_code_t (*config_set)(cfn_hal_driver_t *base, const void *config);
+    cfn_hal_error_code_t (*config_validate)(const cfn_hal_driver_t *base, const void *config);
     cfn_hal_error_code_t (*callback_register)(cfn_hal_driver_t *base, cfn_hal_callback_t callback, void *user_arg);
 
     cfn_hal_error_code_t (*event_enable)(cfn_hal_driver_t *base, uint32_t event_mask);
@@ -83,8 +84,9 @@ typedef struct cfn_hal_api_base_s
 } cfn_hal_api_base_t;
 
 /**
- * @brief Compile-time check to ensure a peripheral API struct is compatible with the base layer.
- * All peripheral APIs must have 'cfn_hal_api_base_t base' as their FIRST member.
+ * @brief Compile-time check to ensure a peripheral API struct is compatible
+ * with the base layer. All peripheral APIs must have 'cfn_hal_api_base_t base'
+ * as their FIRST member.
  */
 #define CFN_HAL_VMT_CHECK(api_struct_type)                                                                             \
     CFN_HAL_STATIC_ASSERT(offsetof(api_struct_type, base) == 0,                                                        \
@@ -123,6 +125,16 @@ CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_config_set(cfn_hal_driver_t  
                                                               cfn_hal_peripheral_type_t expected_type,
                                                               const void               *config);
 
+/**
+ * @brief Generic validation for a configuration
+ * @param base Pointer to the base driver structure.
+ * @param expected_type FourCC code for peripheral type validation.
+ * @param config Pointer to the configuration structure.
+ * @return cfn_hal_error_code_t status code.
+ */
+CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_config_validate(const cfn_hal_driver_t   *base,
+                                                                   cfn_hal_peripheral_type_t expected_type,
+                                                                   const void               *config);
 /**
  * @brief Generic callback registration for any driver.
  *

@@ -32,10 +32,10 @@ extern "C"
 #endif
 
 /* Includes ---------------------------------------------------------*/
-#include <time.h>
-#include "cfn_hal_types.h"
 #include "cfn_hal.h"
 #include "cfn_hal_base.h"
+#include "cfn_hal_types.h"
+#include <time.h>
 
 /* Defines ----------------------------------------------------------*/
 
@@ -70,6 +70,8 @@ typedef enum
 {
     CFN_HAL_RTC_CONFIG_FORMAT_12H, /*!< 12-hour clock (AM/PM) */
     CFN_HAL_RTC_CONFIG_FORMAT_24H, /*!< 24-hour clock */
+
+    CFN_HAL_RTC_CONFIG_FORMAT_MAX
 } cfn_hal_rtc_config_format_t;
 
 /**
@@ -80,6 +82,8 @@ typedef enum
     CFN_HAL_RTC_CONFIG_MODE_BCD,        /*!< Binary Coded Decimal format */
     CFN_HAL_RTC_CONFIG_MODE_BINARY,     /*!< Standard binary format */
     CFN_HAL_RTC_CONFIG_MODE_BINARY_BCD, /*!< Mixed mode support */
+
+    CFN_HAL_RTC_CONFIG_MODE_MAX
 } cfn_hal_rtc_config_mode_t;
 
 /* Types Structs ----------------------------------------------------*/
@@ -141,11 +145,50 @@ struct cfn_hal_rtc_api_s
 CFN_HAL_VMT_CHECK(struct cfn_hal_rtc_api_s);
 
 CFN_HAL_CREATE_DRIVER_TYPE(rtc, cfn_hal_rtc_config_t, cfn_hal_rtc_api_t, cfn_hal_rtc_phy_t, cfn_hal_rtc_callback_t);
-
-#define CFN_HAL_RTC_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                          \
-    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_RTC, api_ptr, phy_ptr, config_ptr)
-
 /* Functions inline ------------------------------------------------- */
+CFN_HAL_INLINE void cfn_hal_rtc_populate(cfn_hal_rtc_t              *driver,
+                                         uint32_t                    peripheral_id,
+                                         struct cfn_hal_clock_s     *clock,
+                                         const cfn_hal_rtc_api_t    *api,
+                                         const cfn_hal_rtc_phy_t    *phy,
+                                         const cfn_hal_rtc_config_t *config,
+                                         cfn_hal_rtc_callback_t      callback,
+                                         void                       *user_arg)
+{
+    if (!driver)
+    {
+        return;
+    }
+    cfn_hal_base_populate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_RTC, peripheral_id, &api->base, clock);
+    driver->api         = api;
+    driver->phy         = phy;
+    driver->config      = config;
+    driver->cb          = callback;
+    driver->cb_user_arg = user_arg;
+}
+
+/**
+ * @brief Validates the RTC configuration.
+ * @param driver Pointer to the RTC driver instance.
+ * @param config Pointer to the configuration structure.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_rtc_config_validate(const cfn_hal_rtc_t        *driver,
+                                                                const cfn_hal_rtc_config_t *config)
+{
+    if (driver == NULL || config == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+
+    if (config->format >= CFN_HAL_RTC_CONFIG_FORMAT_MAX || config->mode >= CFN_HAL_RTC_CONFIG_MODE_MAX)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_RTC, config);
+    ;
+}
 
 /**
  * @brief Initializes the RTC driver.
@@ -158,7 +201,12 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_rtc_init(cfn_hal_rtc_t *driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    driver->base.vmt = (const struct cfn_hal_api_base_s *) driver->api;
+    driver->base.vmt           = (const struct cfn_hal_api_base_s *) driver->api;
+    cfn_hal_error_code_t error = cfn_hal_rtc_config_validate(driver, driver->config);
+    if (error != CFN_HAL_ERROR_OK)
+    {
+        return error;
+    }
     return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_RTC);
 }
 
@@ -187,6 +235,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_rtc_config_set(cfn_hal_rtc_t *driver
     if (!driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    cfn_hal_error_code_t error = cfn_hal_rtc_config_validate(driver, config);
+    if (error != CFN_HAL_ERROR_OK)
+    {
+        return error;
     }
     {
         driver->config = config;
@@ -410,7 +463,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_rtc_stop_alarm(cfn_hal_rtc_t *driver
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_RTC, stop_alarm, driver, error, id);
     return error;
 }
-
+cfn_hal_error_code_t cfn_hal_rtc_construct(cfn_hal_rtc_t              *driver,
+                                           const cfn_hal_rtc_config_t *config,
+                                           const cfn_hal_rtc_phy_t    *phy,
+                                           struct cfn_hal_clock_s     *clock,
+                                           cfn_hal_rtc_callback_t      callback,
+                                           void                       *user_arg);
+cfn_hal_error_code_t cfn_hal_rtc_destruct(cfn_hal_rtc_t *driver);
 #ifdef __cplusplus
 }
 #endif

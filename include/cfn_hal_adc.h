@@ -32,10 +32,10 @@ extern "C"
 #endif
 
 /* Includes ---------------------------------------------------------*/
-#include "cfn_hal_types.h"
 #include "cfn_hal.h"
 #include "cfn_hal_base.h"
 #include "cfn_hal_gpio.h"
+#include "cfn_hal_types.h"
 
 /* Defines ----------------------------------------------------------*/
 
@@ -60,6 +60,50 @@ typedef enum
     CFN_HAL_ADC_ERROR_GENERAL = CFN_HAL_BIT(1), /*!< General Hardware Error */
 } cfn_hal_adc_error_t;
 
+typedef enum
+{
+    CFN_HAL_ADC_RESOLUTION_BIT_4 = 0,
+    CFN_HAL_ADC_RESOLUTION_BIT_6,
+    CFN_HAL_ADC_RESOLUTION_BIT_8,
+    CFN_HAL_ADC_RESOLUTION_BIT_10,
+    CFN_HAL_ADC_RESOLUTION_BIT_12,
+    CFN_HAL_ADC_RESOLUTION_BIT_14,
+    CFN_HAL_ADC_RESOLUTION_BIT_16,
+    CFN_HAL_ADC_RESOLUTION_BIT_24,
+
+    CFN_HAL_ADC_RESOLUTION_BIT_MAX
+} cfn_hal_adc_resolution_t;
+
+typedef enum
+{
+    CFN_HAL_ADC_ALIGN_RIGHT = 0,
+    CFN_HAL_ADC_ALIGN_LEFT,
+
+    CFN_HAL_ADC_ALIGN_MAX
+} cfn_hal_adc_align_t;
+
+typedef enum
+{
+    CFN_HAL_SCAN_ENABLED = 0,
+    CFN_HAL_SCAN_DISABLED,
+
+    CFN_HAL_SCAN_MAX
+} cfn_hal_adc_scan_t;
+
+typedef enum
+{
+    CFN_HAL_ADC_MODE_SINGLE = 0,
+    CFN_HAL_ADC_MODE_CONTINUOUS,
+
+    CFN_HAL_ADC_MODE_MAX
+
+} cfn_hal_adc_mode_t;
+
+typedef enum
+{
+    CFN_HAL_ADC_EOC_SINGLE   = CFN_HAL_BIT(0),
+    CFN_HAL_ADC_EOC_SEQUENCE = CFN_HAL_BIT(1),
+} cfn_hal_adc_eoc_t;
 /* Types Structs ----------------------------------------------------*/
 
 typedef struct
@@ -72,9 +116,12 @@ typedef struct
 
 typedef struct
 {
-    uint32_t resolution;
-    uint32_t alignment;
-    void    *custom;
+    cfn_hal_adc_resolution_t resolution;
+    cfn_hal_adc_align_t      alignment;
+    cfn_hal_adc_scan_t       scan;
+    cfn_hal_adc_mode_t       mode;
+    uint32_t                 eoc;
+    void                    *custom;
 } cfn_hal_adc_config_t;
 
 typedef struct cfn_hal_adc_s     cfn_hal_adc_t;
@@ -108,11 +155,50 @@ struct cfn_hal_adc_api_s
 CFN_HAL_VMT_CHECK(struct cfn_hal_adc_api_s);
 
 CFN_HAL_CREATE_DRIVER_TYPE(adc, cfn_hal_adc_config_t, cfn_hal_adc_api_t, cfn_hal_adc_phy_t, cfn_hal_adc_callback_t);
-
-#define CFN_HAL_ADC_INITIALIZER(api_ptr, phy_ptr, config_ptr)                                                          \
-    CFN_HAL_DRIVER_INITIALIZER(CFN_HAL_PERIPHERAL_TYPE_ADC, api_ptr, phy_ptr, config_ptr)
-
 /* Functions inline ------------------------------------------------- */
+CFN_HAL_INLINE void cfn_hal_adc_populate(cfn_hal_adc_t              *driver,
+                                         uint32_t                    peripheral_id,
+                                         struct cfn_hal_clock_s     *clock,
+                                         const cfn_hal_adc_api_t    *api,
+                                         const cfn_hal_adc_phy_t    *phy,
+                                         const cfn_hal_adc_config_t *config,
+                                         cfn_hal_adc_callback_t      callback,
+                                         void                       *user_arg)
+{
+    if (!driver)
+    {
+        return;
+    }
+    cfn_hal_base_populate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ADC, peripheral_id, &api->base, clock);
+    driver->api         = api;
+    driver->phy         = phy;
+    driver->config      = config;
+    driver->cb          = callback;
+    driver->cb_user_arg = user_arg;
+}
+
+/**
+ * @brief Validates the ADC configuration.
+ * @param driver Pointer to the ADC driver instance.
+ * @param config Pointer to the configuration structure.
+ * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
+ */
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_adc_config_validate(const cfn_hal_adc_t        *driver,
+                                                                const cfn_hal_adc_config_t *config)
+{
+    if (driver == NULL || config == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+
+    if ((config->resolution >= CFN_HAL_ADC_RESOLUTION_BIT_MAX) || (config->alignment >= CFN_HAL_ADC_ALIGN_MAX) ||
+        (config->scan >= CFN_HAL_SCAN_MAX) || (config->mode >= CFN_HAL_ADC_MODE_MAX))
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ADC, config);
+}
 
 /**
  * @brief Initializes the ADC driver.
@@ -125,7 +211,12 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_adc_init(cfn_hal_adc_t *driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    driver->base.vmt = (const struct cfn_hal_api_base_s *) driver->api;
+    driver->base.vmt           = (const struct cfn_hal_api_base_s *) driver->api;
+    cfn_hal_error_code_t error = cfn_hal_adc_config_validate(driver, driver->config);
+    if (error != CFN_HAL_ERROR_OK)
+    {
+        return error;
+    }
     return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ADC);
 }
 
@@ -154,6 +245,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_adc_config_set(cfn_hal_adc_t *driver
     if (!driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    cfn_hal_error_code_t error = cfn_hal_adc_config_validate(driver, config);
+    if (error != CFN_HAL_ERROR_OK)
+    {
+        return error;
     }
     {
         driver->config = config;
@@ -359,6 +455,13 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_adc_read_dma(cfn_hal_adc_t *driver, 
     return error;
 }
 
+cfn_hal_error_code_t cfn_hal_adc_construct(cfn_hal_adc_t              *driver,
+                                           const cfn_hal_adc_config_t *config,
+                                           const cfn_hal_adc_phy_t    *phy,
+                                           struct cfn_hal_clock_s     *clock,
+                                           cfn_hal_adc_callback_t      callback,
+                                           void                       *user_arg);
+cfn_hal_error_code_t cfn_hal_adc_destruct(cfn_hal_adc_t *driver);
 #ifdef __cplusplus
 }
 #endif

@@ -32,9 +32,9 @@ extern "C"
 #endif
 
 /* Includes ---------------------------------------------------------*/
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdbool.h>
 /* Defines ----------------------------------------------------------*/
 
 /* Macro ------------------------------------------------------------*/
@@ -59,12 +59,12 @@ typedef enum cfn_hal_error_codes
     CFN_HAL_ERROR_BUSY,
     CFN_HAL_ERROR_BAD_CONFIG,
 
-    CFN_HAL_ERROR_PERIPHERAL_FAIL =
-        0x100, /*!< Generic peripheral hardware failure. Use peripheral-specific error masks for details. */
+    CFN_HAL_ERROR_PERIPHERAL_FAIL = 0x100, /*!< Generic peripheral hardware failure. Use peripheral-specific
+                                              error masks for details. */
 
-    CFN_HAL_ERROR_TIMING_TIMEOUT = 0x200,
+    CFN_HAL_ERROR_TIMING_TIMEOUT  = 0x200,
 
-    CFN_HAL_ERROR_DRIVER_GENERAL = 0x300,
+    CFN_HAL_ERROR_DRIVER_GENERAL  = 0x300,
     CFN_HAL_ERROR_DRIVER_NOT_INIT,
     CFN_HAL_ERROR_DRIVER_ALREADY_INIT,
 
@@ -88,10 +88,10 @@ struct cfn_hal_api_base_s;
  * @brief Generic function pointer for HAL callbacks.
  * Used as a standard-compliant carrier in the base layer.
  *
- * @warning Calling this pointer directly as a void(void) function is UNDEFINED BEHAVIOR
- * if the original callback has a different signature. Hardware port implementers
- * MUST cast this pointer back to the peripheral-specific callback type
- * (e.g., cfn_hal_uart_callback_t) before execution.
+ * @warning Calling this pointer directly as a void(void) function is UNDEFINED
+ * BEHAVIOR if the original callback has a different signature. Hardware port
+ * implementers MUST cast this pointer back to the peripheral-specific callback
+ * type (e.g., cfn_hal_uart_callback_t) before execution.
  */
 typedef void (*cfn_hal_callback_t)(void);
 
@@ -140,9 +140,12 @@ typedef void (*cfn_hal_callback_t)(void);
 typedef enum
 {
     CFN_HAL_DRIVER_STATUS_UNKNOWN = 0, /*!< Memory state is unknown or explicitly unconstructed. */
-    CFN_HAL_DRIVER_STATUS_CONSTRUCTED, /*!< Driver is constructed (VMT linked) but hardware is NOT initialized. */
-    CFN_HAL_DRIVER_STATUS_INITIALIZED, /*!< Hardware is initialized and ready for use. */
-    CFN_HAL_DRIVER_STATUS_ERROR /*!< A fatal hardware error occurred; requires a _deinit/_init cycle to recover. */
+    CFN_HAL_DRIVER_STATUS_CONSTRUCTED, /*!< Driver is constructed (VMT linked) but
+                                          hardware is NOT initialized. */
+    CFN_HAL_DRIVER_STATUS_INITIALIZED, /*!< Hardware is initialized and ready for
+                                          use. */
+    CFN_HAL_DRIVER_STATUS_ERROR        /*!< A fatal hardware error occurred; requires a
+                                          _deinit/_init cycle to recover. */
 } cfn_hal_driver_status_t;
 
 /* Types Structs ----------------------------------------------------*/
@@ -155,6 +158,8 @@ typedef enum
     CFN_HAL_POWER_STATE_OFF        /*!< Physically unpowered or fully disabled */
 } cfn_hal_power_state_t;
 
+struct cfn_hal_clock_s;
+
 /**
  * @brief Base structure for all peripheral drivers.
  * Contains common state and polymorphic interface linkage.
@@ -165,23 +170,29 @@ typedef struct cfn_hal_driver_s
     cfn_hal_driver_status_t   status;      /*!< Current software state of the driver */
     cfn_hal_power_state_t     power_state; /*!< Current power/clocking state of the hardware */
 
+    struct cfn_hal_clock_s *clock_driver; /*!< Pointer to the clock driver instance */
+
 #if (CFN_HAL_USE_LOCK == 1)
-    void *lock_obj; /*!< Opaque pointer to an RTOS mutex or critical section object */
+    void *lock_obj; /*!< Opaque pointer to an RTOS mutex or critical section
+                       object */
 #endif
 
     /**
      * @brief Board-level configuration hook (BSP).
-     * Called by the generic HAL to handle hardware-specific setup like pin muxing.
+     * Called by the generic HAL to handle hardware-specific setup like pin
+     * muxing.
      */
     cfn_hal_error_code_t (*on_config)(struct cfn_hal_driver_s *base, void *user_arg, cfn_hal_config_phase_t phase);
 
     void *on_config_arg; /*!< User argument passed to the on_config hook */
 
-    void *dependency; /*!< Pointer to an optional peripheral dependency (e.g., DMA handle or parent bus) */
-    void *extension;  /*!< Pointer to an optional driver extension or private implementation state */
+    void *dependency; /*!< Pointer to an optional peripheral dependency (e.g., DMA
+                         handle or parent bus) */
+    void *extension;  /*!< Pointer to an optional driver extension or private
+                         implementation state */
 
-    uint32_t flags; /*!< Generic generic state tracking flags for the peripheral */
-
+    uint32_t                         flags; /*!< Generic generic state tracking flags for the peripheral */
+    uint32_t                         peripheral_id;
     const struct cfn_hal_api_base_s *vmt; /*!< Pointer to the peripheral-specific Virtual Method Table (API) */
 } cfn_hal_driver_t;
 /* Functions prototypes ---------------------------------------------*/

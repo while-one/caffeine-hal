@@ -32,8 +32,8 @@ extern "C"
 #endif
 
 /* Includes ---------------------------------------------------------*/
-#include <stddef.h>
 #include "cfn_hal_types.h"
+#include <stddef.h>
 
 /**
  * @def CFN_HAL_USE_LOCK
@@ -55,20 +55,20 @@ extern "C"
 #ifndef CFN_HAL_INLINE
 /**
  * @brief Macro for inlining HAL wrapper functions.
- * Can be overridden with __attribute__((always_inline)) for performance-critical ports.
+ * Can be overridden with __attribute__((always_inline)) for
+ * performance-critical ports.
  */
 #define CFN_HAL_INLINE static inline
 #endif
 
-/* Defines ----------------------------------------------------------*/ // #define CFN_HAL_CAFFEINE_VERSION
-                                                                        // CAFFEINE_HAL_VERSION /*!< Managed by the
-                                                                        // build system */
+/* Defines ----------------------------------------------------------*/
 #define CFN_HAL_MAX_DELAY (UINT32_MAX)
 
 /* Macro ------------------------------------------------------------*/
 /**
  * @brief Cross-compiler static assertion macro.
- * Uses C++11 static_assert or C11 _Static_assert to avoid dependency on <assert.h>.
+ * Uses C++11 static_assert or C11 _Static_assert to avoid dependency on
+ * <assert.h>.
  */
 #ifdef __cplusplus
 #define CFN_HAL_STATIC_ASSERT static_assert
@@ -93,32 +93,11 @@ extern "C"
  * @brief Helper macro to get the peripheral driver pointer from a base driver
  * pointer.
  * @param ptr Pointer to the base cfn_hal_driver_t structure.
- * @param type Peripheral prefix (e.g. cfn_hal_uart_t, cfn_hal_spi_t, cfn_hal_gpio_t).
+ * @param type Peripheral prefix (e.g. cfn_hal_uart_t, cfn_hal_spi_t,
+ * cfn_hal_gpio_t).
  * @return Typed pointer to the peripheral driver structure.
  */
 #define CFN_HAL_GET_DRIVER_FROM_BASE(ptr, type) CFN_HAL_CONTAINER_OF(ptr, type, base)
-
-/**
- * @brief Helper macro to initialize a peripheral driver structure.
- *
- * @param type_code The FourCC peripheral type code.
- * @param api_ptr Pointer to the VMT implementation.
- * @param phy_ptr Pointer to the physical mapping.
- * @param config_ptr Pointer to the configuration structure.
- */
-#define CFN_HAL_DRIVER_INITIALIZER(type_code, api_ptr, phy_ptr, config_ptr)                                            \
-    {                                                                                                                  \
-        .base   = { .type          = (type_code),                                                                      \
-                    .status        = CFN_HAL_DRIVER_STATUS_CONSTRUCTED,                                                \
-                    .power_state   = CFN_HAL_POWER_STATE_UNKNOWN,                                                      \
-                    .on_config     = NULL,                                                                             \
-                    .on_config_arg = NULL,                                                                             \
-                    .dependency    = NULL,                                                                             \
-                    .extension     = NULL,                                                                             \
-                    .flags         = 0,                                                                                \
-                    .vmt           = (const struct cfn_hal_api_base_s *) (api_ptr) },                                            \
-        .config = (config_ptr), .api = (api_ptr), .phy = (phy_ptr), .cb = NULL, .cb_user_arg = NULL                    \
-    }
 
 #define CFN_HAL_CREATE_DRIVER_TYPE(prefix, config_type, api_type, phy_type, cb_type)                                   \
     struct cfn_hal_##prefix##_s                                                                                        \
@@ -220,7 +199,8 @@ extern "C"
  * @param timeout Lock acquisition timeout in milliseconds.
  * @param result Variable to store the return code (cfn_hal_error_code_t).
  * @param function The driver function to call.
- * @param ... Additional arguments to pass to the function after the driver pointer.
+ * @param ... Additional arguments to pass to the function after the driver
+ * pointer.
  */
 #define CFN_HAL_WITH_LOCK(...)                                                                                         \
     CFN_HAL_GET_LOCK_MACRO(__VA_ARGS__,                                                                                \
