@@ -38,27 +38,30 @@ extern "C"
 
 /* Functions Implementation -----------------------------------------*/
 
-CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_init(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expected_type);
+CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_init(cfn_hal_driver_t         *base,
+                                                        cfn_hal_peripheral_type_t expected_type);
 
-CFN_HAL_INLINE void cfn_hal_base_populate(cfn_hal_driver_t *base,
-                                         cfn_hal_peripheral_type_t type,
-                                         const struct cfn_hal_api_base_s *vmt,
-                                         struct cfn_hal_clock_s *clock)
+CFN_HAL_INLINE void cfn_hal_base_populate(cfn_hal_driver_t                *base,
+                                          cfn_hal_peripheral_type_t        type,
+                                          uint32_t                         peripheral_id,
+                                          const struct cfn_hal_api_base_s *vmt,
+                                          struct cfn_hal_clock_s          *clock)
 {
     if (!base)
     {
         return;
     }
-    base->type         = type;
-    base->vmt          = vmt;
-    base->clock_driver = clock;
-    base->status       = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
-    base->power_state  = CFN_HAL_POWER_STATE_UNKNOWN;
-    base->on_config    = NULL;
+    base->type          = type;
+    base->peripheral_id = peripheral_id;
+    base->vmt           = vmt;
+    base->clock_driver  = clock;
+    base->status        = CFN_HAL_DRIVER_STATUS_CONSTRUCTED;
+    base->power_state   = CFN_HAL_POWER_STATE_UNKNOWN;
+    base->on_config     = NULL;
     base->on_config_arg = NULL;
-    base->dependency   = NULL;
-    base->extension    = NULL;
-    base->flags        = 0;
+    base->dependency    = NULL;
+    base->extension     = NULL;
+    base->flags         = 0;
 }
 
 CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_init(cfn_hal_driver_t *base, cfn_hal_peripheral_type_t expected_type)

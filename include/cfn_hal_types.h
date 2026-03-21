@@ -191,8 +191,8 @@ typedef struct cfn_hal_driver_s
     void *extension;  /*!< Pointer to an optional driver extension or private
                          implementation state */
 
-    uint32_t flags; /*!< Generic generic state tracking flags for the peripheral */
-    uint32_t peripheral_id;
+    uint32_t                         flags; /*!< Generic generic state tracking flags for the peripheral */
+    uint32_t                         peripheral_id;
     const struct cfn_hal_api_base_s *vmt; /*!< Pointer to the peripheral-specific Virtual Method Table (API) */
 } cfn_hal_driver_t;
 /* Functions prototypes ---------------------------------------------*/

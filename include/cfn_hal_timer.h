@@ -129,23 +129,26 @@ CFN_HAL_CREATE_DRIVER_TYPE(
     timer, cfn_hal_timer_config_t, cfn_hal_timer_api_t, cfn_hal_timer_phy_t, cfn_hal_timer_callback_t);
 
 /* Functions inline ------------------------------------------------- */
-CFN_HAL_INLINE void cfn_hal_timer_populate(cfn_hal_timer_t *driver,
-                                          struct cfn_hal_clock_s *clock,
-                                          const cfn_hal_timer_api_t *api,
-                                          const cfn_hal_timer_phy_t *phy,
-                                          const cfn_hal_timer_config_t *config,
-                                          cfn_hal_timer_callback_t callback,
-                                          void *user_arg) {
-  if (!driver) return;
-  cfn_hal_base_populate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_TIMER,
-                        &api->base, clock);
-  driver->api = api;
-  driver->phy = phy;
-  driver->config = config;
-  driver->cb = callback;
-  driver->cb_user_arg = user_arg;
+CFN_HAL_INLINE void cfn_hal_timer_populate(cfn_hal_timer_t              *driver,
+                                           uint32_t                      peripheral_id,
+                                           struct cfn_hal_clock_s       *clock,
+                                           const cfn_hal_timer_api_t    *api,
+                                           const cfn_hal_timer_phy_t    *phy,
+                                           const cfn_hal_timer_config_t *config,
+                                           cfn_hal_timer_callback_t      callback,
+                                           void                         *user_arg)
+{
+    if (!driver)
+    {
+        return;
+    }
+    cfn_hal_base_populate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_TIMER, peripheral_id, &api->base, clock);
+    driver->api         = api;
+    driver->phy         = phy;
+    driver->config      = config;
+    driver->cb          = callback;
+    driver->cb_user_arg = user_arg;
 }
-
 
 /**
  * @brief Validates the Timer configuration.
@@ -429,7 +432,12 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_timer_set_period(cfn_hal_timer_t    
     return error;
 }
 
-cfn_hal_error_code_t cfn_hal_timer_construct(cfn_hal_timer_t *driver, const cfn_hal_timer_config_t *config, const cfn_hal_timer_phy_t *phy, struct cfn_hal_clock_s *clock, cfn_hal_timer_callback_t callback, void *user_arg);
+cfn_hal_error_code_t cfn_hal_timer_construct(cfn_hal_timer_t              *driver,
+                                             const cfn_hal_timer_config_t *config,
+                                             const cfn_hal_timer_phy_t    *phy,
+                                             struct cfn_hal_clock_s       *clock,
+                                             cfn_hal_timer_callback_t      callback,
+                                             void                         *user_arg);
 cfn_hal_error_code_t cfn_hal_timer_destruct(cfn_hal_timer_t *driver);
 #ifdef __cplusplus
 }
