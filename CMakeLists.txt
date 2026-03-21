@@ -15,21 +15,7 @@ project(
 # This provides some important cross-platform paths to be used later during install
 include(GNUInstallDirs)
 
-# User-configurable flags (with sensible defaults)
-option(CAFFEINE_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
-set(CAFFEINE_OPTIMIZATION_LEVEL "-Os" CACHE STRING "Compiler optimization level (e.g., -O0, -O2, -Os, -O3)")
-
-# Universal strict warnings and preparation for dead-code elimination
-set(CAFFEINE_COMPILE_OPTIONS
-        -pedantic-errors
-        -Wall -Wextra -Wpedantic -Wshadow
-        -ffunction-sections -fdata-sections
-        ${CAFFEINE_OPTIMIZATION_LEVEL}
-)
-
-if(CAFFEINE_WARNINGS_AS_ERRORS)
-    list(APPEND CAFFEINE_COMPILE_OPTIONS -Werror)
-endif()
+include(${PROJECT_SOURCE_DIR}/caffeine-build/cmake/CaffeineMacros.cmake)
 
 MESSAGE(STATUS "Target CAFFEINE_BUILD_STAGE: ${CAFFEINE_BUILD_STAGE}")
 
