@@ -7,17 +7,5 @@
   },
   "include": [
     "caffeine-build/cmake/presets/base.json"
-  ],
-  "configurePresets": [
-    {
-      "name": "unit-tests-gtest",
-      "displayName": "HAL Unit Tests (Native GTest)",
-      "inherits": "base-common",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/unit-tests-gtest",
-      "cacheVariables": {
-        "CFN_BUILD_TESTS": "ON"
-      }
-    }
   ]
 }
