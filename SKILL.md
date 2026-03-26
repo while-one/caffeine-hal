@@ -31,6 +31,9 @@ When contributing to, modifying, or generating code for Caffeine-HAL, you **must
     *   **Port implementers:** You MUST cast the type-erased `cfn_hal_callback_t` back to its original signature (e.g., `cfn_hal_uart_callback_t`) before execution to avoid Undefined Behavior.
 
 ### B. HAL Conventions
+*   **Mock Library:** Caffeine-HAL provides a standalone mock library (`caffeine::hal-mock`) containing empty VMT stubs for all peripherals.
+    *   **Consumption:** Consumers can request this library by setting `CFN_HAL_PROVIDE_MOCK=ON` before fetching the HAL.
+    *   **Target:** `caffeine::hal-mock` (STATIC).
 *   **Static Initializers:** Every peripheral MUST provide a static initializer macro: `CFN_HAL_<PERIPHERAL>_INITIALIZER(api_ptr, phy_ptr, config_ptr)`. Use the generic `CFN_HAL_DRIVER_INITIALIZER` macro from `cfn_hal.h`.
 *   **VMT Validation:** Every peripheral API struct definition MUST be followed immediately by a `CFN_HAL_VMT_CHECK(struct cfn_hal_<p>_api_s)` call to ensure structural compatibility with the base layer.
 *   **Error Handling:** Every API function must return a `cfn_hal_error_code_t`.

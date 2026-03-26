@@ -37,22 +37,10 @@ Copyright (c) 2026 Hisham Moussa Daou <https://whileone.me>
 
 ### Key Features
 *   **Zero-Copy & Header-Only:** Designed as a CMake `INTERFACE` library for easy integration.
-*   **Modular Base Driver:** All peripherals inherit from a common base (`cfn_hal_base.h`), ensuring a consistent lifecycle. The base logic can be used as header-only (default) or compiled into a library to reduce code duplication in large systems.
-*   **Layered FourCC Identification:** Uses FourCC codes with `CFN_HAL_PERIPHERAL_PREFIX` (reserved 'A' for the HAL layer) to uniquely identify peripheral types across system layers.
-*   **Nominal/Exception Separation:** Standardized splitting of peripheral status into nominal `events` and exception `errors`.
-*   **Board-Level Hooks:** Built-in `on_config` callback (using `cfn_hal_config_phase_t`) for handling clock gating, pin muxing, and DMA routing without breaking the generic API.
+*   **Mock Library Support:** Provides a standalone `caffeine::hal-mock` STATIC library for native host testing of upper layers (SAL, Apps) without hardware dependencies. Automatically enabled via the global `CFN_BUILD_TESTS` flag.
+*   **Modular Base Driver:** All peripherals inherit from a common base (`cfn_hal_base.h`), ensuring a consistent lifecycle.
 *   **Thread-Safe by Design:** Optimized locking strategy using `CFN_HAL_WITH_LOCK` for clean multi-threaded RTOS environments.
 *   **Pragmatic Static Analysis:** Pre-configured for `clang-format`, `clang-tidy`, and `cppcheck` (BARR-C 2018 / Allman style).
-
----
-
-## Architecture
-
-Every peripheral in Caffeine-HAL follows a standard container pattern:
-
-1.  **Generic Driver (`cfn_hal_xxx_t`):** Contains the base state (via `cfn_hal_driver_t`), configuration pointers, and VMT pointers.
-2.  **Hardware API (`cfn_hal_xxx_api_t`):** A structure of function pointers (Virtual Method Table) implemented by the specific hardware port.
-3.  **Physical Mapping (`cfn_hal_xxx_phy_t`):** Defines the hardware instance and pin mappings (using `cfn_hal_gpio_pin_handle_t`).
 
 ---
 
@@ -77,42 +65,15 @@ FetchContent_MakeAvailable(caffeine-hal)
 target_link_libraries(your_app PRIVATE caffeine::hal)
 ```
 
-**Option B: add_subdirectory**
-
-Clone the repository into your project tree (e.g., `lib/caffeine-hal`) and add it.
+**Option B: Native Testing with Mocks**
+Enable the global test flag to automatically expose the mock library.
 
 ```cmake
-add_subdirectory(lib/caffeine-hal)
-target_link_libraries(your_app PRIVATE caffeine::hal)
-```
+set(CFN_BUILD_TESTS ON)
+FetchContent_MakeAvailable(caffeine-hal)
 
-### 2. Basic Usage (UART Example)
-```c
-#include "cfn_hal_uart.h"
-
-// 1. Define your configuration
-cfn_hal_uart_config_t uart_cfg = {
-    .baudrate = 115200,
-    .data_len = CFN_HAL_UART_CONFIG_DATA_LEN_8,
-    .stop_bits = CFN_HAL_UART_CONFIG_STOP_ONE_BIT,
-    .parity = CFN_HAL_UART_CONFIG_PARITY_NONE,
-};
-
-// 2. Setup the physical mapping
-cfn_hal_uart_phy_t uart_phy = {
-    .instance = (void*)VENDOR_UART1_BASE, // Peripheral base address
-    .tx = &(cfn_hal_gpio_pin_handle_t){.port = &vendor_gpio_port_a, .pin = CFN_HAL_GPIO_PIN_9},
-    .rx = &(cfn_hal_gpio_pin_handle_t){.port = &vendor_gpio_port_a, .pin = CFN_HAL_GPIO_PIN_10},
-};
-
-// 3. Setup the driver instance using the static initializer macro (Recommended)
-cfn_hal_uart_t my_uart = CFN_HAL_UART_INITIALIZER(&vendor_uart_api_impl, &uart_phy, &uart_cfg);
-
-// 4. Initialize and use
-if (cfn_hal_uart_init(&my_uart) == CFN_HAL_ERROR_OK) {
-    uint8_t msg[] = "Hello World\n";
-    cfn_hal_uart_tx_polling(&my_uart, msg, sizeof(msg), 1000);
-}
+# Use the mock target for your unit tests
+target_link_libraries(your_test_bin PRIVATE caffeine::hal caffeine::hal-mock)
 ```
 
 ---
@@ -121,56 +82,32 @@ if (cfn_hal_uart_init(&my_uart) == CFN_HAL_ERROR_OK) {
 
 The project includes built-in targets for maintaining code quality:
 
-*   **Format Code:** `cmake --build build --target caffeine-hal-format` (Requires `clang-format`)
-*   **Run Static Analysis:** `cmake --build build --target caffeine-hal-analyze` (Runs `cppcheck` and `clang-tidy`)
-*   **Verify C11 Compliance:** `cmake --build build --target caffeine-hal-compliance` (Strict C11 check)
-*   **Run Unit Tests:** `cmake --build build --target caffeine-hal-test` (Requires `GoogleTest`)
+*   **Format Code:** `cmake --build build --target caffeine-hal-format`
+*   **Run Static Analysis:** `cmake --build build --target caffeine-hal-analyze`
+*   **Run Unit Tests:** `cmake --build build --target caffeine-hal-test` (Requires `-D CFN_BUILD_TESTS=ON`)
 
 ---
 
 ## Build Environment (Docker & Local)
 
-To ensure consistency between local development and CI, a multi-stage `Dockerfile` is provided in the **`caffeine-build`** submodule. This Docker image pre-installs all necessary toolchains and dependencies, including a pre-built GoogleTest.
-
-### 1. Building with Docker (Recommended for CI Parity)
-
-Use the `caffeine-build/scripts/build.sh` helper script to build your project inside a Docker container. This guarantees your build environment is identical to the CI.
+Use the `caffeine-build/scripts/build.sh` helper script to build your project inside a Docker container.
 
 ```bash
-# Build using the native Linux stage (default: builds all targets)
-./caffeine-build/scripts/build.sh tests-native
+# Build using the native Linux stage
+./caffeine-build/scripts/build.sh unit-tests-gtest
 
-# To build a specific CMake target (e.g., 'caffeine-hal-format')
-./caffeine-build/scripts/build.sh tests-native caffeine-hal-format
-```
-
-### 2. Building Natively (Without Docker)
-
-You can still build the project directly on your host machine without Docker. The CMake configuration is designed to gracefully handle missing dependencies.
-
-*   **GTest:** If GoogleTest is not found on your system, CMake will automatically download it via `FetchContent`.
-*   **Toolchains:** You will need to install your own `cmake`, `build-essential`, `clang-format`, etc. The `Dockerfile` provides a reference for the required packages.
-
-```bash
-# Standard CMake build on your host
-mkdir build && cd build
-cmake ..
-cmake --build .
-ctest --output-on-failure
+# Perform a clean build
+./caffeine-build/scripts/build.sh --clean unit-tests-gtest
 ```
 
 ---
 
 ## The Caffeine Framework Layers
 
-Caffeine-HAL is the foundational interface within the broader **Caffeine Framework**—a strictly decoupled, layered architecture designed for modern embedded systems. This separation of concerns ensures that business logic remains completely portable across different microcontrollers and even host operating systems.
-
-The framework is composed of the following distinct layers:
-
-1.  **Generic Interface (`caffeine-hal`):** This repository. Header-only definitions of the Hardware Abstraction Layer and Virtual Method Tables (VMTs).
-2.  **Hardware Ports ([`caffeine-hal-ports`](https://github.com/while-one/caffeine-hal-ports)):** The concrete implementations of the HAL for specific vendors (e.g., STM32, GD32V) and OS environments (Linux POSIX). It encapsulates vendor SDKs and provides modern CMake cross-compilation presets.
-3.  **Middleware ([`caffeine-services`](https://github.com/while-one/caffeine-services)):** Device drivers (e.g., displays, sensors) and generic connectivity abstractions (`Connection`, `Transport`) that build strictly upon the generic `caffeine-hal` interface, remaining completely agnostic to the underlying hardware.
-4.  **Application ([`caffeine-app-mvp`](https://github.com/while-one/caffeine-app-mvp)):** The top-level business logic, state machines, and system orchestration that utilize the middleware and HAL interfaces.
+1.  **Generic Interface (`caffeine-hal`):** This repository. Definitions of the HAL and Virtual Method Tables (VMTs).
+2.  **Hardware Ports ([`caffeine-hal-ports`](https://github.com/while-one/caffeine-hal-ports)):** Concrete implementations for specific vendors. Encapsulates low-level hardware definitions into target scripts (e.g., `stm32f417vgtx.cmake`).
+3.  **Middleware ([`caffeine-sal`](https://github.com/while-one/caffeine-sal)):** Hardware-agnostic device drivers and connectivity abstractions.
+4.  **Application ([`caffeine-app-mvp`](https://github.com/while-one/caffeine-app-mvp)):** Top-level business logic utilizing the framework.
 
 ---
 ## Support the Gallery
