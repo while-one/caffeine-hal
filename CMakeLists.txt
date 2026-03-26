@@ -153,21 +153,17 @@ if(CPPCHECK)
     add_custom_target(
         ${PROJECT_NAME}-cppcheck
         COMMAND ${CPPCHECK}
-        --enable=all
-        --suppress=missingIncludeSystem
-        --suppress=unusedFunction
-        --inline-suppr
-        --std=c11
+        ${CFN_CPPCHECK_FLAGS}
         -I ${PROJECT_SOURCE_DIR}/include
         ${ALL_HEADERS}
         COMMENT "Running cppcheck static analysis..."
     )
-    
     if(NOT TARGET ${PROJECT_NAME}-analyze)
         add_custom_target(${PROJECT_NAME}-analyze COMMENT "Running full static analysis suite...")
     endif()
     add_dependencies(${PROJECT_NAME}-analyze ${PROJECT_NAME}-cppcheck)
 endif()
+
 
 # 3. Static Analysis (clang-tidy)
 find_program(CLANG_TIDY clang-tidy)
