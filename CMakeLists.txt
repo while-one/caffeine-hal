@@ -51,13 +51,25 @@ target_sources(
         FILES ${PROJECT_ALL_HEADERS}
 )
 
-# Define an option to build tests, default is OFF unless this is the top-level project
-option(CFN_HAL_BUILD_TESTS "Build the Caffeine-HAL test executable" OFF)
+# Define an option to build tests globally
+option(CFN_BUILD_TESTS "Build unit tests" OFF)
 
-if(CFN_HAL_BUILD_TESTS AND PROJECT_IS_TOP_LEVEL)
-    include(CTest)
-    if(BUILD_TESTING)
-        add_subdirectory(tests)
+if(CFN_BUILD_TESTS)
+    # Automatically expose the mock target if tests are enabled anywhere in the workspace
+    file(GLOB MOCK_SOURCES "src/mock/*.c")
+    if(MOCK_SOURCES)
+        add_library(caffeine-hal-mock STATIC ${MOCK_SOURCES})
+        target_link_libraries(caffeine-hal-mock PUBLIC ${PROJECT_NAME})
+        add_library(caffeine::hal-mock ALIAS caffeine-hal-mock)
+    endif()
+endif()
+
+if(CFN_BUILD_TESTS)
+    if(PROJECT_IS_TOP_LEVEL)
+        include(CTest)
+        if(BUILD_TESTING)
+            add_subdirectory(tests)
+        endif()
     endif()
 endif()
 
