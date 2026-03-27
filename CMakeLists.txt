@@ -121,53 +121,53 @@ set(ALL_HEADERS ${PROJECT_ALL_HEADERS})
 file(GLOB TEST_SOURCES "${PROJECT_SOURCE_DIR}/tests/*.cpp")
 set(ALL_ANALYSIS_SOURCES ${ALL_HEADERS} ${TEST_SOURCES})
 
+cfn_add_code_quality_targets(
+    ${PROJECT_NAME}
+    HEADERS_ONLY
+    FORMAT_SOURCES ${ALL_ANALYSIS_SOURCES}
+    ANALYSIS_SOURCES ${ALL_HEADERS}
+    CPPCHECK_ARGS -I ${PROJECT_SOURCE_DIR}/include
+    TIDY_ARGS -I${PROJECT_SOURCE_DIR}/include
+    TIDY_HEADER_FILTER ".*"
+)
 
-# 1. Code Formatting (clang-format)
-find_program(CLANG_FORMAT clang-format)
-if(CLANG_FORMAT)
-    option(FORMAT_DRY_RUN "Run clang-format in dry-run mode" OFF)
-    
-    if(FORMAT_DRY_RUN)
-        set(FORMAT_ARGS --dry-run --Werror)
-        set(FORMAT_COMMENT "Checking header formatting with clang-format (BARR-C style)...")
-    else()
-        set(FORMAT_ARGS -i)
-        set(FORMAT_COMMENT "Formatting header files with clang-format (BARR-C style)...")
-    endif()
+# 4. C11 Compliance Check
+# This target compiles a minimal C file that includes all HAL headers
+# using strict C11 flags to ensure no non-standard extensions are used.
+add_executable(${PROJECT_NAME}-compliance ${PROJECT_SOURCE_DIR}/tests/compliance.c)
+target_link_libraries(${PROJECT_NAME}-compliance PRIVATE ${PROJECT_NAME})
+target_compile_options(${PROJECT_NAME}-compliance PRIVATE
+    -std=c11
+    -pedantic-errors
+    -Wall
+    -Wextra
+    -Werror
+)
+set_target_properties(${PROJECT_NAME}-compliance PROPERTIES EXCLUDE_FROM_ALL ON)
 
-    add_custom_target(
-        ${PROJECT_NAME}-format
-        COMMAND ${CLANG_FORMAT}
-        ${FORMAT_ARGS}
-        -style=file:${PROJECT_SOURCE_DIR}/caffeine-build/config/coding/.clang-format
-        ${ALL_ANALYSIS_SOURCES}
-        COMMENT "${FORMAT_COMMENT}"
+if(TARGET ${PROJECT_NAME}-analyze)
+    add_dependencies(${PROJECT_NAME}-analyze ${PROJECT_NAME}-compliance)
+endif()
+
+# 5. Doxygen Documentation
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+    set(DOXYGEN_PROJECT_NAME "Caffeine-HAL")
+    set(DOXYGEN_WARN_AS_ERROR YES)
+    set(DOXYGEN_GENERATE_LATEX NO)
+    set(DOXYGEN_OPTIMIZE_OUTPUT_FOR_C YES)
+    set(DOXYGEN_EXTRACT_ALL YES)
+
+    doxygen_add_docs(
+        ${PROJECT_NAME}-docs
+        ${PROJECT_SOURCE_DIR}/include
+        COMMENT "Generating API documentation with Doxygen"
     )
 else()
-    message(WARNING "clang-format not found.")
+    message(WARNING "Doxygen not found - documentation cannot be generated")
 endif()
 
-# 2. Static Analysis (cppcheck)
-find_program(CPPCHECK cppcheck)
-if(CPPCHECK)
-    add_custom_target(
-        ${PROJECT_NAME}-cppcheck
-        COMMAND ${CPPCHECK}
-        ${CFN_CPPCHECK_FLAGS}
-        -I ${PROJECT_SOURCE_DIR}/include
-        ${ALL_HEADERS}
-        COMMENT "Running cppcheck static analysis..."
-    )
-    if(NOT TARGET ${PROJECT_NAME}-analyze)
-        add_custom_target(${PROJECT_NAME}-analyze COMMENT "Running full static analysis suite...")
-    endif()
-    add_dependencies(${PROJECT_NAME}-analyze ${PROJECT_NAME}-cppcheck)
-endif()
-
-
-# 3. Static Analysis (clang-tidy)
-find_program(CLANG_TIDY clang-tidy)
-if(CLANG_TIDY)
+_TIDY)
     add_custom_target(
         ${PROJECT_NAME}-tidy
         COMMAND ${CLANG_TIDY}
