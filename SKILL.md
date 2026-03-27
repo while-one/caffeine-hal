@@ -54,7 +54,8 @@ When contributing to, modifying, or generating code for Caffeine-HAL, you **must
 
 ## 4. CMake & Build System
 *   **Target Type:** Caffeine-HAL is an `INTERFACE` target.
-*   **Test Presets:** Unit tests are executed via the centralized `unit-tests-gtest` preset.
+*   **Code Quality:** Static analysis targets are managed via the `cfn_add_code_quality_targets()` macro in `CaffeineMacros.cmake`.
+*   **Test Presets:** Unit tests are executed via the project-local `unit-tests-gtest` preset (inheriting from `base-unit-tests-gtest` in `caffeine-build`).
 
 ---
 
@@ -67,7 +68,7 @@ All builds utilize pre-built images from the `caffeine-build` registry.
 Every repository utilizes the framework's unified quality gate script:
 ```bash
 # Validates formatting, static analysis, and unit tests
-./caffeine-build/scripts/ci.sh
+./caffeine-build/scripts/ci.sh all
 ```
 
 ### C. Strict Static Analysis
@@ -76,7 +77,7 @@ A **zero-warning policy** is enforced. Any violation in `clang-tidy` or `cppchec
 ### D. Native Host Builds
 Standard CMake builds are supported on the host. Ensure the global test flag is enabled if running tests:
 ```bash
-cmake --preset unit-tests-gtest -D CFN_BUILD_TESTS=ON
+cmake --preset unit-tests-gtest
 cmake --build build/unit-tests-gtest
 ctest --preset unit-tests-gtest
 ```
