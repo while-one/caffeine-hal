@@ -90,9 +90,12 @@ The project includes built-in targets for maintaining code quality:
 
 ## Build Environment (Docker & Local)
 
-Use the `caffeine-build/scripts/build.sh` helper script to build your project inside a Docker container.
+Use the framework's centralized scripts for orchestration:
 
 ```bash
+# Full Quality Gate (Format -> Analyze -> Build -> Test)
+./caffeine-build/scripts/ci.sh all
+
 # Build using the native Linux stage
 ./caffeine-build/scripts/build.sh unit-tests-gtest
 
