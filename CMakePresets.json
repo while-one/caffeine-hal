@@ -7,5 +7,20 @@
   },
   "include": [
     "caffeine-build/cmake/presets/base.json"
+  ],
+  "configurePresets": [
+    {
+      "name": "unit-tests-gtest",
+      "inherits": "base-unit-tests-gtest"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "unit-tests-gtest",
+      "configurePreset": "unit-tests-gtest",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
   ]
 }

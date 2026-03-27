@@ -121,70 +121,15 @@ set(ALL_HEADERS ${PROJECT_ALL_HEADERS})
 file(GLOB TEST_SOURCES "${PROJECT_SOURCE_DIR}/tests/*.cpp")
 set(ALL_ANALYSIS_SOURCES ${ALL_HEADERS} ${TEST_SOURCES})
 
-
-# 1. Code Formatting (clang-format)
-find_program(CLANG_FORMAT clang-format)
-if(CLANG_FORMAT)
-    option(FORMAT_DRY_RUN "Run clang-format in dry-run mode" OFF)
-    
-    if(FORMAT_DRY_RUN)
-        set(FORMAT_ARGS --dry-run --Werror)
-        set(FORMAT_COMMENT "Checking header formatting with clang-format (BARR-C style)...")
-    else()
-        set(FORMAT_ARGS -i)
-        set(FORMAT_COMMENT "Formatting header files with clang-format (BARR-C style)...")
-    endif()
-
-    add_custom_target(
-        ${PROJECT_NAME}-format
-        COMMAND ${CLANG_FORMAT}
-        ${FORMAT_ARGS}
-        -style=file:${PROJECT_SOURCE_DIR}/caffeine-build/config/coding/.clang-format
-        ${ALL_ANALYSIS_SOURCES}
-        COMMENT "${FORMAT_COMMENT}"
-    )
-else()
-    message(WARNING "clang-format not found.")
-endif()
-
-# 2. Static Analysis (cppcheck)
-find_program(CPPCHECK cppcheck)
-if(CPPCHECK)
-    add_custom_target(
-        ${PROJECT_NAME}-cppcheck
-        COMMAND ${CPPCHECK}
-        ${CFN_CPPCHECK_FLAGS}
-        -I ${PROJECT_SOURCE_DIR}/include
-        ${ALL_HEADERS}
-        COMMENT "Running cppcheck static analysis..."
-    )
-    if(NOT TARGET ${PROJECT_NAME}-analyze)
-        add_custom_target(${PROJECT_NAME}-analyze COMMENT "Running full static analysis suite...")
-    endif()
-    add_dependencies(${PROJECT_NAME}-analyze ${PROJECT_NAME}-cppcheck)
-endif()
-
-
-# 3. Static Analysis (clang-tidy)
-find_program(CLANG_TIDY clang-tidy)
-if(CLANG_TIDY)
-    add_custom_target(
-        ${PROJECT_NAME}-tidy
-        COMMAND ${CLANG_TIDY}
-        --config-file=${PROJECT_SOURCE_DIR}/caffeine-build/config/coding/.clang-tidy
-        --header-filter=.*
-        ${ALL_HEADERS}
-        ${PROJECT_SOURCE_DIR}/tests/compliance.c
-        --
-        -I${PROJECT_SOURCE_DIR}/include
-        -std=c11
-        COMMENT "Running clang-tidy static analysis..."
-    )
-    
-    if(TARGET ${PROJECT_NAME}-analyze)
-        add_dependencies(${PROJECT_NAME}-analyze ${PROJECT_NAME}-tidy)
-    endif()
-endif()
+cfn_add_code_quality_targets(
+    ${PROJECT_NAME}
+    HEADERS_ONLY
+    FORMAT_SOURCES ${ALL_ANALYSIS_SOURCES}
+    ANALYSIS_SOURCES ${ALL_HEADERS}
+    CPPCHECK_ARGS -I ${PROJECT_SOURCE_DIR}/include
+    TIDY_ARGS -I${PROJECT_SOURCE_DIR}/include
+    TIDY_HEADER_FILTER ".*"
+)
 
 # 4. C11 Compliance Check
 # This target compiles a minimal C file that includes all HAL headers
