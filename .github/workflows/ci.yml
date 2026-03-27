@@ -9,3 +9,5 @@ on:
 jobs:
   framework-ci:
     uses: while-one/caffeine-build/.github/workflows/reusable-ci.yml@main
+    with:
+      submodules: recursive
