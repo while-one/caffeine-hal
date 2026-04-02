@@ -214,13 +214,13 @@ TEST_F(NvmTest, EraseChipSuccess)
 TEST_F(NvmTest, GetInfoSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.get_info       = [](cfn_hal_nvm_t *d, cfn_hal_nvm_info_t *info) -> cfn_hal_error_code_t
+    api.get_info       = [](cfn_hal_nvm_t *d, uint32_t addr, cfn_hal_nvm_info_t *info) -> cfn_hal_error_code_t
     {
         info->total_size = 1024;
         return CFN_HAL_ERROR_OK;
     };
     cfn_hal_nvm_info_t info{};
-    EXPECT_EQ(cfn_hal_nvm_get_info(&driver, &info), CFN_HAL_ERROR_OK);
+    EXPECT_EQ(cfn_hal_nvm_get_info(&driver, 0x08000000, &info), CFN_HAL_ERROR_OK);
     EXPECT_EQ(info.total_size, 1024);
 }
 

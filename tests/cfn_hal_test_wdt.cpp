@@ -32,7 +32,7 @@ class WdtTest : public ::testing::Test
   protected:
     cfn_hal_wdt_t        driver{};
     cfn_hal_wdt_api_t    api{};
-    cfn_hal_wdt_config_t dummy_config{};
+    cfn_hal_wdt_config_t dummy_config{ .timeout_ms = 1 };
 
     void SetUp() override
     {
@@ -97,9 +97,10 @@ TEST_F(WdtTest, DeinitSuccess)
 TEST_F(WdtTest, ConfigValidation)
 {
     cfn_hal_wdt_config_t config = {
-        .sleep  = CFN_HAL_WDT_CONFIG_SLEEP_RUN,
-        .reset  = CFN_HAL_WDT_CONFIG_RESET_CPU,
-        .custom = nullptr,
+        .timeout_ms = 1000,
+        .sleep      = CFN_HAL_WDT_CONFIG_SLEEP_RUN,
+        .reset      = CFN_HAL_WDT_CONFIG_RESET_CPU,
+        .custom     = nullptr,
     };
 
     // Valid config
@@ -119,6 +120,11 @@ TEST_F(WdtTest, ConfigValidation)
     // Invalid enum (Reset)
     config.reset = CFN_HAL_WDT_CONFIG_RESET_MAX;
     EXPECT_EQ(cfn_hal_wdt_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.reset      = CFN_HAL_WDT_CONFIG_RESET_CPU;
+
+    // Invalid timeout
+    config.timeout_ms = 0;
+    EXPECT_EQ(cfn_hal_wdt_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
 }
 
 TEST_F(WdtTest, ConfigSetSuccess)
@@ -126,14 +132,14 @@ TEST_F(WdtTest, ConfigSetSuccess)
     driver.base.status  = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     api.base.config_set = [](cfn_hal_driver_t *b, const void *config) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
-    cfn_hal_wdt_config_t config{};
+    cfn_hal_wdt_config_t config{ .timeout_ms = 1 };
     EXPECT_EQ(cfn_hal_wdt_config_set(&driver, &config), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.config, &config);
 }
 
 TEST_F(WdtTest, ConfigGetSuccess)
 {
-    cfn_hal_wdt_config_t config{};
+    cfn_hal_wdt_config_t config{ .timeout_ms = 1 };
     cfn_hal_wdt_config_t config_out{};
     driver.config = &config;
     EXPECT_EQ(cfn_hal_wdt_config_get(&driver, &config_out), CFN_HAL_ERROR_OK);

@@ -115,7 +115,7 @@ struct cfn_hal_nvm_api_s
     cfn_hal_error_code_t (*write)(cfn_hal_nvm_t *driver, uint32_t addr, const uint8_t *data, size_t size);
     cfn_hal_error_code_t (*erase_sector)(cfn_hal_nvm_t *driver, uint32_t sector_addr);
     cfn_hal_error_code_t (*erase_chip)(cfn_hal_nvm_t *driver);
-    cfn_hal_error_code_t (*get_info)(cfn_hal_nvm_t *driver, cfn_hal_nvm_info_t *info);
+    cfn_hal_error_code_t (*get_info)(cfn_hal_nvm_t *driver, uint32_t addr, cfn_hal_nvm_info_t *info);
 };
 
 CFN_HAL_VMT_CHECK(struct cfn_hal_nvm_api_s);
@@ -422,15 +422,16 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_nvm_erase_chip(cfn_hal_nvm_t *driver
 }
 
 /**
- * @brief Retrieves information about memory organization and endurance.
+ * @brief Retrieves information about memory organization and endurance for a specific address.
  * @param driver Pointer to the NVM driver instance.
+ * @param addr Address within the target sector/region.
  * @param info [out] Pointer to the information structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_nvm_get_info(cfn_hal_nvm_t *driver, cfn_hal_nvm_info_t *info)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_nvm_get_info(cfn_hal_nvm_t *driver, uint32_t addr, cfn_hal_nvm_info_t *info)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_NVM, get_info, driver, error, info);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_NVM, get_info, driver, error, addr, info);
     return error;
 }
 cfn_hal_error_code_t cfn_hal_nvm_construct(cfn_hal_nvm_t              *driver,

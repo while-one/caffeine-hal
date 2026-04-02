@@ -32,7 +32,7 @@ class UsbTest : public ::testing::Test
   protected:
     cfn_hal_usb_t        driver{};
     cfn_hal_usb_api_t    api{};
-    cfn_hal_usb_config_t dummy_config{};
+    cfn_hal_usb_config_t dummy_config{ .dev_endpoints = 1 };
 
     void SetUp() override
     {
@@ -96,14 +96,30 @@ TEST_F(UsbTest, DeinitSuccess)
 
 // --- Configuration & Callback Tests ---
 
+TEST_F(UsbTest, ConfigValidation)
+{
+    cfn_hal_usb_config_t config = {
+        .dev_endpoints = 7,
+        .user_config   = nullptr,
+    };
+
+    // Valid config
+    EXPECT_EQ(cfn_hal_usb_config_validate(&driver, &config), CFN_HAL_ERROR_OK);
+
+    // Invalid endpoints
+    config.dev_endpoints = 0;
+    EXPECT_EQ(cfn_hal_usb_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+}
+
 TEST_F(UsbTest, ConfigSetGet)
 {
-    cfn_hal_usb_config_t config = { .user_config = (void *) 0x1234 };
+    cfn_hal_usb_config_t config = { .dev_endpoints = 7, .user_config = (void *) 0x1234 };
     cfn_hal_usb_config_t read_config{};
 
     EXPECT_EQ(cfn_hal_usb_config_set(&driver, &config), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_usb_config_get(&driver, &read_config), CFN_HAL_ERROR_OK);
     EXPECT_EQ(read_config.user_config, (void *) 0x1234);
+    EXPECT_EQ(read_config.dev_endpoints, 7);
 }
 
 TEST_F(UsbTest, CallbackRegister)
