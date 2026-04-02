@@ -65,13 +65,55 @@ typedef enum
 /* Types Structs ----------------------------------------------------*/
 
 /**
+ * @brief I2S operational mode.
+ */
+typedef enum
+{
+    CFN_HAL_I2S_CONFIG_MODE_MASTER_TX,
+    CFN_HAL_I2S_CONFIG_MODE_MASTER_RX,
+    CFN_HAL_I2S_CONFIG_MODE_SLAVE_TX,
+    CFN_HAL_I2S_CONFIG_MODE_SLAVE_RX,
+
+    CFN_HAL_I2S_CONFIG_MODE_MAX
+} cfn_hal_i2s_config_mode_t;
+
+/**
+ * @brief I2S communication standard.
+ */
+typedef enum
+{
+    CFN_HAL_I2S_CONFIG_STANDARD_PHILIPS,
+    CFN_HAL_I2S_CONFIG_STANDARD_MSB,
+    CFN_HAL_I2S_CONFIG_STANDARD_LSB,
+    CFN_HAL_I2S_CONFIG_STANDARD_PCM_SHORT,
+    CFN_HAL_I2S_CONFIG_STANDARD_PCM_LONG,
+
+    CFN_HAL_I2S_CONFIG_STANDARD_MAX
+} cfn_hal_i2s_config_standard_t;
+
+/**
+ * @brief I2S data format.
+ */
+typedef enum
+{
+    CFN_HAL_I2S_CONFIG_DATAFORMAT_16B,
+    CFN_HAL_I2S_CONFIG_DATAFORMAT_16B_EXTENDED,
+    CFN_HAL_I2S_CONFIG_DATAFORMAT_24B,
+    CFN_HAL_I2S_CONFIG_DATAFORMAT_32B,
+
+    CFN_HAL_I2S_CONFIG_DATAFORMAT_MAX
+} cfn_hal_i2s_config_dataformat_t;
+
+/**
  * @brief I2S configuration structure.
  */
 typedef struct
 {
-    uint32_t sample_rate; /*!< Audio sampling frequency in Hz */
-    uint32_t data_format; /*!< Data bits and standard (e.g. Philips, MSB) */
-    void    *custom;      /*!< Vendor-specific custom configuration */
+    uint32_t                        sample_rate; /*!< Audio sampling frequency in Hz */
+    cfn_hal_i2s_config_mode_t       mode;        /*!< Operational mode */
+    cfn_hal_i2s_config_standard_t   standard;    /*!< Communication standard */
+    cfn_hal_i2s_config_dataformat_t data_format; /*!< Data format */
+    void                           *custom;      /*!< Vendor-specific custom configuration */
 } cfn_hal_i2s_config_t;
 
 /**
@@ -153,6 +195,12 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_config_validate(const cfn_hal_i2
     if (driver == NULL || config == NULL)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
+    }
+
+    if ((config->mode >= CFN_HAL_I2S_CONFIG_MODE_MAX) || (config->standard >= CFN_HAL_I2S_CONFIG_STANDARD_MAX) ||
+        (config->data_format >= CFN_HAL_I2S_CONFIG_DATAFORMAT_MAX))
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
     }
 
     return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, config);

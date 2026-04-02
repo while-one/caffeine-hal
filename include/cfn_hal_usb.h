@@ -88,7 +88,8 @@ typedef enum
  */
 typedef struct
 {
-    void *user_config; /*!< Vendor-specific USB hardware configuration */
+    uint32_t dev_endpoints; /*!< Maximum number of endpoints supported by the device */
+    void    *user_config;   /*!< Vendor-specific USB hardware configuration */
 } cfn_hal_usb_config_t;
 
 /**
@@ -182,6 +183,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_usb_config_validate(const cfn_hal_us
     if (driver == NULL || config == NULL)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
+    }
+
+    if (config->dev_endpoints == 0)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
     }
 
     return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_USB, config);

@@ -97,9 +97,10 @@ typedef struct
  */
 typedef struct
 {
-    cfn_hal_wdt_config_sleep_t sleep;  /*!< Behavior during system sleep */
-    cfn_hal_wdt_config_reset_t reset;  /*!< Reset strategy on timeout */
-    void                      *custom; /*!< Vendor-specific custom configuration */
+    uint32_t                   timeout_ms; /*!< Watchdog timeout in milliseconds */
+    cfn_hal_wdt_config_sleep_t sleep;      /*!< Behavior during system sleep */
+    cfn_hal_wdt_config_reset_t reset;      /*!< Reset strategy on timeout */
+    void                      *custom;     /*!< Vendor-specific custom configuration */
 } cfn_hal_wdt_config_t;
 
 typedef struct cfn_hal_wdt_s     cfn_hal_wdt_t;
@@ -166,6 +167,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_wdt_config_validate(cfn_hal_wdt_t   
     }
 
     if (config->sleep >= CFN_HAL_WDT_CONFIG_SLEEP_MAX || config->reset >= CFN_HAL_WDT_CONFIG_RESET_MAX)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
+    }
+
+    if (config->timeout_ms == 0)
     {
         return CFN_HAL_ERROR_BAD_CONFIG;
     }

@@ -79,6 +79,34 @@ TEST_F(I2sTest, OnConfigFailureAbortsInit)
 
 // --- Lifecycle Tests ---
 
+TEST_F(I2sTest, ConfigValidation)
+{
+    cfn_hal_i2s_config_t config = {
+        .sample_rate = 44100,
+        .mode        = CFN_HAL_I2S_CONFIG_MODE_MASTER_TX,
+        .standard    = CFN_HAL_I2S_CONFIG_STANDARD_PHILIPS,
+        .data_format = CFN_HAL_I2S_CONFIG_DATAFORMAT_16B,
+        .custom      = nullptr,
+    };
+
+    // Valid config
+    EXPECT_EQ(cfn_hal_i2s_config_validate(&driver, &config), CFN_HAL_ERROR_OK);
+
+    // Invalid mode
+    config.mode = CFN_HAL_I2S_CONFIG_MODE_MAX;
+    EXPECT_EQ(cfn_hal_i2s_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.mode     = CFN_HAL_I2S_CONFIG_MODE_MASTER_TX;
+
+    // Invalid standard
+    config.standard = CFN_HAL_I2S_CONFIG_STANDARD_MAX;
+    EXPECT_EQ(cfn_hal_i2s_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+    config.standard    = CFN_HAL_I2S_CONFIG_STANDARD_PHILIPS;
+
+    // Invalid data_format
+    config.data_format = CFN_HAL_I2S_CONFIG_DATAFORMAT_MAX;
+    EXPECT_EQ(cfn_hal_i2s_config_validate(&driver, &config), CFN_HAL_ERROR_BAD_CONFIG);
+}
+
 TEST_F(I2sTest, InitSuccess)
 {
     api.base.init = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
