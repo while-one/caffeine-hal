@@ -26,9 +26,90 @@
 #include "cfn_hal_eth.h"
 #include "cfn_hal_eth_port.h"
 
-static cfn_hal_error_code_t port_base_event_get(cfn_hal_driver_t *base, uint32_t *event_mask) { CFN_HAL_UNUSED(base); if (event_mask) { *event_mask = 0; } return CFN_HAL_ERROR_OK; }
+static cfn_hal_error_code_t port_base_event_get(cfn_hal_driver_t *base, uint32_t *event_mask)
+{
+    CFN_HAL_UNUSED(base);
+    if (event_mask)
+    {
+        *event_mask = 0;
+    }
+    return CFN_HAL_ERROR_OK;
+}
 
-static cfn_hal_error_code_t port_base_error_get(cfn_hal_driver_t *base, uint32_t *error_mask) { CFN_HAL_UNUSED(base); if (error_mask) { *error_mask = 0; } return CFN_HAL_ERROR_OK; }
+static cfn_hal_error_code_t port_base_error_get(cfn_hal_driver_t *base, uint32_t *error_mask)
+{
+    CFN_HAL_UNUSED(base);
+    if (error_mask)
+    {
+        *error_mask = 0;
+    }
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t port_eth_start(cfn_hal_eth_t *driver)
+{
+    CFN_HAL_UNUSED(driver);
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t port_eth_stop(cfn_hal_eth_t *driver)
+{
+    CFN_HAL_UNUSED(driver);
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t port_eth_transmit_frame(cfn_hal_eth_t *driver, const uint8_t *frame, size_t length, uint32_t timeout)
+{
+    CFN_HAL_UNUSED(driver);
+    CFN_HAL_UNUSED(frame);
+    CFN_HAL_UNUSED(length);
+    CFN_HAL_UNUSED(timeout);
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t port_eth_receive_frame(cfn_hal_eth_t *driver,
+                                                   uint8_t       *buffer,
+                                                   size_t         max_length,
+                                                   size_t        *received_length,
+                                                   uint32_t       timeout)
+{
+    CFN_HAL_UNUSED(driver);
+    CFN_HAL_UNUSED(buffer);
+    CFN_HAL_UNUSED(max_length);
+    CFN_HAL_UNUSED(received_length);
+    CFN_HAL_UNUSED(timeout);
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t
+port_eth_read_phy_reg(cfn_hal_eth_t *driver, uint16_t phy_addr, uint16_t reg_addr, uint16_t *value, uint32_t timeout)
+{
+    CFN_HAL_UNUSED(driver);
+    CFN_HAL_UNUSED(phy_addr);
+    CFN_HAL_UNUSED(reg_addr);
+    CFN_HAL_UNUSED(value);
+    CFN_HAL_UNUSED(timeout);
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t
+port_eth_write_phy_reg(cfn_hal_eth_t *driver, uint16_t phy_addr, uint16_t reg_addr, uint16_t value, uint32_t timeout)
+{
+    CFN_HAL_UNUSED(driver);
+    CFN_HAL_UNUSED(phy_addr);
+    CFN_HAL_UNUSED(reg_addr);
+    CFN_HAL_UNUSED(value);
+    CFN_HAL_UNUSED(timeout);
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t port_eth_get_link_status(cfn_hal_eth_t *driver, cfn_hal_eth_link_status_t *status, uint32_t timeout)
+{
+    CFN_HAL_UNUSED(driver);
+    CFN_HAL_UNUSED(status);
+    CFN_HAL_UNUSED(timeout);
+    return CFN_HAL_ERROR_OK;
+}
 
 static const cfn_hal_eth_api_t eth_api = {
     .base = {
@@ -44,12 +125,13 @@ static const cfn_hal_eth_api_t eth_api = {
         .error_disable = NULL,
         .error_get = port_base_error_get,
     },
-    .start = NULL,
-    .stop = NULL,
-    .transmit_frame = NULL,
-    .read_phy_reg = NULL,
-    .write_phy_reg = NULL,
-    .get_link_status = NULL
+    .start = port_eth_start,
+    .stop = port_eth_stop,
+    .transmit_frame = port_eth_transmit_frame,
+    .receive_frame = port_eth_receive_frame,
+    .read_phy_reg = port_eth_read_phy_reg,
+    .write_phy_reg = port_eth_write_phy_reg,
+    .get_link_status = port_eth_get_link_status
 };
 
 cfn_hal_error_code_t cfn_hal_eth_construct(cfn_hal_eth_t              *driver,

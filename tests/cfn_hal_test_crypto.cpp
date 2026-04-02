@@ -119,27 +119,28 @@ TEST_F(CryptoTest, CallbackRegister)
 
 TEST_F(CryptoTest, EncryptDecryptSuccess)
 {
-    api.encrypt = [](cfn_hal_crypto_t *d, const uint8_t *in, uint8_t *out, size_t s) -> cfn_hal_error_code_t
+    api.encrypt = [](cfn_hal_crypto_t *d, const uint8_t *i, uint8_t *o, size_t s, uint32_t t) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
-    api.decrypt = [](cfn_hal_crypto_t *d, const uint8_t *in, uint8_t *out, size_t s) -> cfn_hal_error_code_t
+    api.decrypt = [](cfn_hal_crypto_t *d, const uint8_t *i, uint8_t *o, size_t s, uint32_t t) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
 
     uint8_t in[16]  = { 0 };
     uint8_t out[16] = { 0 };
-    EXPECT_EQ(cfn_hal_crypto_encrypt(&driver, in, out, 16), CFN_HAL_ERROR_OK);
-    EXPECT_EQ(cfn_hal_crypto_decrypt(&driver, in, out, 16), CFN_HAL_ERROR_OK);
+    EXPECT_EQ(cfn_hal_crypto_encrypt(&driver, in, out, 16, 100), CFN_HAL_ERROR_OK);
+    EXPECT_EQ(cfn_hal_crypto_decrypt(&driver, in, out, 16, 100), CFN_HAL_ERROR_OK);
 }
 
 TEST_F(CryptoTest, HashSuccess)
 {
     api.hash_update = [](cfn_hal_crypto_t *d, const uint8_t *data, size_t s) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
-    api.hash_finish  = [](cfn_hal_crypto_t *d, uint8_t *hash) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.hash_finish = [](cfn_hal_crypto_t *d, uint8_t *hash, uint32_t t) -> cfn_hal_error_code_t
+    { return CFN_HAL_ERROR_OK; };
 
     uint8_t data[16] = { 0 };
     uint8_t hash[32] = { 0 };
     EXPECT_EQ(cfn_hal_crypto_hash_update(&driver, data, 16), CFN_HAL_ERROR_OK);
-    EXPECT_EQ(cfn_hal_crypto_hash_finish(&driver, hash), CFN_HAL_ERROR_OK);
+    EXPECT_EQ(cfn_hal_crypto_hash_finish(&driver, hash, 100), CFN_HAL_ERROR_OK);
 }
 
 TEST_F(CryptoTest, RandomSuccess)

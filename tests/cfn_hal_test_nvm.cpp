@@ -182,33 +182,35 @@ TEST_F(NvmTest, ErrorGetSuccess)
 TEST_F(NvmTest, ReadSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.read           = [](cfn_hal_nvm_t *d, uint32_t addr, uint8_t *buffer, size_t size) -> cfn_hal_error_code_t
+    api.read = [](cfn_hal_nvm_t *d, uint32_t addr, uint8_t *buffer, size_t size, uint32_t t) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     uint8_t buffer[10];
-    EXPECT_EQ(cfn_hal_nvm_read(&driver, 0x08000000, buffer, 10), CFN_HAL_ERROR_OK);
+    EXPECT_EQ(cfn_hal_nvm_read(&driver, 0x08000000, buffer, 10, 100), CFN_HAL_ERROR_OK);
 }
 
 TEST_F(NvmTest, WriteSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.write          = [](cfn_hal_nvm_t *d, uint32_t addr, const uint8_t *data, size_t size) -> cfn_hal_error_code_t
+    api.write =
+        [](cfn_hal_nvm_t *d, uint32_t addr, const uint8_t *data, size_t size, uint32_t t) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     uint8_t data[10] = { 0 };
-    EXPECT_EQ(cfn_hal_nvm_write(&driver, 0x08000000, data, 10), CFN_HAL_ERROR_OK);
+    EXPECT_EQ(cfn_hal_nvm_write(&driver, 0x08000000, data, 10, 100), CFN_HAL_ERROR_OK);
 }
 
 TEST_F(NvmTest, EraseSectorSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.erase_sector = [](cfn_hal_nvm_t *d, uint32_t sector_addr) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    EXPECT_EQ(cfn_hal_nvm_erase_sector(&driver, 0x08000000), CFN_HAL_ERROR_OK);
+    api.erase_sector   = [](cfn_hal_nvm_t *d, uint32_t sector_addr, uint32_t t) -> cfn_hal_error_code_t
+    { return CFN_HAL_ERROR_OK; };
+    EXPECT_EQ(cfn_hal_nvm_erase_sector(&driver, 0x08000000, 100), CFN_HAL_ERROR_OK);
 }
 
 TEST_F(NvmTest, EraseChipSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.erase_chip     = [](cfn_hal_nvm_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    EXPECT_EQ(cfn_hal_nvm_erase_chip(&driver), CFN_HAL_ERROR_OK);
+    api.erase_chip     = [](cfn_hal_nvm_t *d, uint32_t t) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    EXPECT_EQ(cfn_hal_nvm_erase_chip(&driver, 100), CFN_HAL_ERROR_OK);
 }
 
 TEST_F(NvmTest, GetInfoSuccess)
