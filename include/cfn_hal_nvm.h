@@ -111,10 +111,11 @@ struct cfn_hal_nvm_api_s
     cfn_hal_api_base_t base;
 
     /* NVM Specific Extensions */
-    cfn_hal_error_code_t (*read)(cfn_hal_nvm_t *driver, uint32_t addr, uint8_t *buffer, size_t size);
-    cfn_hal_error_code_t (*write)(cfn_hal_nvm_t *driver, uint32_t addr, const uint8_t *data, size_t size);
-    cfn_hal_error_code_t (*erase_sector)(cfn_hal_nvm_t *driver, uint32_t sector_addr);
-    cfn_hal_error_code_t (*erase_chip)(cfn_hal_nvm_t *driver);
+    cfn_hal_error_code_t (*read)(cfn_hal_nvm_t *driver, uint32_t addr, uint8_t *buffer, size_t size, uint32_t timeout);
+    cfn_hal_error_code_t (*write)(
+        cfn_hal_nvm_t *driver, uint32_t addr, const uint8_t *data, size_t size, uint32_t timeout);
+    cfn_hal_error_code_t (*erase_sector)(cfn_hal_nvm_t *driver, uint32_t sector_addr, uint32_t timeout);
+    cfn_hal_error_code_t (*erase_chip)(cfn_hal_nvm_t *driver, uint32_t timeout);
     cfn_hal_error_code_t (*get_info)(cfn_hal_nvm_t *driver, uint32_t addr, cfn_hal_nvm_info_t *info);
 };
 
@@ -369,12 +370,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_nvm_error_get(cfn_hal_nvm_t *driver,
  * @param addr Source memory address.
  * @param buffer Pointer to the buffer where data will be stored.
  * @param size Number of bytes to read.
+ * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_nvm_read(cfn_hal_nvm_t *driver, uint32_t addr, uint8_t *buffer, size_t size)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_nvm_read(cfn_hal_nvm_t *driver, uint32_t addr, uint8_t *buffer, size_t size, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_NVM, read, driver, error, addr, buffer, size);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_NVM, read, driver, error, addr, buffer, size, timeout);
     return error;
 }
 
@@ -384,15 +387,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_nvm_read(cfn_hal_nvm_t *driver, uint
  * @param addr Destination memory address.
  * @param data Pointer to the data to be written.
  * @param size Number of bytes to write.
+ * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_nvm_write(cfn_hal_nvm_t *driver,
-                                                      uint32_t       addr,
-                                                      const uint8_t *data,
-                                                      size_t         size)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_nvm_write(cfn_hal_nvm_t *driver, uint32_t addr, const uint8_t *data, size_t size, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_NVM, write, driver, error, addr, data, size);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_NVM, write, driver, error, addr, data, size, timeout);
     return error;
 }
 
@@ -400,24 +402,28 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_nvm_write(cfn_hal_nvm_t *driver,
  * @brief Erases a specific sector or page of memory.
  * @param driver Pointer to the NVM driver instance.
  * @param sector_addr Address within the sector to be erased.
+ * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_nvm_erase_sector(cfn_hal_nvm_t *driver, uint32_t sector_addr)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_nvm_erase_sector(cfn_hal_nvm_t *driver,
+                                                             uint32_t       sector_addr,
+                                                             uint32_t       timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_NVM, erase_sector, driver, error, sector_addr);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_NVM, erase_sector, driver, error, sector_addr, timeout);
     return error;
 }
 
 /**
  * @brief Erases the entire non-volatile memory (Bulk Erase).
  * @param driver Pointer to the NVM driver instance.
+ * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_nvm_erase_chip(cfn_hal_nvm_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_nvm_erase_chip(cfn_hal_nvm_t *driver, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_NVM, erase_chip, driver, error);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_NVM, erase_chip, driver, error, timeout);
     return error;
 }
 

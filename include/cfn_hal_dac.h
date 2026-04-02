@@ -125,7 +125,7 @@ struct cfn_hal_dac_api_s
     cfn_hal_api_base_t base;
 
     /* DAC Specific Extensions */
-    cfn_hal_error_code_t (*set_value)(cfn_hal_dac_t *driver, uint32_t value);
+    cfn_hal_error_code_t (*set_value)(cfn_hal_dac_t *driver, uint32_t value, uint32_t timeout);
     cfn_hal_error_code_t (*start)(cfn_hal_dac_t *driver);
     cfn_hal_error_code_t (*stop)(cfn_hal_dac_t *driver);
     cfn_hal_error_code_t (*write_dma)(cfn_hal_dac_t *driver, const uint32_t *data, size_t nbr_of_samples);
@@ -383,15 +383,16 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dac_error_get(cfn_hal_dac_t *driver,
 /* DAC Specific Functions ------------------------------------------- */
 
 /**
- * @brief Sets a static output value for the DAC.
+ * @brief Sets the analog output value (blocking).
  * @param driver Pointer to the DAC driver instance.
- * @param value The digital value to convert to analog.
+ * @param value The raw digital value to convert.
+ * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dac_set_value(cfn_hal_dac_t *driver, uint32_t value)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_dac_set_value(cfn_hal_dac_t *driver, uint32_t value, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_DAC, set_value, driver, error, value);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_DAC, set_value, driver, error, value, timeout);
     return error;
 }
 

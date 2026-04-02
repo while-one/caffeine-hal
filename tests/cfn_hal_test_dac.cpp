@@ -142,8 +142,8 @@ TEST_F(DacTest, CallbackRegister)
 
 TEST_F(DacTest, SetValueSuccess)
 {
-    api.set_value = [](cfn_hal_dac_t *d, uint32_t v) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    EXPECT_EQ(cfn_hal_dac_set_value(&driver, 2048), CFN_HAL_ERROR_OK);
+    api.set_value = [](cfn_hal_dac_t *d, uint32_t v, uint32_t t) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    EXPECT_EQ(cfn_hal_dac_set_value(&driver, 2048, 100), CFN_HAL_ERROR_OK);
 }
 
 TEST_F(DacTest, StartStopSuccess)
@@ -187,8 +187,8 @@ TEST_F(DacTest, ErrorEnableDisable)
 
 TEST_F(DacTest, WithLockMacroWorks)
 {
-    api.set_value = [](cfn_hal_dac_t *d, uint32_t v) { return CFN_HAL_ERROR_OK; };
+    api.set_value = [](cfn_hal_dac_t *d, uint32_t v, uint32_t t) { return CFN_HAL_ERROR_OK; };
     cfn_hal_error_code_t result;
-    CFN_HAL_WITH_LOCK(&driver, 100, result, cfn_hal_dac_set_value, 2048);
+    CFN_HAL_WITH_LOCK(&driver, 100, result, cfn_hal_dac_set_value, 2048, 100);
     EXPECT_EQ(result, CFN_HAL_ERROR_OK);
 }

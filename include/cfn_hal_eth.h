@@ -39,6 +39,57 @@ extern "C"
 
 /* Defines ----------------------------------------------------------*/
 
+/**
+ * @brief Standard IEEE 802.3 PHY Registers.
+ */
+#define CFN_HAL_ETH_PHY_REG_BMCR   0x00U /*!< Basic Mode Control Register */
+#define CFN_HAL_ETH_PHY_REG_BSR    0x01U /*!< Basic Mode Status Register */
+#define CFN_HAL_ETH_PHY_REG_ID1    0x02U /*!< PHY Identifier 1 Register */
+#define CFN_HAL_ETH_PHY_REG_ID2    0x03U /*!< PHY Identifier 2 Register */
+#define CFN_HAL_ETH_PHY_REG_ANAR   0x04U /*!< Auto-Negotiation Advertisement Register */
+#define CFN_HAL_ETH_PHY_REG_ANLPAR 0x05U /*!< Auto-Negotiation Link Partner Ability Register */
+#define CFN_HAL_ETH_PHY_REG_ANER   0x06U /*!< Auto-Negotiation Expansion Register */
+
+/**
+ * @brief BMCR (Basic Mode Control Register) bit definitions.
+ */
+#define CFN_HAL_ETH_PHY_BMCR_RESET     CFN_HAL_BIT(15) /*!< PHY reset */
+#define CFN_HAL_ETH_PHY_BMCR_LOOPBACK  CFN_HAL_BIT(14) /*!< Enable loopback */
+#define CFN_HAL_ETH_PHY_BMCR_SPEED_100 CFN_HAL_BIT(13) /*!< Select 100Mbps (0 = 10Mbps) */
+#define CFN_HAL_ETH_PHY_BMCR_AUTONEG   CFN_HAL_BIT(12) /*!< Enable auto-negotiation */
+#define CFN_HAL_ETH_PHY_BMCR_POWERDOWN CFN_HAL_BIT(11) /*!< PHY power down */
+#define CFN_HAL_ETH_PHY_BMCR_ISOLATE   CFN_HAL_BIT(10) /*!< Isolate PHY from MII */
+#define CFN_HAL_ETH_PHY_BMCR_RESTART   CFN_HAL_BIT(9)  /*!< Restart auto-negotiation */
+#define CFN_HAL_ETH_PHY_BMCR_DUPLEX    CFN_HAL_BIT(8)  /*!< Full duplex (0 = half) */
+
+/**
+ * @brief BSR (Basic Mode Status Register) bit definitions.
+ */
+#define CFN_HAL_ETH_PHY_BSR_100BASET4  CFN_HAL_BIT(15) /*!< 100Base-T4 support */
+#define CFN_HAL_ETH_PHY_BSR_100BASEXFD CFN_HAL_BIT(14) /*!< 100Base-X Full Duplex support */
+#define CFN_HAL_ETH_PHY_BSR_100BASEXHD CFN_HAL_BIT(13) /*!< 100Base-X Half Duplex support */
+#define CFN_HAL_ETH_PHY_BSR_10BASETFD  CFN_HAL_BIT(12) /*!< 10Base-T Full Duplex support */
+#define CFN_HAL_ETH_PHY_BSR_10BASETHD  CFN_HAL_BIT(11) /*!< 10Base-T Half Duplex support */
+#define CFN_HAL_ETH_PHY_BSR_AUTONEGCMP CFN_HAL_BIT(5)  /*!< Auto-negotiation complete */
+#define CFN_HAL_ETH_PHY_BSR_REMOTEFLT  CFN_HAL_BIT(4)  /*!< Remote fault detected */
+#define CFN_HAL_ETH_PHY_BSR_AUTONEGABL CFN_HAL_BIT(3)  /*!< Auto-negotiation ability */
+#define CFN_HAL_ETH_PHY_BSR_LINKSTAT   CFN_HAL_BIT(2)  /*!< Link status (1 = up) */
+#define CFN_HAL_ETH_PHY_BSR_JABBERDET  CFN_HAL_BIT(1)  /*!< Jabber condition detected */
+#define CFN_HAL_ETH_PHY_BSR_EXTENDED   CFN_HAL_BIT(0)  /*!< Extended capability support */
+
+/**
+ * @brief ANAR (Auto-Negotiation Advertisement Register) bit definitions.
+ */
+#define CFN_HAL_ETH_PHY_ANAR_NEXT_PAGE CFN_HAL_BIT(15) /*!< Next page ability */
+#define CFN_HAL_ETH_PHY_ANAR_REM_FAULT CFN_HAL_BIT(13) /*!< Remote fault */
+#define CFN_HAL_ETH_PHY_ANAR_PAUSE     CFN_HAL_BIT(10) /*!< Pause support */
+#define CFN_HAL_ETH_PHY_ANAR_100T4     CFN_HAL_BIT(9)  /*!< 100Base-T4 ability */
+#define CFN_HAL_ETH_PHY_ANAR_100FD     CFN_HAL_BIT(8)  /*!< 100Base-TX full duplex ability */
+#define CFN_HAL_ETH_PHY_ANAR_100HD     CFN_HAL_BIT(7)  /*!< 100Base-TX half duplex ability */
+#define CFN_HAL_ETH_PHY_ANAR_10FD      CFN_HAL_BIT(6)  /*!< 10Base-T full duplex ability */
+#define CFN_HAL_ETH_PHY_ANAR_10HD      CFN_HAL_BIT(5)  /*!< 10Base-T half duplex ability */
+#define CFN_HAL_ETH_PHY_ANAR_SELECTOR  0x001FU         /*!< Protocol selector field */
+
 /* Types Enums ------------------------------------------------------*/
 
 /**
@@ -100,8 +151,9 @@ typedef struct
  */
 typedef struct
 {
-    uint8_t mac_addr[6]; /*!< Device MAC address */
-    void   *user_config; /*!< Vendor-specific MAC/PHY configuration */
+    uint8_t  mac_addr[6]; /*!< Device MAC address */
+    uint16_t phy_addr;    /*!< SMI address of the PHY (0-31) */
+    void    *user_config; /*!< Vendor-specific MAC/PHY configuration */
 } cfn_hal_eth_config_t;
 
 /**
@@ -144,14 +196,17 @@ struct cfn_hal_eth_api_s
     /* Ethernet Specific Extensions */
     cfn_hal_error_code_t (*start)(cfn_hal_eth_t *driver);
     cfn_hal_error_code_t (*stop)(cfn_hal_eth_t *driver);
-    cfn_hal_error_code_t (*transmit_frame)(cfn_hal_eth_t *driver, const uint8_t *frame, size_t length);
-    cfn_hal_error_code_t (*receive_frame)(cfn_hal_eth_t *driver,
-                                          uint8_t       *buffer,
-                                          size_t         max_length,
-                                          size_t        *received_length);
-    cfn_hal_error_code_t (*read_phy_reg)(cfn_hal_eth_t *driver, uint16_t phy_addr, uint16_t reg_addr, uint16_t *value);
-    cfn_hal_error_code_t (*write_phy_reg)(cfn_hal_eth_t *driver, uint16_t phy_addr, uint16_t reg_addr, uint16_t value);
-    cfn_hal_error_code_t (*get_link_status)(cfn_hal_eth_t *driver, cfn_hal_eth_link_status_t *status);
+    cfn_hal_error_code_t (*transmit_frame)(cfn_hal_eth_t *driver,
+                                           const uint8_t *frame,
+                                           size_t         length,
+                                           uint32_t       timeout);
+    cfn_hal_error_code_t (*receive_frame)(
+        cfn_hal_eth_t *driver, uint8_t *buffer, size_t max_length, size_t *received_length, uint32_t timeout);
+    cfn_hal_error_code_t (*read_phy_reg)(
+        cfn_hal_eth_t *driver, uint16_t phy_addr, uint16_t reg_addr, uint16_t *value, uint32_t timeout);
+    cfn_hal_error_code_t (*write_phy_reg)(
+        cfn_hal_eth_t *driver, uint16_t phy_addr, uint16_t reg_addr, uint16_t value, uint32_t timeout);
+    cfn_hal_error_code_t (*get_link_status)(cfn_hal_eth_t *driver, cfn_hal_eth_link_status_t *status, uint32_t timeout);
 };
 
 CFN_HAL_VMT_CHECK(struct cfn_hal_eth_api_s);
@@ -191,6 +246,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_config_validate(const cfn_hal_et
     if (driver == NULL || config == NULL)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
+    }
+
+    if (config->phy_addr >= 32)
+    {
+        return CFN_HAL_ERROR_BAD_CONFIG;
     }
 
     return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_ETH, config);
@@ -428,14 +488,17 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_stop(cfn_hal_eth_t *driver)
  * @param driver Pointer to the Ethernet driver instance.
  * @param frame Pointer to the raw frame data.
  * @param length Length of the frame in bytes.
+ * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_transmit_frame(cfn_hal_eth_t *driver,
                                                                const uint8_t *frame,
-                                                               size_t         length)
+                                                               size_t         length,
+                                                               uint32_t       timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_ETH, transmit_frame, driver, error, frame, length);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
+        CFN_HAL_PERIPHERAL_TYPE_ETH, transmit_frame, driver, error, frame, length, timeout);
     return error;
 }
 
@@ -445,16 +508,15 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_transmit_frame(cfn_hal_eth_t *dr
  * @param buffer Pointer to the buffer where the frame will be stored.
  * @param max_length Maximum capacity of the buffer.
  * @param received_length [out] Actual number of bytes received.
+ * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_receive_frame(cfn_hal_eth_t *driver,
-                                                              uint8_t       *buffer,
-                                                              size_t         max_length,
-                                                              size_t        *received_length)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_receive_frame(
+    cfn_hal_eth_t *driver, uint8_t *buffer, size_t max_length, size_t *received_length, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
-        CFN_HAL_PERIPHERAL_TYPE_ETH, receive_frame, driver, error, buffer, max_length, received_length);
+        CFN_HAL_PERIPHERAL_TYPE_ETH, receive_frame, driver, error, buffer, max_length, received_length, timeout);
     return error;
 }
 
@@ -464,16 +526,15 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_receive_frame(cfn_hal_eth_t *dri
  * @param phy_addr Address of the target PHY.
  * @param reg_addr Address of the target register.
  * @param value [out] Pointer to store the read value.
+ * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_read_phy_reg(cfn_hal_eth_t *driver,
-                                                             uint16_t       phy_addr,
-                                                             uint16_t       reg_addr,
-                                                             uint16_t      *value)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_eth_read_phy_reg(cfn_hal_eth_t *driver, uint16_t phy_addr, uint16_t reg_addr, uint16_t *value, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
-        CFN_HAL_PERIPHERAL_TYPE_ETH, read_phy_reg, driver, error, phy_addr, reg_addr, value);
+        CFN_HAL_PERIPHERAL_TYPE_ETH, read_phy_reg, driver, error, phy_addr, reg_addr, value, timeout);
     return error;
 }
 
@@ -483,16 +544,15 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_read_phy_reg(cfn_hal_eth_t *driv
  * @param phy_addr Address of the target PHY.
  * @param reg_addr Address of the target register.
  * @param value Value to write.
+ * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_write_phy_reg(cfn_hal_eth_t *driver,
-                                                              uint16_t       phy_addr,
-                                                              uint16_t       reg_addr,
-                                                              uint16_t       value)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_eth_write_phy_reg(cfn_hal_eth_t *driver, uint16_t phy_addr, uint16_t reg_addr, uint16_t value, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
-        CFN_HAL_PERIPHERAL_TYPE_ETH, write_phy_reg, driver, error, phy_addr, reg_addr, value);
+        CFN_HAL_PERIPHERAL_TYPE_ETH, write_phy_reg, driver, error, phy_addr, reg_addr, value, timeout);
     return error;
 }
 
@@ -500,13 +560,15 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_write_phy_reg(cfn_hal_eth_t *dri
  * @brief Retrieves the current link status.
  * @param driver Pointer to the Ethernet driver instance.
  * @param status [out] Pointer to the link status structure.
+ * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_eth_get_link_status(cfn_hal_eth_t             *driver,
-                                                                cfn_hal_eth_link_status_t *status)
+                                                                cfn_hal_eth_link_status_t *status,
+                                                                uint32_t                   timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_ETH, get_link_status, driver, error, status);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_ETH, get_link_status, driver, error, status, timeout);
     return error;
 }
 cfn_hal_error_code_t cfn_hal_eth_construct(cfn_hal_eth_t              *driver,
@@ -516,8 +578,9 @@ cfn_hal_error_code_t cfn_hal_eth_construct(cfn_hal_eth_t              *driver,
                                            cfn_hal_eth_callback_t      callback,
                                            void                       *user_arg);
 cfn_hal_error_code_t cfn_hal_eth_destruct(cfn_hal_eth_t *driver);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif // CAFFEINE_HAL_HAL_ETH_H
+#endif // CAFFEINE_HAL_HAL_DAC_H

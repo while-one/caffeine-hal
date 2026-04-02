@@ -26,9 +26,79 @@
 #include "cfn_hal_crypto.h"
 #include "cfn_hal_crypto_port.h"
 
-static cfn_hal_error_code_t port_base_event_get(cfn_hal_driver_t *base, uint32_t *event_mask) { CFN_HAL_UNUSED(base); if (event_mask) { *event_mask = 0; } return CFN_HAL_ERROR_OK; }
+static cfn_hal_error_code_t port_base_event_get(cfn_hal_driver_t *base, uint32_t *event_mask)
+{
+    CFN_HAL_UNUSED(base);
+    if (event_mask)
+    {
+        *event_mask = 0;
+    }
+    return CFN_HAL_ERROR_OK;
+}
 
-static cfn_hal_error_code_t port_base_error_get(cfn_hal_driver_t *base, uint32_t *error_mask) { CFN_HAL_UNUSED(base); if (error_mask) { *error_mask = 0; } return CFN_HAL_ERROR_OK; }
+static cfn_hal_error_code_t port_base_error_get(cfn_hal_driver_t *base, uint32_t *error_mask)
+{
+    CFN_HAL_UNUSED(base);
+    if (error_mask)
+    {
+        *error_mask = 0;
+    }
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t
+port_crypto_encrypt(cfn_hal_crypto_t *driver, const uint8_t *in, uint8_t *out, size_t size, uint32_t timeout)
+{
+    CFN_HAL_UNUSED(driver);
+    CFN_HAL_UNUSED(in);
+    CFN_HAL_UNUSED(out);
+    CFN_HAL_UNUSED(size);
+    CFN_HAL_UNUSED(timeout);
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t
+port_crypto_decrypt(cfn_hal_crypto_t *driver, const uint8_t *in, uint8_t *out, size_t size, uint32_t timeout)
+{
+    CFN_HAL_UNUSED(driver);
+    CFN_HAL_UNUSED(in);
+    CFN_HAL_UNUSED(out);
+    CFN_HAL_UNUSED(size);
+    CFN_HAL_UNUSED(timeout);
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t port_crypto_hash_update(cfn_hal_crypto_t *driver, const uint8_t *data, size_t size)
+{
+    CFN_HAL_UNUSED(driver);
+    CFN_HAL_UNUSED(data);
+    CFN_HAL_UNUSED(size);
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t port_crypto_hash_finish(cfn_hal_crypto_t *driver, uint8_t *hash, uint32_t timeout)
+{
+    CFN_HAL_UNUSED(driver);
+    CFN_HAL_UNUSED(hash);
+    CFN_HAL_UNUSED(timeout);
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t port_crypto_generate_random(cfn_hal_crypto_t *driver, uint8_t *buffer, size_t size)
+{
+    CFN_HAL_UNUSED(driver);
+    CFN_HAL_UNUSED(buffer);
+    CFN_HAL_UNUSED(size);
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t port_crypto_set_key(cfn_hal_crypto_t *driver, const uint8_t *key, size_t key_size)
+{
+    CFN_HAL_UNUSED(driver);
+    CFN_HAL_UNUSED(key);
+    CFN_HAL_UNUSED(key_size);
+    return CFN_HAL_ERROR_OK;
+}
 
 static const cfn_hal_crypto_api_t crypto_api = {
     .base = {
@@ -44,12 +114,12 @@ static const cfn_hal_crypto_api_t crypto_api = {
         .error_disable = NULL,
         .error_get = port_base_error_get,
     },
-    .encrypt = NULL,
-    .decrypt = NULL,
-    .hash_update = NULL,
-    .hash_finish = NULL,
-    .generate_random = NULL,
-    .set_key = NULL
+    .encrypt = port_crypto_encrypt,
+    .decrypt = port_crypto_decrypt,
+    .hash_update = port_crypto_hash_update,
+    .hash_finish = port_crypto_hash_finish,
+    .generate_random = port_crypto_generate_random,
+    .set_key = port_crypto_set_key
 };
 
 cfn_hal_error_code_t cfn_hal_crypto_construct(cfn_hal_crypto_t              *driver,

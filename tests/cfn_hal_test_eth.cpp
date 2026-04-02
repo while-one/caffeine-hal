@@ -99,13 +99,15 @@ TEST_F(EthTest, DeinitSuccess)
 TEST_F(EthTest, ConfigSetGet)
 {
     cfn_hal_eth_config_t config = {
-        .mac_addr = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED }
+        .mac_addr = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED },
+          .phy_addr = 7
     };
     cfn_hal_eth_config_t read_config{};
 
     EXPECT_EQ(cfn_hal_eth_config_set(&driver, &config), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_eth_config_get(&driver, &read_config), CFN_HAL_ERROR_OK);
     EXPECT_EQ(read_config.mac_addr[0], 0xDE);
+    EXPECT_EQ(read_config.phy_addr, 7);
 }
 
 TEST_F(EthTest, CallbackRegister)
@@ -130,9 +132,9 @@ TEST_F(EthTest, StartStopSuccess)
 
 TEST_F(EthTest, TransmitReceiveSuccess)
 {
-    api.transmit_frame = [](cfn_hal_eth_t *d, const uint8_t *f, size_t l) -> cfn_hal_error_code_t
+    api.transmit_frame = [](cfn_hal_eth_t *d, const uint8_t *f, size_t l, uint32_t t) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
-    api.receive_frame = [](cfn_hal_eth_t *d, uint8_t *b, size_t m, size_t *r) -> cfn_hal_error_code_t
+    api.receive_frame = [](cfn_hal_eth_t *d, uint8_t *b, size_t m, size_t *r, uint32_t t) -> cfn_hal_error_code_t
     {
         *r = 64;
         return CFN_HAL_ERROR_OK;
@@ -140,36 +142,36 @@ TEST_F(EthTest, TransmitReceiveSuccess)
 
     uint8_t frame[64] = { 0 };
     size_t  rx_len    = 0;
-    EXPECT_EQ(cfn_hal_eth_transmit_frame(&driver, frame, 64), CFN_HAL_ERROR_OK);
-    EXPECT_EQ(cfn_hal_eth_receive_frame(&driver, frame, 64, &rx_len), CFN_HAL_ERROR_OK);
+    EXPECT_EQ(cfn_hal_eth_transmit_frame(&driver, frame, 64, 100), CFN_HAL_ERROR_OK);
+    EXPECT_EQ(cfn_hal_eth_receive_frame(&driver, frame, 64, &rx_len, 100), CFN_HAL_ERROR_OK);
     EXPECT_EQ(rx_len, 64);
 }
 
 TEST_F(EthTest, PhyRegSuccess)
 {
-    api.read_phy_reg = [](cfn_hal_eth_t *d, uint16_t pa, uint16_t ra, uint16_t *v) -> cfn_hal_error_code_t
+    api.read_phy_reg = [](cfn_hal_eth_t *d, uint16_t pa, uint16_t ra, uint16_t *v, uint32_t t) -> cfn_hal_error_code_t
     {
         *v = 0x1234;
         return CFN_HAL_ERROR_OK;
     };
-    api.write_phy_reg = [](cfn_hal_eth_t *d, uint16_t pa, uint16_t ra, uint16_t v) -> cfn_hal_error_code_t
+    api.write_phy_reg = [](cfn_hal_eth_t *d, uint16_t pa, uint16_t ra, uint16_t v, uint32_t t) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
 
     uint16_t val = 0;
-    EXPECT_EQ(cfn_hal_eth_read_phy_reg(&driver, 0, 0, &val), CFN_HAL_ERROR_OK);
+    EXPECT_EQ(cfn_hal_eth_read_phy_reg(&driver, 0, 0, &val, 100), CFN_HAL_ERROR_OK);
     EXPECT_EQ(val, 0x1234);
-    EXPECT_EQ(cfn_hal_eth_write_phy_reg(&driver, 0, 0, 0x1234), CFN_HAL_ERROR_OK);
+    EXPECT_EQ(cfn_hal_eth_write_phy_reg(&driver, 0, 0, 0x1234, 100), CFN_HAL_ERROR_OK);
 }
 
 TEST_F(EthTest, LinkStatusSuccess)
 {
-    api.get_link_status = [](cfn_hal_eth_t *d, cfn_hal_eth_link_status_t *s) -> cfn_hal_error_code_t
+    api.get_link_status = [](cfn_hal_eth_t *d, cfn_hal_eth_link_status_t *s, uint32_t t) -> cfn_hal_error_code_t
     {
         s->is_up = true;
         return CFN_HAL_ERROR_OK;
     };
     cfn_hal_eth_link_status_t status{};
-    EXPECT_EQ(cfn_hal_eth_get_link_status(&driver, &status), CFN_HAL_ERROR_OK);
+    EXPECT_EQ(cfn_hal_eth_get_link_status(&driver, &status, 100), CFN_HAL_ERROR_OK);
     EXPECT_TRUE(status.is_up);
 }
 

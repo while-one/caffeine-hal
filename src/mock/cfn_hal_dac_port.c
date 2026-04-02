@@ -26,9 +26,53 @@
 #include "cfn_hal_dac.h"
 #include "cfn_hal_dac_port.h"
 
-static cfn_hal_error_code_t port_base_event_get(cfn_hal_driver_t *base, uint32_t *event_mask) { CFN_HAL_UNUSED(base); if (event_mask) { *event_mask = 0; } return CFN_HAL_ERROR_OK; }
+static cfn_hal_error_code_t port_base_event_get(cfn_hal_driver_t *base, uint32_t *event_mask)
+{
+    CFN_HAL_UNUSED(base);
+    if (event_mask)
+    {
+        *event_mask = 0;
+    }
+    return CFN_HAL_ERROR_OK;
+}
 
-static cfn_hal_error_code_t port_base_error_get(cfn_hal_driver_t *base, uint32_t *error_mask) { CFN_HAL_UNUSED(base); if (error_mask) { *error_mask = 0; } return CFN_HAL_ERROR_OK; }
+static cfn_hal_error_code_t port_base_error_get(cfn_hal_driver_t *base, uint32_t *error_mask)
+{
+    CFN_HAL_UNUSED(base);
+    if (error_mask)
+    {
+        *error_mask = 0;
+    }
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t port_dac_set_value(cfn_hal_dac_t *driver, uint32_t value, uint32_t timeout)
+{
+    CFN_HAL_UNUSED(driver);
+    CFN_HAL_UNUSED(value);
+    CFN_HAL_UNUSED(timeout);
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t port_dac_start(cfn_hal_dac_t *driver)
+{
+    CFN_HAL_UNUSED(driver);
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t port_dac_stop(cfn_hal_dac_t *driver)
+{
+    CFN_HAL_UNUSED(driver);
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t port_dac_write_dma(cfn_hal_dac_t *driver, const uint32_t *data, size_t nbr_of_samples)
+{
+    CFN_HAL_UNUSED(driver);
+    CFN_HAL_UNUSED(data);
+    CFN_HAL_UNUSED(nbr_of_samples);
+    return CFN_HAL_ERROR_OK;
+}
 
 static const cfn_hal_dac_api_t dac_api = {
     .base = {
@@ -44,10 +88,10 @@ static const cfn_hal_dac_api_t dac_api = {
         .error_disable = NULL,
         .error_get = port_base_error_get,
     },
-    .set_value = NULL,
-    .start = NULL,
-    .stop = NULL,
-    .write_dma = NULL
+    .set_value = port_dac_set_value,
+    .start = port_dac_start,
+    .stop = port_dac_stop,
+    .write_dma = port_dac_write_dma
 };
 
 cfn_hal_error_code_t cfn_hal_dac_construct(cfn_hal_dac_t              *driver,

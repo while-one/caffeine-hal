@@ -26,9 +26,69 @@
 #include "cfn_hal_nvm.h"
 #include "cfn_hal_nvm_port.h"
 
-static cfn_hal_error_code_t port_base_event_get(cfn_hal_driver_t *base, uint32_t *event_mask) { CFN_HAL_UNUSED(base); if (event_mask) { *event_mask = 0; } return CFN_HAL_ERROR_OK; }
+static cfn_hal_error_code_t port_base_event_get(cfn_hal_driver_t *base, uint32_t *event_mask)
+{
+    CFN_HAL_UNUSED(base);
+    if (event_mask)
+    {
+        *event_mask = 0;
+    }
+    return CFN_HAL_ERROR_OK;
+}
 
-static cfn_hal_error_code_t port_base_error_get(cfn_hal_driver_t *base, uint32_t *error_mask) { CFN_HAL_UNUSED(base); if (error_mask) { *error_mask = 0; } return CFN_HAL_ERROR_OK; }
+static cfn_hal_error_code_t port_base_error_get(cfn_hal_driver_t *base, uint32_t *error_mask)
+{
+    CFN_HAL_UNUSED(base);
+    if (error_mask)
+    {
+        *error_mask = 0;
+    }
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t port_nvm_read(cfn_hal_nvm_t *driver, uint32_t addr, uint8_t *buffer, size_t size, uint32_t timeout)
+{
+    CFN_HAL_UNUSED(driver);
+    CFN_HAL_UNUSED(addr);
+    CFN_HAL_UNUSED(buffer);
+    CFN_HAL_UNUSED(size);
+    CFN_HAL_UNUSED(timeout);
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t
+port_nvm_write(cfn_hal_nvm_t *driver, uint32_t addr, const uint8_t *data, size_t size, uint32_t timeout)
+{
+    CFN_HAL_UNUSED(driver);
+    CFN_HAL_UNUSED(addr);
+    CFN_HAL_UNUSED(data);
+    CFN_HAL_UNUSED(size);
+    CFN_HAL_UNUSED(timeout);
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t port_nvm_erase_sector(cfn_hal_nvm_t *driver, uint32_t sector_addr, uint32_t timeout)
+{
+    CFN_HAL_UNUSED(driver);
+    CFN_HAL_UNUSED(sector_addr);
+    CFN_HAL_UNUSED(timeout);
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t port_nvm_erase_chip(cfn_hal_nvm_t *driver, uint32_t timeout)
+{
+    CFN_HAL_UNUSED(driver);
+    CFN_HAL_UNUSED(timeout);
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t port_nvm_get_info(cfn_hal_nvm_t *driver, uint32_t addr, cfn_hal_nvm_info_t *info)
+{
+    CFN_HAL_UNUSED(driver);
+    CFN_HAL_UNUSED(addr);
+    CFN_HAL_UNUSED(info);
+    return CFN_HAL_ERROR_OK;
+}
 
 static const cfn_hal_nvm_api_t nvm_api = {
     .base = {
@@ -44,11 +104,11 @@ static const cfn_hal_nvm_api_t nvm_api = {
         .error_disable = NULL,
         .error_get = port_base_error_get,
     },
-    .read = NULL,
-    .write = NULL,
-    .erase_sector = NULL,
-    .erase_chip = NULL,
-    .get_info = NULL
+    .read = port_nvm_read,
+    .write = port_nvm_write,
+    .erase_sector = port_nvm_erase_sector,
+    .erase_chip = port_nvm_erase_chip,
+    .get_info = port_nvm_get_info
 };
 
 cfn_hal_error_code_t cfn_hal_nvm_construct(cfn_hal_nvm_t              *driver,

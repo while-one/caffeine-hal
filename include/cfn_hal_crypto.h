@@ -116,10 +116,12 @@ struct cfn_hal_crypto_api_s
     cfn_hal_api_base_t base;
 
     /* Crypto Specific Extensions */
-    cfn_hal_error_code_t (*encrypt)(cfn_hal_crypto_t *driver, const uint8_t *in, uint8_t *out, size_t size);
-    cfn_hal_error_code_t (*decrypt)(cfn_hal_crypto_t *driver, const uint8_t *in, uint8_t *out, size_t size);
+    cfn_hal_error_code_t (*encrypt)(
+        cfn_hal_crypto_t *driver, const uint8_t *in, uint8_t *out, size_t size, uint32_t timeout);
+    cfn_hal_error_code_t (*decrypt)(
+        cfn_hal_crypto_t *driver, const uint8_t *in, uint8_t *out, size_t size, uint32_t timeout);
     cfn_hal_error_code_t (*hash_update)(cfn_hal_crypto_t *driver, const uint8_t *data, size_t size);
-    cfn_hal_error_code_t (*hash_finish)(cfn_hal_crypto_t *driver, uint8_t *hash);
+    cfn_hal_error_code_t (*hash_finish)(cfn_hal_crypto_t *driver, uint8_t *hash, uint32_t timeout);
     cfn_hal_error_code_t (*generate_random)(cfn_hal_crypto_t *driver, uint8_t *buffer, size_t size);
     cfn_hal_error_code_t (*set_key)(cfn_hal_crypto_t *driver, const uint8_t *key, size_t key_size);
 };
@@ -378,15 +380,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_error_get(cfn_hal_crypto_t *d
  * @param in Pointer to the plaintext data.
  * @param out Pointer to the buffer where ciphertext will be stored.
  * @param size Number of bytes to encrypt.
+ * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_encrypt(cfn_hal_crypto_t *driver,
-                                                           const uint8_t    *in,
-                                                           uint8_t          *out,
-                                                           size_t            size)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_crypto_encrypt(cfn_hal_crypto_t *driver, const uint8_t *in, uint8_t *out, size_t size, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, encrypt, driver, error, in, out, size);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, encrypt, driver, error, in, out, size, timeout);
     return error;
 }
 
@@ -396,15 +397,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_encrypt(cfn_hal_crypto_t *dri
  * @param in Pointer to the ciphertext data.
  * @param out Pointer to the buffer where plaintext will be stored.
  * @param size Number of bytes to decrypt.
+ * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_decrypt(cfn_hal_crypto_t *driver,
-                                                           const uint8_t    *in,
-                                                           uint8_t          *out,
-                                                           size_t            size)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_crypto_decrypt(cfn_hal_crypto_t *driver, const uint8_t *in, uint8_t *out, size_t size, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, decrypt, driver, error, in, out, size);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, decrypt, driver, error, in, out, size, timeout);
     return error;
 }
 
@@ -428,12 +428,15 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_hash_update(cfn_hal_crypto_t 
  * @brief Finalizes the hash calculation and retrieves the digest.
  * @param driver Pointer to the Crypto driver instance.
  * @param hash [out] Pointer to the buffer where the digest will be stored.
+ * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_hash_finish(cfn_hal_crypto_t *driver, uint8_t *hash)
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_hash_finish(cfn_hal_crypto_t *driver,
+                                                               uint8_t          *hash,
+                                                               uint32_t          timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, hash_finish, driver, error, hash);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, hash_finish, driver, error, hash, timeout);
     return error;
 }
 
