@@ -12,6 +12,12 @@
     {
       "name": "unit-tests-gtest",
       "inherits": "base-unit-tests-gtest"
+    },
+    {
+      "name": "ci-all-sources",
+      "displayName": "Universe CI Target (All Sources)",
+      "inherits": "base-common",
+      "binaryDir": "${sourceDir}/build/ci-all-sources"
     }
   ],
   "testPresets": [

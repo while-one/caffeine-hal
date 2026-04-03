@@ -16,6 +16,7 @@ project(
 include(GNUInstallDirs)
 
 include(${PROJECT_SOURCE_DIR}/caffeine-build/cmake/CaffeineMacros.cmake)
+cfn_add_universe_targets()
 
 MESSAGE(STATUS "Target CAFFEINE_BUILD_STAGE: ${CAFFEINE_BUILD_STAGE}")
 
@@ -149,10 +150,10 @@ if(TARGET ${PROJECT_NAME}-analyze)
     add_dependencies(${PROJECT_NAME}-analyze ${PROJECT_NAME}-compliance)
 endif()
 
-# 5. Doxygen Documentation
+# 6. Doxygen Documentation
 cfn_add_docs(
     ${PROJECT_NAME}-docs
-    ${PROJECT_SOURCE_DIR}/include
+    INPUTS ${CFN_UNIVERSE_SOURCES} ${PROJECT_SOURCE_DIR}/README.md
     COMMENT "Generating API documentation with Doxygen"
 )
 
