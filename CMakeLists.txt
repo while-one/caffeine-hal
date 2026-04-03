@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.23)
 # Information about the project
 project(
         caffeine-hal
-        VERSION 0.5.5
+        VERSION 0.5.4
         LANGUAGES C
         DESCRIPTION "A Header-Defined Interface c library, it provides the hal layer for the Caffeine framework"
         HOMEPAGE_URL "https://github.com/while-one/caffeine-hal"
@@ -131,7 +131,6 @@ set(ALL_ANALYSIS_SOURCES ${ALL_UNIVERSE_SOURCES})
 cfn_add_code_quality_targets(
     ${PROJECT_NAME}
     HEADERS_ONLY
-    FORMAT_SOURCES ${ALL_UNIVERSE_SOURCES}
     ANALYSIS_SOURCES ${ALL_HEADERS}
     CPPCHECK_ARGS -I ${PROJECT_SOURCE_DIR}/include
     TIDY_ARGS -I${PROJECT_SOURCE_DIR}/include
