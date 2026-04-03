@@ -158,7 +158,8 @@ endif()
 # 6. Doxygen Documentation
 cfn_add_docs(
     ${PROJECT_NAME}-docs
-    INPUTS ${CFN_UNIVERSE_SOURCES} ${PROJECT_SOURCE_DIR}/README.md
+    INPUTS ${ALL_UNIVERSE_SOURCES} ${PROJECT_SOURCE_DIR}/README.md
+    EXCLUDE_PATTERNS "*/tests/*" "*/test/*"
     COMMENT "Generating API documentation with Doxygen"
 )
 
