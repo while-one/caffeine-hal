@@ -15,7 +15,15 @@ project(
 # This provides some important cross-platform paths to be used later during install
 include(GNUInstallDirs)
 
+# 3. Code Quality (Formatting & Analysis)
+# Define the absolute universe of sources for this repository
+file(GLOB_RECURSE UNIVERSE_HEADERS "${PROJECT_SOURCE_DIR}/include/*.h")
+file(GLOB_RECURSE UNIVERSE_MOCKS "${PROJECT_SOURCE_DIR}/src/mock/*.c" "${PROJECT_SOURCE_DIR}/src/mock/*.h")
+file(GLOB_RECURSE UNIVERSE_TESTS "${PROJECT_SOURCE_DIR}/tests/*.cpp" "${PROJECT_SOURCE_DIR}/tests/*.c" "${PROJECT_SOURCE_DIR}/tests/*.h")
+set(ALL_UNIVERSE_SOURCES ${UNIVERSE_HEADERS} ${UNIVERSE_MOCKS} ${UNIVERSE_TESTS})
+
 include(${PROJECT_SOURCE_DIR}/caffeine-build/cmake/CaffeineMacros.cmake)
+cfn_add_universe_targets(INPUTS ${ALL_UNIVERSE_SOURCES})
 
 MESSAGE(STATUS "Target CAFFEINE_BUILD_STAGE: ${CAFFEINE_BUILD_STAGE}")
 
@@ -117,14 +125,13 @@ install(
 # ==============================================================================
 
 # Gather sources for formatting and analysis
-set(ALL_HEADERS ${PROJECT_ALL_HEADERS})
-file(GLOB TEST_SOURCES "${PROJECT_SOURCE_DIR}/tests/*.cpp")
-set(ALL_ANALYSIS_SOURCES ${ALL_HEADERS} ${TEST_SOURCES})
+set(ALL_HEADERS ${UNIVERSE_HEADERS})
+set(ALL_ANALYSIS_SOURCES ${ALL_UNIVERSE_SOURCES})
 
 cfn_add_code_quality_targets(
     ${PROJECT_NAME}
     HEADERS_ONLY
-    FORMAT_SOURCES ${ALL_ANALYSIS_SOURCES}
+    FORMAT_SOURCES ${ALL_UNIVERSE_SOURCES}
     ANALYSIS_SOURCES ${ALL_HEADERS}
     CPPCHECK_ARGS -I ${PROJECT_SOURCE_DIR}/include
     TIDY_ARGS -I${PROJECT_SOURCE_DIR}/include
@@ -149,10 +156,10 @@ if(TARGET ${PROJECT_NAME}-analyze)
     add_dependencies(${PROJECT_NAME}-analyze ${PROJECT_NAME}-compliance)
 endif()
 
-# 5. Doxygen Documentation
+# 6. Doxygen Documentation
 cfn_add_docs(
     ${PROJECT_NAME}-docs
-    ${PROJECT_SOURCE_DIR}/include
+    INPUTS ${CFN_UNIVERSE_SOURCES} ${PROJECT_SOURCE_DIR}/README.md
     COMMENT "Generating API documentation with Doxygen"
 )
 

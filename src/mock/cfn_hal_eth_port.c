@@ -58,7 +58,8 @@ static cfn_hal_error_code_t port_eth_stop(cfn_hal_eth_t *driver)
     return CFN_HAL_ERROR_OK;
 }
 
-static cfn_hal_error_code_t port_eth_transmit_frame(cfn_hal_eth_t *driver, const uint8_t *frame, size_t length, uint32_t timeout)
+static cfn_hal_error_code_t
+port_eth_transmit_frame(cfn_hal_eth_t *driver, const uint8_t *frame, size_t length, uint32_t timeout)
 {
     CFN_HAL_UNUSED(driver);
     CFN_HAL_UNUSED(frame);
@@ -67,11 +68,8 @@ static cfn_hal_error_code_t port_eth_transmit_frame(cfn_hal_eth_t *driver, const
     return CFN_HAL_ERROR_OK;
 }
 
-static cfn_hal_error_code_t port_eth_receive_frame(cfn_hal_eth_t *driver,
-                                                   uint8_t       *buffer,
-                                                   size_t         max_length,
-                                                   size_t        *received_length,
-                                                   uint32_t       timeout)
+static cfn_hal_error_code_t port_eth_receive_frame(
+    cfn_hal_eth_t *driver, uint8_t *buffer, size_t max_length, size_t *received_length, uint32_t timeout)
 {
     CFN_HAL_UNUSED(driver);
     CFN_HAL_UNUSED(buffer);
@@ -103,7 +101,8 @@ port_eth_write_phy_reg(cfn_hal_eth_t *driver, uint16_t phy_addr, uint16_t reg_ad
     return CFN_HAL_ERROR_OK;
 }
 
-static cfn_hal_error_code_t port_eth_get_link_status(cfn_hal_eth_t *driver, cfn_hal_eth_link_status_t *status, uint32_t timeout)
+static cfn_hal_error_code_t
+port_eth_get_link_status(cfn_hal_eth_t *driver, cfn_hal_eth_link_status_t *status, uint32_t timeout)
 {
     CFN_HAL_UNUSED(driver);
     CFN_HAL_UNUSED(status);
@@ -141,14 +140,20 @@ cfn_hal_error_code_t cfn_hal_eth_construct(cfn_hal_eth_t              *driver,
                                            cfn_hal_eth_callback_t      callback,
                                            void                       *user_arg)
 {
-    if ((driver == NULL) || (phy == NULL)) { return CFN_HAL_ERROR_BAD_PARAM; }
+    if ((driver == NULL) || (phy == NULL))
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
     cfn_hal_eth_populate(driver, 0, clock, &eth_api, phy, config, callback, user_arg);
     return CFN_HAL_ERROR_OK;
 }
 
 cfn_hal_error_code_t cfn_hal_eth_destruct(cfn_hal_eth_t *driver)
 {
-    if (driver == NULL) { return CFN_HAL_ERROR_BAD_PARAM; }
+    if (driver == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
     cfn_hal_eth_populate(driver, 0, NULL, NULL, NULL, NULL, NULL, NULL);
     return CFN_HAL_ERROR_OK;
 }

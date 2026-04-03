@@ -37,10 +37,11 @@ Copyright (c) 2026 Hisham Moussa Daou <https://whileone.me>
 
 ### Key Features
 *   **Zero-Copy & Header-Only:** Designed as a CMake `INTERFACE` library for easy integration.
+*   **Universe Standard:** Uses the `ci-all-sources` preset for global formatting and documentation, ensuring every peripheral interface is consistently validated.
 *   **Mock Library Support:** Provides a standalone `caffeine::hal-mock` STATIC library for native host testing of upper layers (SAL, Apps) without hardware dependencies. Automatically enabled via the global `CFN_BUILD_TESTS` flag.
 *   **Modular Base Driver:** All peripherals inherit from a common base (`cfn_hal_base.h`), ensuring a consistent lifecycle.
 *   **Thread-Safe by Design:** Optimized locking strategy using `CFN_HAL_WITH_LOCK` for clean multi-threaded RTOS environments.
-*   **Pragmatic Static Analysis:** Pre-configured for `clang-format`, `clang-tidy`, and `cppcheck` (BARR-C 2018 / Allman style).
+*   **Pragmatic Static Analysis:** Pre-configured for `clang-format`, `clang-tidy`, and `cppcheck` (Allman style).
 
 ---
 
@@ -102,6 +103,15 @@ Use the framework's centralized scripts for orchestration:
 # Perform a clean build
 ./caffeine-build/scripts/build.sh --clean unit-tests-gtest
 ```
+
+---
+
+## Directory Structure
+
+- `caffeine-build/`: Submodule containing centralized build presets, toolchains, scripts, and hardware target definitions.
+- `include/`: Foundational hardware abstraction headers and polymorphic VMT definitions.
+- `src/mock/`: Stubs and bridges for the `caffeine::hal-mock` library.
+- `tests/`: GTest suite for validating framework logic on host.
 
 ---
 

@@ -129,14 +129,20 @@ cfn_hal_error_code_t cfn_hal_crypto_construct(cfn_hal_crypto_t              *dri
                                               cfn_hal_crypto_callback_t      callback,
                                               void                          *user_arg)
 {
-    if ((driver == NULL) || (phy == NULL)) { return CFN_HAL_ERROR_BAD_PARAM; }
+    if ((driver == NULL) || (phy == NULL))
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
     cfn_hal_crypto_populate(driver, 0, clock, &crypto_api, phy, config, callback, user_arg);
     return CFN_HAL_ERROR_OK;
 }
 
 cfn_hal_error_code_t cfn_hal_crypto_destruct(cfn_hal_crypto_t *driver)
 {
-    if (driver == NULL) { return CFN_HAL_ERROR_BAD_PARAM; }
+    if (driver == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
     cfn_hal_crypto_populate(driver, 0, NULL, NULL, NULL, NULL, NULL, NULL);
     return CFN_HAL_ERROR_OK;
 }
