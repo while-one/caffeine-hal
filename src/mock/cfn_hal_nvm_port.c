@@ -46,7 +46,8 @@ static cfn_hal_error_code_t port_base_error_get(cfn_hal_driver_t *base, uint32_t
     return CFN_HAL_ERROR_OK;
 }
 
-static cfn_hal_error_code_t port_nvm_read(cfn_hal_nvm_t *driver, uint32_t addr, uint8_t *buffer, size_t size, uint32_t timeout)
+static cfn_hal_error_code_t
+port_nvm_read(cfn_hal_nvm_t *driver, uint32_t addr, uint8_t *buffer, size_t size, uint32_t timeout)
 {
     CFN_HAL_UNUSED(driver);
     CFN_HAL_UNUSED(addr);
@@ -118,14 +119,20 @@ cfn_hal_error_code_t cfn_hal_nvm_construct(cfn_hal_nvm_t              *driver,
                                            cfn_hal_nvm_callback_t      callback,
                                            void                       *user_arg)
 {
-    if ((driver == NULL) || (phy == NULL)) { return CFN_HAL_ERROR_BAD_PARAM; }
+    if ((driver == NULL) || (phy == NULL))
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
     cfn_hal_nvm_populate(driver, 0, clock, &nvm_api, phy, config, callback, user_arg);
     return CFN_HAL_ERROR_OK;
 }
 
 cfn_hal_error_code_t cfn_hal_nvm_destruct(cfn_hal_nvm_t *driver)
 {
-    if (driver == NULL) { return CFN_HAL_ERROR_BAD_PARAM; }
+    if (driver == NULL)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
     cfn_hal_nvm_populate(driver, 0, NULL, NULL, NULL, NULL, NULL, NULL);
     return CFN_HAL_ERROR_OK;
 }
