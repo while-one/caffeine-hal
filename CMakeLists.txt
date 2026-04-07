@@ -140,26 +140,29 @@ cfn_add_code_quality_targets(
 # 4. C11 Compliance Check
 # This target compiles a minimal C file that includes all HAL headers
 # using strict C11 flags to ensure no non-standard extensions are used.
-add_executable(${PROJECT_NAME}-compliance ${PROJECT_SOURCE_DIR}/tests/compliance.c)
-target_link_libraries(${PROJECT_NAME}-compliance PRIVATE ${PROJECT_NAME})
-target_compile_options(${PROJECT_NAME}-compliance PRIVATE
-    -std=c11
-    -pedantic-errors
-    -Wall
-    -Wextra
-    -Werror
-)
-set_target_properties(${PROJECT_NAME}-compliance PROPERTIES EXCLUDE_FROM_ALL ON)
+if(NOT CMAKE_CROSSCOMPILING)
+    add_executable(${PROJECT_NAME}-compliance ${PROJECT_SOURCE_DIR}/tests/compliance.c)
+    target_link_libraries(${PROJECT_NAME}-compliance PRIVATE ${PROJECT_NAME})
+    target_compile_options(${PROJECT_NAME}-compliance PRIVATE
+        -std=c11
+        -pedantic-errors
+        -Wall
+        -Wextra
+        -Werror
+    )
+    set_target_properties(${PROJECT_NAME}-compliance PROPERTIES EXCLUDE_FROM_ALL ON)
 
-if(TARGET ${PROJECT_NAME}-analyze)
-    add_dependencies(${PROJECT_NAME}-analyze ${PROJECT_NAME}-compliance)
+    if(TARGET ${PROJECT_NAME}-analyze)
+        add_dependencies(${PROJECT_NAME}-analyze ${PROJECT_NAME}-compliance)
+    endif()
 endif()
 
 # 6. Doxygen Documentation
+set(ALL_UNIVERSE_SOURCES_NO_TESTS ${ALL_UNIVERSE_SOURCES})
+list(FILTER ALL_UNIVERSE_SOURCES_NO_TESTS EXCLUDE REGEX ".*/tests/.*")
 cfn_add_docs(
     ${PROJECT_NAME}-docs
-    INPUTS ${ALL_UNIVERSE_SOURCES} ${PROJECT_SOURCE_DIR}/README.md
-    EXCLUDE_PATTERNS "*/tests/*" "*/test/*"
+    INPUTS ${ALL_UNIVERSE_SOURCES_NO_TESTS} ${PROJECT_SOURCE_DIR}/README.md
     COMMENT "Generating API documentation with Doxygen"
 )
 

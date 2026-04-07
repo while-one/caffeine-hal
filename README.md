@@ -115,6 +115,16 @@ Use the framework's centralized scripts for orchestration:
 
 ---
 
+## Documentation
+
+The API reference for this repository is generated automatically via Doxygen and hosted on GitHub Pages.
+
+📚 **[View the Caffeine-HAL API Documentation](https://while-one.github.io/caffeine-hal)**
+
+---
+
+---
+
 ## The Caffeine Framework Layers
 
 1.  **Generic Interface (`caffeine-hal`):** This repository. Definitions of the HAL and Virtual Method Tables (VMTs).
