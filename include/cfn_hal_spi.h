@@ -127,6 +127,16 @@ typedef struct
 } cfn_hal_spi_transaction_t;
 
 typedef struct cfn_hal_spi_s     cfn_hal_spi_t;
+
+/**
+ * @brief SPI Device addressing association.
+ */
+typedef struct
+{
+    cfn_hal_spi_t             *spi;    /*!< Pointer to the underlying SPI driver */
+    cfn_hal_gpio_pin_handle_t *cs_pin; /*!< Chip Select pin handle */
+} cfn_hal_spi_device_t;
+
 typedef struct cfn_hal_spi_api_s cfn_hal_spi_api_t;
 
 /**

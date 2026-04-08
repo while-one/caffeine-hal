@@ -77,6 +77,7 @@ typedef enum cfn_hal_error_codes
     CFN_HAL_ERROR_MEMORY_ALLOC,
     CFN_HAL_ERROR_MEMORY_EMPTY,
 
+
     CFN_HAL_ERROR_UNKNOWN
 } cfn_hal_error_code_t;
 

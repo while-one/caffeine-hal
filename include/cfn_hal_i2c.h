@@ -135,6 +135,16 @@ typedef struct
 } cfn_hal_i2c_mem_transaction_t;
 
 typedef struct cfn_hal_i2c_s     cfn_hal_i2c_t;
+
+/**
+ * @brief I2C Device addressing association.
+ */
+typedef struct
+{
+    cfn_hal_i2c_t *i2c;     /*!< Pointer to the underlying I2C driver */
+    uint16_t       address; /*!< 7-bit or 10-bit target address */
+} cfn_hal_i2c_device_t;
+
 typedef struct cfn_hal_i2c_api_s cfn_hal_i2c_api_t;
 
 /**
