@@ -17,10 +17,15 @@ include(GNUInstallDirs)
 
 # 3. Code Quality (Formatting & Analysis)
 # Define the absolute universe of sources for this repository
-file(GLOB_RECURSE UNIVERSE_HEADERS "${PROJECT_SOURCE_DIR}/include/*.h")
-file(GLOB_RECURSE UNIVERSE_MOCKS "${PROJECT_SOURCE_DIR}/src/mock/*.c" "${PROJECT_SOURCE_DIR}/src/mock/*.h")
-file(GLOB_RECURSE UNIVERSE_TESTS "${PROJECT_SOURCE_DIR}/tests/*.cpp" "${PROJECT_SOURCE_DIR}/tests/*.c" "${PROJECT_SOURCE_DIR}/tests/*.h")
-set(ALL_UNIVERSE_SOURCES ${UNIVERSE_HEADERS} ${UNIVERSE_MOCKS} ${UNIVERSE_TESTS})
+# Globbing is encouraged for CI quality gates to ensure 100% coverage
+file(GLOB_RECURSE ALL_UNIVERSE_SOURCES CONFIGURE_DEPENDS
+    "${PROJECT_SOURCE_DIR}/include/*.h"
+    "${PROJECT_SOURCE_DIR}/src/mock/*.c"
+    "${PROJECT_SOURCE_DIR}/src/mock/*.h"
+    "${PROJECT_SOURCE_DIR}/tests/*.cpp"
+    "${PROJECT_SOURCE_DIR}/tests/*.c"
+    "${PROJECT_SOURCE_DIR}/tests/*.h"
+)
 
 include(${PROJECT_SOURCE_DIR}/caffeine-build/cmake/CaffeineMacros.cmake)
 cfn_add_universe_targets(INPUTS ${ALL_UNIVERSE_SOURCES})
@@ -43,8 +48,35 @@ target_compile_definitions(${PROJECT_NAME} INTERFACE CAFFEINE_HAL_VERSION="${PRO
 target_compile_features(${PROJECT_NAME} INTERFACE c_std_11)
 
 # --- Modern Header Management (CMake 3.23+) ---
-# Gather all headers for target definition and tooling
-file(GLOB PROJECT_ALL_HEADERS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/*.h")
+# Actual binary targets MUST explicitly list all headers for determinism
+set(PROJECT_ALL_HEADERS
+    include/cfn_hal.h
+    include/cfn_hal_adc.h
+    include/cfn_hal_base.h
+    include/cfn_hal_base_impl.h
+    include/cfn_hal_can.h
+    include/cfn_hal_clock.h
+    include/cfn_hal_comp.h
+    include/cfn_hal_crypto.h
+    include/cfn_hal_dac.h
+    include/cfn_hal_dma.h
+    include/cfn_hal_eth.h
+    include/cfn_hal_gpio.h
+    include/cfn_hal_i2c.h
+    include/cfn_hal_i2s.h
+    include/cfn_hal_irq.h
+    include/cfn_hal_nvm.h
+    include/cfn_hal_pwm.h
+    include/cfn_hal_qspi.h
+    include/cfn_hal_rtc.h
+    include/cfn_hal_sdio.h
+    include/cfn_hal_spi.h
+    include/cfn_hal_timer.h
+    include/cfn_hal_types.h
+    include/cfn_hal_uart.h
+    include/cfn_hal_usb.h
+    include/cfn_hal_wdt.h
+)
 
 # We use FILE_SET to define public headers. This automatically:
 # 1. Handles include directories for both build and install.
@@ -64,7 +96,31 @@ option(CFN_BUILD_TESTS "Build unit tests" OFF)
 
 if(CFN_BUILD_TESTS)
     # Automatically expose the mock target if tests are enabled anywhere in the workspace
-    file(GLOB MOCK_SOURCES "src/mock/*.c")
+    # Static libraries are binary targets - MUST be explicit
+    set(MOCK_SOURCES
+        src/mock/cfn_hal_adc_port.c
+        src/mock/cfn_hal_can_port.c
+        src/mock/cfn_hal_clock_port.c
+        src/mock/cfn_hal_comp_port.c
+        src/mock/cfn_hal_crypto_port.c
+        src/mock/cfn_hal_dac_port.c
+        src/mock/cfn_hal_dma_port.c
+        src/mock/cfn_hal_eth_port.c
+        src/mock/cfn_hal_gpio_port.c
+        src/mock/cfn_hal_i2c_port.c
+        src/mock/cfn_hal_i2s_port.c
+        src/mock/cfn_hal_irq_port.c
+        src/mock/cfn_hal_nvm_port.c
+        src/mock/cfn_hal_pwm_port.c
+        src/mock/cfn_hal_qspi_port.c
+        src/mock/cfn_hal_rtc_port.c
+        src/mock/cfn_hal_sdio_port.c
+        src/mock/cfn_hal_spi_port.c
+        src/mock/cfn_hal_timer_port.c
+        src/mock/cfn_hal_uart_port.c
+        src/mock/cfn_hal_usb_port.c
+        src/mock/cfn_hal_wdt_port.c
+    )
     if(MOCK_SOURCES)
         add_library(caffeine-hal-mock STATIC ${MOCK_SOURCES})
         target_link_libraries(caffeine-hal-mock PUBLIC ${PROJECT_NAME})
@@ -124,14 +180,17 @@ install(
 # Tooling: Formatting & Analysis
 # ==============================================================================
 
-# Gather sources for formatting and analysis
-set(ALL_HEADERS ${UNIVERSE_HEADERS})
-set(ALL_ANALYSIS_SOURCES ${ALL_UNIVERSE_SOURCES})
+# Use globbing for quality gate sources
+file(GLOB_RECURSE ALL_ANALYSIS_SOURCES CONFIGURE_DEPENDS
+    "${PROJECT_SOURCE_DIR}/include/*.h"
+    "${PROJECT_SOURCE_DIR}/src/mock/*.c"
+    "${PROJECT_SOURCE_DIR}/src/mock/*.h"
+)
 
 cfn_add_code_quality_targets(
     ${PROJECT_NAME}
     HEADERS_ONLY
-    ANALYSIS_SOURCES ${ALL_HEADERS}
+    ANALYSIS_SOURCES ${ALL_ANALYSIS_SOURCES}
     CPPCHECK_ARGS -I ${PROJECT_SOURCE_DIR}/include
     TIDY_ARGS -I${PROJECT_SOURCE_DIR}/include
     TIDY_HEADER_FILTER ".*"
@@ -158,6 +217,7 @@ if(NOT CMAKE_CROSSCOMPILING)
 endif()
 
 # 6. Doxygen Documentation
+# Filter out tests from universe for docs
 set(ALL_UNIVERSE_SOURCES_NO_TESTS ${ALL_UNIVERSE_SOURCES})
 list(FILTER ALL_UNIVERSE_SOURCES_NO_TESTS EXCLUDE REGEX ".*/tests/.*")
 cfn_add_docs(
@@ -165,4 +225,3 @@ cfn_add_docs(
     INPUTS ${ALL_UNIVERSE_SOURCES_NO_TESTS} ${PROJECT_SOURCE_DIR}/README.md
     COMMENT "Generating API documentation with Doxygen"
 )
-
