@@ -126,7 +126,7 @@ typedef struct
     cfn_hal_gpio_pin_handle_t *cs;           /*!< Target CS driver mapping if HAL controlled */
 } cfn_hal_spi_transaction_t;
 
-typedef struct cfn_hal_spi_s     cfn_hal_spi_t;
+typedef struct cfn_hal_spi_s cfn_hal_spi_t;
 
 /**
  * @brief SPI Device addressing association.

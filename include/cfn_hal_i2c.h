@@ -134,7 +134,7 @@ typedef struct
     size_t   size;          /*!< Bytes to transfer */
 } cfn_hal_i2c_mem_transaction_t;
 
-typedef struct cfn_hal_i2c_s     cfn_hal_i2c_t;
+typedef struct cfn_hal_i2c_s cfn_hal_i2c_t;
 
 /**
  * @brief I2C Device addressing association.
