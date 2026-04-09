@@ -181,12 +181,8 @@ install(
 # ==============================================================================
 
 # Use globbing for quality gate sources
-file(GLOB_RECURSE ALL_ANALYSIS_SOURCES CONFIGURE_DEPENDS
-    "${PROJECT_SOURCE_DIR}/include/*.h"
-    "${PROJECT_SOURCE_DIR}/src/mock/*.c"
-    "${PROJECT_SOURCE_DIR}/src/mock/*.h"
-)
-
+set(ALL_ANALYSIS_SOURCES ${ALL_UNIVERSE_SOURCES})
+list(FILTER ALL_ANALYSIS_SOURCES EXCLUDE REGEX ".*/tests/.*")
 cfn_add_code_quality_targets(
     ${PROJECT_NAME}
     HEADERS_ONLY

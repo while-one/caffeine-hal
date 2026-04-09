@@ -48,7 +48,7 @@ static cfn_hal_error_code_t port_base_error_get(cfn_hal_driver_t *base, uint32_t
 
 static cfn_hal_error_code_t port_nvm_read(cfn_hal_nvm_t *driver,
                                           uint32_t       addr,
-                                          uint8_t       *buffer,
+                                          uint8_t       *buffer, // NOLINT(readability-non-const-parameter)
                                           size_t         size,
                                           uint32_t       timeout) // NOLINT(readability-non-const-parameter)
 {

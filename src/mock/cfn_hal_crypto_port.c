@@ -48,7 +48,7 @@ static cfn_hal_error_code_t port_base_error_get(cfn_hal_driver_t *base, uint32_t
 
 static cfn_hal_error_code_t port_crypto_encrypt(cfn_hal_crypto_t *driver,
                                                 const uint8_t    *in,
-                                                uint8_t          *out,
+                                                uint8_t          *out, // NOLINT(readability-non-const-parameter)
                                                 size_t            size,
                                                 uint32_t          timeout) // NOLINT(readability-non-const-parameter)
 {
@@ -62,7 +62,7 @@ static cfn_hal_error_code_t port_crypto_encrypt(cfn_hal_crypto_t *driver,
 
 static cfn_hal_error_code_t port_crypto_decrypt(cfn_hal_crypto_t *driver,
                                                 const uint8_t    *in,
-                                                uint8_t          *out,
+                                                uint8_t          *out, // NOLINT(readability-non-const-parameter)
                                                 size_t            size,
                                                 uint32_t          timeout) // NOLINT(readability-non-const-parameter)
 {
@@ -83,8 +83,8 @@ static cfn_hal_error_code_t port_crypto_hash_update(cfn_hal_crypto_t *driver, co
 }
 
 static cfn_hal_error_code_t port_crypto_hash_finish(cfn_hal_crypto_t *driver,
-                                                    uint8_t          *hash,
-                                                    uint32_t timeout) // NOLINT(readability-non-const-parameter)
+                                                    uint8_t          *hash, // NOLINT(readability-non-const-parameter)
+                                                    uint32_t timeout)       // NOLINT(readability-non-const-parameter)
 {
     CFN_HAL_UNUSED(driver);
     CFN_HAL_UNUSED(hash);
@@ -93,8 +93,8 @@ static cfn_hal_error_code_t port_crypto_hash_finish(cfn_hal_crypto_t *driver,
 }
 
 static cfn_hal_error_code_t port_crypto_generate_random(cfn_hal_crypto_t *driver,
-                                                        uint8_t          *buffer,
-                                                        size_t size) // NOLINT(readability-non-const-parameter)
+                                                        uint8_t *buffer, // NOLINT(readability-non-const-parameter)
+                                                        size_t   size)     // NOLINT(readability-non-const-parameter)
 {
     CFN_HAL_UNUSED(driver);
     CFN_HAL_UNUSED(buffer);

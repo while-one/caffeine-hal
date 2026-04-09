@@ -69,10 +69,10 @@ port_eth_transmit_frame(cfn_hal_eth_t *driver, const uint8_t *frame, size_t leng
 }
 
 static cfn_hal_error_code_t port_eth_receive_frame(cfn_hal_eth_t *driver,
-                                                   uint8_t       *buffer,
+                                                   uint8_t       *buffer, // NOLINT(readability-non-const-parameter)
                                                    size_t         max_length,
-                                                   size_t        *received_length,
-                                                   uint32_t       timeout) // NOLINT(readability-non-const-parameter)
+                                                   size_t  *received_length, // NOLINT(readability-non-const-parameter)
+                                                   uint32_t timeout)         // NOLINT(readability-non-const-parameter)
 {
     CFN_HAL_UNUSED(driver);
     CFN_HAL_UNUSED(buffer);
@@ -85,8 +85,8 @@ static cfn_hal_error_code_t port_eth_receive_frame(cfn_hal_eth_t *driver,
 static cfn_hal_error_code_t port_eth_read_phy_reg(cfn_hal_eth_t *driver,
                                                   uint16_t       phy_addr,
                                                   uint16_t       reg_addr,
-                                                  uint16_t      *value,
-                                                  uint32_t       timeout) // NOLINT(readability-non-const-parameter)
+                                                  uint16_t      *value, // NOLINT(readability-non-const-parameter)
+                                                  uint32_t       timeout)     // NOLINT(readability-non-const-parameter)
 {
     CFN_HAL_UNUSED(driver);
     CFN_HAL_UNUSED(phy_addr);

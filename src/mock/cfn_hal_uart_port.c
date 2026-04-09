@@ -47,8 +47,8 @@ static cfn_hal_error_code_t port_base_error_get(cfn_hal_driver_t *base, uint32_t
 }
 
 static cfn_hal_error_code_t port_uart_rx_n_irq(cfn_hal_uart_t *driver,
-                                               uint8_t        *data,
-                                               size_t          nbr_of_bytes) // NOLINT(readability-non-const-parameter)
+                                               uint8_t        *data, // NOLINT(readability-non-const-parameter)
+                                               size_t          nbr_of_bytes)  // NOLINT(readability-non-const-parameter)
 {
     if (driver)
     {
