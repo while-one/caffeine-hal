@@ -99,7 +99,8 @@ typedef void (*cfn_hal_callback_t)(void);
 // Note: This packs in Little-Endian order (a is LSB), ensuring
 // debug readability in memory dumps on Little-Endian systems (e.g., ARM).
 #define CFN_HAL_MAKE_TYPE(a, b, c, d)                                                                                  \
-    (((uint32_t) (a)) | ((uint32_t) (b) << 8) | ((uint32_t) (c) << 16) | ((uint32_t) (d) << 24))
+    (((uint32_t) (uint8_t) (a)) | ((uint32_t) (uint8_t) (b) << 8U) | ((uint32_t) (uint8_t) (c) << 16U) |               \
+     ((uint32_t) (uint8_t) (d) << 24U))
 
 /**
  * @brief Prefix for all HAL-level peripheral types.

@@ -37,15 +37,33 @@ extern "C"
 #include "cfn_hal_base.h"
 
 /* Functions Implementation -----------------------------------------*/
-
-CFN_HAL_BASE_API cfn_hal_error_code_t cfn_hal_base_init(cfn_hal_driver_t         *base,
-                                                        cfn_hal_peripheral_type_t expected_type);
+/**
+ * @brief Standardizes the population of a peripheral driver structure.
+ * This macro ensures that the base driver is populated and that all peripheral-specific
+ * pointers (API, PHY, Config) and callbacks are assigned correctly and consistently.
+ */
+#define CFN_HAL_POPULATE_DRIVER(                                                                                       \
+    driver_ptr, periph_type, periph_id, clock_ptr, dep_ptr, api_ptr, phy_ptr, cfg_ptr, cb_func, cb_arg)                \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        if (driver_ptr)                                                                                                \
+        {                                                                                                              \
+            cfn_hal_base_populate(                                                                                     \
+                &(driver_ptr)->base, (periph_type), (periph_id), &(api_ptr)->base, (clock_ptr), (dep_ptr));            \
+            (driver_ptr)->api         = (api_ptr);                                                                     \
+            (driver_ptr)->phy         = (phy_ptr);                                                                     \
+            (driver_ptr)->config      = (cfg_ptr);                                                                     \
+            (driver_ptr)->cb          = (cb_func);                                                                     \
+            (driver_ptr)->cb_user_arg = (cb_arg);                                                                      \
+        }                                                                                                              \
+    } while (0)
 
 CFN_HAL_INLINE void cfn_hal_base_populate(cfn_hal_driver_t                *base,
                                           cfn_hal_peripheral_type_t        type,
                                           uint32_t                         peripheral_id,
                                           const struct cfn_hal_api_base_s *vmt,
-                                          struct cfn_hal_clock_s          *clock)
+                                          struct cfn_hal_clock_s          *clock,
+                                          void                            *dependency)
 {
     if (!base)
     {
@@ -59,7 +77,7 @@ CFN_HAL_INLINE void cfn_hal_base_populate(cfn_hal_driver_t                *base,
     base->power_state   = CFN_HAL_POWER_STATE_UNKNOWN;
     base->on_config     = NULL;
     base->on_config_arg = NULL;
-    base->dependency    = NULL;
+    base->dependency    = dependency;
     base->extension     = NULL;
     base->flags         = 0;
 }

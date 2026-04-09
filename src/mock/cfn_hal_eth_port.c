@@ -68,8 +68,11 @@ port_eth_transmit_frame(cfn_hal_eth_t *driver, const uint8_t *frame, size_t leng
     return CFN_HAL_ERROR_OK;
 }
 
-static cfn_hal_error_code_t port_eth_receive_frame(
-    cfn_hal_eth_t *driver, uint8_t *buffer, size_t max_length, size_t *received_length, uint32_t timeout)
+static cfn_hal_error_code_t port_eth_receive_frame(cfn_hal_eth_t *driver,
+                                                   uint8_t       *buffer,
+                                                   size_t         max_length,
+                                                   size_t        *received_length,
+                                                   uint32_t       timeout) // NOLINT(readability-non-const-parameter)
 {
     CFN_HAL_UNUSED(driver);
     CFN_HAL_UNUSED(buffer);
@@ -79,8 +82,11 @@ static cfn_hal_error_code_t port_eth_receive_frame(
     return CFN_HAL_ERROR_OK;
 }
 
-static cfn_hal_error_code_t
-port_eth_read_phy_reg(cfn_hal_eth_t *driver, uint16_t phy_addr, uint16_t reg_addr, uint16_t *value, uint32_t timeout)
+static cfn_hal_error_code_t port_eth_read_phy_reg(cfn_hal_eth_t *driver,
+                                                  uint16_t       phy_addr,
+                                                  uint16_t       reg_addr,
+                                                  uint16_t      *value,
+                                                  uint32_t       timeout) // NOLINT(readability-non-const-parameter)
 {
     CFN_HAL_UNUSED(driver);
     CFN_HAL_UNUSED(phy_addr);
@@ -110,7 +116,7 @@ port_eth_get_link_status(cfn_hal_eth_t *driver, cfn_hal_eth_link_status_t *statu
     return CFN_HAL_ERROR_OK;
 }
 
-static const cfn_hal_eth_api_t eth_api = {
+static const cfn_hal_eth_api_t ETH_API = {
     .base = {
         .init = NULL,
         .deinit = NULL,
@@ -137,6 +143,7 @@ cfn_hal_error_code_t cfn_hal_eth_construct(cfn_hal_eth_t              *driver,
                                            const cfn_hal_eth_config_t *config,
                                            const cfn_hal_eth_phy_t    *phy,
                                            struct cfn_hal_clock_s     *clock,
+                                           void                       *dependency,
                                            cfn_hal_eth_callback_t      callback,
                                            void                       *user_arg)
 {
@@ -144,7 +151,7 @@ cfn_hal_error_code_t cfn_hal_eth_construct(cfn_hal_eth_t              *driver,
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    cfn_hal_eth_populate(driver, 0, clock, &eth_api, phy, config, callback, user_arg);
+    cfn_hal_eth_populate(driver, 0, clock, dependency, &ETH_API, phy, config, callback, user_arg);
     return CFN_HAL_ERROR_OK;
 }
 
@@ -154,6 +161,6 @@ cfn_hal_error_code_t cfn_hal_eth_destruct(cfn_hal_eth_t *driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    cfn_hal_eth_populate(driver, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+    cfn_hal_eth_populate(driver, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     return CFN_HAL_ERROR_OK;
 }

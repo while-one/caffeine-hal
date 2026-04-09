@@ -46,8 +46,11 @@ static cfn_hal_error_code_t port_base_error_get(cfn_hal_driver_t *base, uint32_t
     return CFN_HAL_ERROR_OK;
 }
 
-static cfn_hal_error_code_t
-port_crypto_encrypt(cfn_hal_crypto_t *driver, const uint8_t *in, uint8_t *out, size_t size, uint32_t timeout)
+static cfn_hal_error_code_t port_crypto_encrypt(cfn_hal_crypto_t *driver,
+                                                const uint8_t    *in,
+                                                uint8_t          *out,
+                                                size_t            size,
+                                                uint32_t          timeout) // NOLINT(readability-non-const-parameter)
 {
     CFN_HAL_UNUSED(driver);
     CFN_HAL_UNUSED(in);
@@ -57,8 +60,11 @@ port_crypto_encrypt(cfn_hal_crypto_t *driver, const uint8_t *in, uint8_t *out, s
     return CFN_HAL_ERROR_OK;
 }
 
-static cfn_hal_error_code_t
-port_crypto_decrypt(cfn_hal_crypto_t *driver, const uint8_t *in, uint8_t *out, size_t size, uint32_t timeout)
+static cfn_hal_error_code_t port_crypto_decrypt(cfn_hal_crypto_t *driver,
+                                                const uint8_t    *in,
+                                                uint8_t          *out,
+                                                size_t            size,
+                                                uint32_t          timeout) // NOLINT(readability-non-const-parameter)
 {
     CFN_HAL_UNUSED(driver);
     CFN_HAL_UNUSED(in);
@@ -76,7 +82,9 @@ static cfn_hal_error_code_t port_crypto_hash_update(cfn_hal_crypto_t *driver, co
     return CFN_HAL_ERROR_OK;
 }
 
-static cfn_hal_error_code_t port_crypto_hash_finish(cfn_hal_crypto_t *driver, uint8_t *hash, uint32_t timeout)
+static cfn_hal_error_code_t port_crypto_hash_finish(cfn_hal_crypto_t *driver,
+                                                    uint8_t          *hash,
+                                                    uint32_t timeout) // NOLINT(readability-non-const-parameter)
 {
     CFN_HAL_UNUSED(driver);
     CFN_HAL_UNUSED(hash);
@@ -84,7 +92,9 @@ static cfn_hal_error_code_t port_crypto_hash_finish(cfn_hal_crypto_t *driver, ui
     return CFN_HAL_ERROR_OK;
 }
 
-static cfn_hal_error_code_t port_crypto_generate_random(cfn_hal_crypto_t *driver, uint8_t *buffer, size_t size)
+static cfn_hal_error_code_t port_crypto_generate_random(cfn_hal_crypto_t *driver,
+                                                        uint8_t          *buffer,
+                                                        size_t size) // NOLINT(readability-non-const-parameter)
 {
     CFN_HAL_UNUSED(driver);
     CFN_HAL_UNUSED(buffer);
@@ -100,7 +110,7 @@ static cfn_hal_error_code_t port_crypto_set_key(cfn_hal_crypto_t *driver, const 
     return CFN_HAL_ERROR_OK;
 }
 
-static const cfn_hal_crypto_api_t crypto_api = {
+static const cfn_hal_crypto_api_t CRYPTO_API = {
     .base = {
         .init = NULL,
         .deinit = NULL,
@@ -126,6 +136,7 @@ cfn_hal_error_code_t cfn_hal_crypto_construct(cfn_hal_crypto_t              *dri
                                               const cfn_hal_crypto_config_t *config,
                                               const cfn_hal_crypto_phy_t    *phy,
                                               struct cfn_hal_clock_s        *clock,
+                                              void                          *dependency,
                                               cfn_hal_crypto_callback_t      callback,
                                               void                          *user_arg)
 {
@@ -133,7 +144,7 @@ cfn_hal_error_code_t cfn_hal_crypto_construct(cfn_hal_crypto_t              *dri
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    cfn_hal_crypto_populate(driver, 0, clock, &crypto_api, phy, config, callback, user_arg);
+    cfn_hal_crypto_populate(driver, 0, clock, dependency, &CRYPTO_API, phy, config, callback, user_arg);
     return CFN_HAL_ERROR_OK;
 }
 
@@ -143,6 +154,6 @@ cfn_hal_error_code_t cfn_hal_crypto_destruct(cfn_hal_crypto_t *driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    cfn_hal_crypto_populate(driver, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+    cfn_hal_crypto_populate(driver, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     return CFN_HAL_ERROR_OK;
 }

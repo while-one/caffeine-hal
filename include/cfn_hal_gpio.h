@@ -212,21 +212,14 @@ CFN_HAL_CREATE_DRIVER_TYPE(gpio, void, cfn_hal_gpio_api_t, cfn_hal_gpio_phy_t, c
 CFN_HAL_INLINE void cfn_hal_gpio_populate(cfn_hal_gpio_t           *driver,
                                           uint32_t                  peripheral_id,
                                           struct cfn_hal_clock_s   *clock,
+                                          void                     *dependency,
                                           const cfn_hal_gpio_api_t *api,
                                           const cfn_hal_gpio_phy_t *phy,
                                           cfn_hal_gpio_callback_t   callback,
                                           void                     *user_arg)
 {
-    if (!driver)
-    {
-        return;
-    }
-    cfn_hal_base_populate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, peripheral_id, &api->base, clock);
-    driver->api         = api;
-    driver->phy         = phy;
-    driver->config      = NULL;
-    driver->cb          = callback;
-    driver->cb_user_arg = user_arg;
+    CFN_HAL_POPULATE_DRIVER(
+        driver, CFN_HAL_PERIPHERAL_TYPE_GPIO, peripheral_id, clock, dependency, api, phy, NULL, callback, user_arg);
 }
 
 /**
@@ -503,6 +496,7 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_port_write(cfn_hal_gpio_t *port
 cfn_hal_error_code_t cfn_hal_gpio_construct(cfn_hal_gpio_t           *driver,
                                             const cfn_hal_gpio_phy_t *phy,
                                             struct cfn_hal_clock_s   *clock,
+                                            void                     *dependency,
                                             cfn_hal_gpio_callback_t   callback,
                                             void                     *user_arg);
 cfn_hal_error_code_t cfn_hal_gpio_destruct(cfn_hal_gpio_t *driver);
