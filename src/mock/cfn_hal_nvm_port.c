@@ -46,8 +46,11 @@ static cfn_hal_error_code_t port_base_error_get(cfn_hal_driver_t *base, uint32_t
     return CFN_HAL_ERROR_OK;
 }
 
-static cfn_hal_error_code_t
-port_nvm_read(cfn_hal_nvm_t *driver, uint32_t addr, uint8_t *buffer, size_t size, uint32_t timeout)
+static cfn_hal_error_code_t port_nvm_read(cfn_hal_nvm_t *driver,
+                                          uint32_t       addr,
+                                          uint8_t       *buffer, // NOLINT(readability-non-const-parameter)
+                                          size_t         size,
+                                          uint32_t       timeout) // NOLINT(readability-non-const-parameter)
 {
     CFN_HAL_UNUSED(driver);
     CFN_HAL_UNUSED(addr);
@@ -91,7 +94,7 @@ static cfn_hal_error_code_t port_nvm_get_info(cfn_hal_nvm_t *driver, uint32_t ad
     return CFN_HAL_ERROR_OK;
 }
 
-static const cfn_hal_nvm_api_t nvm_api = {
+static const cfn_hal_nvm_api_t NVM_API = {
     .base = {
         .init = NULL,
         .deinit = NULL,
@@ -116,6 +119,7 @@ cfn_hal_error_code_t cfn_hal_nvm_construct(cfn_hal_nvm_t              *driver,
                                            const cfn_hal_nvm_config_t *config,
                                            const cfn_hal_nvm_phy_t    *phy,
                                            struct cfn_hal_clock_s     *clock,
+                                           void                       *dependency,
                                            cfn_hal_nvm_callback_t      callback,
                                            void                       *user_arg)
 {
@@ -123,7 +127,7 @@ cfn_hal_error_code_t cfn_hal_nvm_construct(cfn_hal_nvm_t              *driver,
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    cfn_hal_nvm_populate(driver, 0, clock, &nvm_api, phy, config, callback, user_arg);
+    cfn_hal_nvm_populate(driver, 0, clock, dependency, &NVM_API, phy, config, callback, user_arg);
     return CFN_HAL_ERROR_OK;
 }
 
@@ -133,6 +137,6 @@ cfn_hal_error_code_t cfn_hal_nvm_destruct(cfn_hal_nvm_t *driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    cfn_hal_nvm_populate(driver, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+    cfn_hal_nvm_populate(driver, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     return CFN_HAL_ERROR_OK;
 }

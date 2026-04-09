@@ -14,6 +14,10 @@
       "inherits": "base-unit-tests-gtest"
     },
     {
+      "name": "compliance",
+      "inherits": "base-compliance"
+    },
+    {
       "name": "universe-all-sources",
       "displayName": "Universe Target (All Sources)",
       "inherits": "base-common",

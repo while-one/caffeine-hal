@@ -46,7 +46,7 @@ static cfn_hal_error_code_t port_base_error_get(cfn_hal_driver_t *base, uint32_t
     return CFN_HAL_ERROR_OK;
 }
 
-static const cfn_hal_usb_api_t usb_api = {
+static const cfn_hal_usb_api_t USB_API = {
     .base = {
         .init = NULL,
         .deinit = NULL,
@@ -73,6 +73,7 @@ cfn_hal_error_code_t cfn_hal_usb_construct(cfn_hal_usb_t              *driver,
                                            const cfn_hal_usb_config_t *config,
                                            const cfn_hal_usb_phy_t    *phy,
                                            struct cfn_hal_clock_s     *clock,
+                                           void                       *dependency,
                                            cfn_hal_usb_callback_t      callback,
                                            void                       *user_arg)
 {
@@ -80,7 +81,7 @@ cfn_hal_error_code_t cfn_hal_usb_construct(cfn_hal_usb_t              *driver,
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    cfn_hal_usb_populate(driver, 0, clock, &usb_api, phy, config, callback, user_arg);
+    cfn_hal_usb_populate(driver, 0, clock, dependency, &USB_API, phy, config, callback, user_arg);
     return CFN_HAL_ERROR_OK;
 }
 
@@ -90,6 +91,6 @@ cfn_hal_error_code_t cfn_hal_usb_destruct(cfn_hal_usb_t *driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    cfn_hal_usb_populate(driver, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+    cfn_hal_usb_populate(driver, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     return CFN_HAL_ERROR_OK;
 }

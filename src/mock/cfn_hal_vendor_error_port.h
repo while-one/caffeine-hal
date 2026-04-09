@@ -51,11 +51,11 @@ extern "C"
  * @brief Internal mapping array from vendor status to cfn_hal_error_code_t.
  * The array is indexed by the actual vendor enum constants.
  */
-static const cfn_hal_error_code_t vendor_error_map[VENDOR_MAX] = {
+static const cfn_hal_error_code_t VENDOR_ERROR_MAP[VENDOR_MAX] = {
     [VENDOR_OK]      = CFN_HAL_ERROR_OK,
     [VENDOR_ERROR]   = CFN_HAL_ERROR_FAIL,
     [VENDOR_BUSY]    = CFN_HAL_ERROR_BUSY,
-    [VENDOR_TIMEOUT] = CFN_HAL_ERROR_TIMEOUT,
+    [VENDOR_TIMEOUT] = CFN_HAL_ERROR_TIMING_TIMEOUT,
 };
 
 /* Functions --------------------------------------------------------*/
@@ -71,7 +71,7 @@ static inline cfn_hal_error_code_t cfn_hal_vendor_map_error(int status)
     {
         return CFN_HAL_ERROR_FAIL;
     }
-    return vendor_error_map[status];
+    return VENDOR_ERROR_MAP[status];
 }
 
 #ifdef __cplusplus
