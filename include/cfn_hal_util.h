@@ -191,7 +191,7 @@ static inline int16_t cfn_util_f32_to_q15(float val)
  */
 static inline uint8_t cfn_util_get_msb16(uint16_t val)
 {
-    return (uint8_t)(((uint32_t)val >> 8U) & 0xFFU);
+    return (uint8_t) (((uint32_t) val >> 8U) & 0xFFU);
 }
 
 /**
@@ -201,7 +201,7 @@ static inline uint8_t cfn_util_get_msb16(uint16_t val)
  */
 static inline uint8_t cfn_util_get_lsb16(uint16_t val)
 {
-    return (uint8_t)((uint32_t)val & 0xFFU);
+    return (uint8_t) ((uint32_t) val & 0xFFU);
 }
 
 #endif // CAFFEINE_HAL_CFN_HAL_UTIL_H
