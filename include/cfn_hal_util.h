@@ -74,21 +74,16 @@ static inline int32_t cfn_util_bytes_to_int32_be(uint8_t b0, uint8_t b1, uint8_t
 /* --- 2. Bitwise Manipulation (Explicit Logic) --- */
 
 /**
- * @brief Safely extracts a bitfield from a register value.
- * * @param[in] reg_val The raw register value.
- * @param[in] mask    The bitmask to isolate the field.
- * @param[in] shift   The number of bits to shift right.
- * @return uint8_t    The extracted and aligned bitfield value.
+ * @brief Extracts a bitfield, shifts it to the LSB, and returns it.
+ * @param[in] val   The source register value.
+ * @param[in] mask  The bitmask for the field.
+ * @param[in] shift The number of positions to shift right.
+ * @return uint32_t The extracted and shifted field.
  */
-static inline uint8_t cfn_util_extract_field(uint8_t reg_val, uint8_t mask, uint8_t shift)
+static inline uint32_t cfn_util_extract_field(uint32_t val, uint32_t mask, uint32_t shift)
 {
-    /* * Cast to uint32_t first to prevent promotion to signed int.
-     * This ensures the bitwise AND and SHIFT are performed on unsigned types.
-     */
-    const uint32_t VAL  = (uint32_t) reg_val;
-    const uint32_t MASK = (uint32_t) mask;
-
-    return (uint8_t) ((VAL & MASK) >> (uint32_t) shift);
+    /* Mask first, then shift down so the result fits in the smallest possible type */
+    return (uint32_t)((val & mask) >> shift);
 }
 
 /**
