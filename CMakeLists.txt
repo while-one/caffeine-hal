@@ -76,6 +76,7 @@ set(PROJECT_ALL_HEADERS
     include/cfn_hal_uart.h
     include/cfn_hal_usb.h
     include/cfn_hal_wdt.h
+    include/cfn_hal_util.h
 )
 
 # We use FILE_SET to define public headers. This automatically:
