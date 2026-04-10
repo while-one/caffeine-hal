@@ -83,7 +83,7 @@ static inline int32_t cfn_util_bytes_to_int32_be(uint8_t b0, uint8_t b1, uint8_t
 static inline uint32_t cfn_util_extract_field(uint32_t val, uint32_t mask, uint32_t shift)
 {
     /* Mask first, then shift down so the result fits in the smallest possible type */
-    return (uint32_t)((val & mask) >> shift);
+    return (uint32_t) ((val & mask) >> shift);
 }
 
 /**
