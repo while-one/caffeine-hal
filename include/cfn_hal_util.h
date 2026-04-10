@@ -184,4 +184,24 @@ static inline int16_t cfn_util_f32_to_q15(float val)
     return (int16_t) SCALED;
 }
 
+/**
+ * @brief Extracts the Most Significant Byte from a 16-bit value.
+ * @param[in] val The 16-bit source value.
+ * @return uint8_t The MSB.
+ */
+static inline uint8_t cfn_util_get_msb16(uint16_t val)
+{
+    return (uint8_t)(((uint32_t)val >> 8U) & 0xFFU);
+}
+
+/**
+ * @brief Extracts the Least Significant Byte from a 16-bit value.
+ * @param[in] val The 16-bit source value.
+ * @return uint8_t The LSB.
+ */
+static inline uint8_t cfn_util_get_lsb16(uint16_t val)
+{
+    return (uint8_t)((uint32_t)val & 0xFFU);
+}
+
 #endif // CAFFEINE_HAL_CFN_HAL_UTIL_H
