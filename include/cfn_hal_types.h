@@ -76,7 +76,8 @@ typedef enum cfn_hal_error_codes
     CFN_HAL_ERROR_MEMORY_ALLOC,
     CFN_HAL_ERROR_MEMORY_EMPTY,
 
-    CFN_HAL_ERROR_DEVICE_NOT_FOUND = 0x180,
+    CFN_HAL_ERROR_DEVICE_FAIL = 0x180,
+    CFN_HAL_ERROR_DEVICE_NOT_FOUND,
 
     CFN_HAL_ERROR_UNKNOWN
 } cfn_hal_error_code_t;
