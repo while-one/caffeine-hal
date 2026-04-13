@@ -166,7 +166,7 @@ typedef struct cfn_hal_gpio_s     cfn_hal_gpio_t;
 typedef struct cfn_hal_gpio_api_s cfn_hal_gpio_api_t;
 
 /**
- * @brief Optional API extension for external GPIO expanders (e.g., I2C/SPI chips).
+ * @brief Optional API extension can be used for external GPIO expanders or other (e.g., I2C/SPI chips).
  */
 typedef struct
 {
