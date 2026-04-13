@@ -210,8 +210,6 @@ struct cfn_hal_gpio_api_s
     cfn_hal_error_code_t (*port_read)(cfn_hal_gpio_t *port, uint32_t *port_value);
     cfn_hal_error_code_t (*port_write)(cfn_hal_gpio_t *port, uint32_t pin_mask, uint32_t port_value);
 
-    void (*handle_interrupt)(cfn_hal_gpio_t *port);
-
     const cfn_hal_gpio_extender_api_t *extender;
 };
 
@@ -513,18 +511,9 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_port_write(cfn_hal_gpio_t *port
  */
 CFN_HAL_INLINE void cfn_hal_gpio_handle_interrupt(cfn_hal_gpio_t *port)
 {
-    if (port && port->api)
+    if (port && port->api && port->api->extender && port->api->extender->handle_interrupt)
     {
-        /* Primary core HAL interrupt handler (if implemented by MCU core) */
-        if (port->api->handle_interrupt)
-        {
-            port->api->handle_interrupt(port);
-        }
-        /* Fallback to Extender API for GPIO expander chips */
-        else if (port->api->extender && port->api->extender->handle_interrupt)
-        {
-            port->api->extender->handle_interrupt(port);
-        }
+        port->api->extender->handle_interrupt(port);
     }
 }
 
