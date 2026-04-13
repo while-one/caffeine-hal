@@ -172,7 +172,7 @@ typedef struct
 {
     cfn_hal_error_code_t (*get_id)(cfn_hal_gpio_t *port, uint32_t *id_out);
     void (*handle_interrupt)(cfn_hal_gpio_t *port);
-} cfn_hal_gpio_extender_api_t;
+} cfn_hal_gpio_extension_api_t;
 
 /**
  * @brief Lightweight handle to a specific GPIO pin.
@@ -210,7 +210,7 @@ struct cfn_hal_gpio_api_s
     cfn_hal_error_code_t (*port_read)(cfn_hal_gpio_t *port, uint32_t *port_value);
     cfn_hal_error_code_t (*port_write)(cfn_hal_gpio_t *port, uint32_t pin_mask, uint32_t port_value);
 
-    const cfn_hal_gpio_extender_api_t *extender;
+    const cfn_hal_gpio_extension_api_t *extender;
 };
 
 CFN_HAL_VMT_CHECK(struct cfn_hal_gpio_api_s);
