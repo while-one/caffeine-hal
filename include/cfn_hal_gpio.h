@@ -166,6 +166,15 @@ typedef struct cfn_hal_gpio_s     cfn_hal_gpio_t;
 typedef struct cfn_hal_gpio_api_s cfn_hal_gpio_api_t;
 
 /**
+ * @brief Optional API extension for external GPIO expanders (e.g., I2C/SPI chips).
+ */
+typedef struct
+{
+    cfn_hal_error_code_t (*get_id)(cfn_hal_gpio_t *port, uint32_t *id_out);
+    void (*handle_interrupt)(cfn_hal_gpio_t *port);
+} cfn_hal_gpio_extender_api_t;
+
+/**
  * @brief Lightweight handle to a specific GPIO pin.
  * Used by other peripherals to reference physical pins.
  */
@@ -200,6 +209,10 @@ struct cfn_hal_gpio_api_s
 
     cfn_hal_error_code_t (*port_read)(cfn_hal_gpio_t *port, uint32_t *port_value);
     cfn_hal_error_code_t (*port_write)(cfn_hal_gpio_t *port, uint32_t pin_mask, uint32_t port_value);
+
+    void (*handle_interrupt)(cfn_hal_gpio_t *port);
+
+    const cfn_hal_gpio_extender_api_t *extender;
 };
 
 CFN_HAL_VMT_CHECK(struct cfn_hal_gpio_api_s);
@@ -493,6 +506,47 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_port_write(cfn_hal_gpio_t *port
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_GPIO, port_write, port, error, pin_mask, port_value);
     return error;
 }
+
+/**
+ * @brief Handle a hardware interrupt for the GPIO port.
+ * @param port Pointer to the GPIO port driver instance.
+ */
+CFN_HAL_INLINE void cfn_hal_gpio_handle_interrupt(cfn_hal_gpio_t *port)
+{
+    if (port && port->api)
+    {
+        /* Primary core HAL interrupt handler (if implemented by MCU core) */
+        if (port->api->handle_interrupt)
+        {
+            port->api->handle_interrupt(port);
+        }
+        /* Fallback to Extender API for GPIO expander chips */
+        else if (port->api->extender && port->api->extender->handle_interrupt)
+        {
+            port->api->extender->handle_interrupt(port);
+        }
+    }
+}
+
+/**
+ * @brief Get the ID of the GPIO expander.
+ * @param port Pointer to the GPIO port driver instance.
+ * @param id_out Pointer to store the ID.
+ * @return CFN_HAL_ERROR_OK on success, CFN_HAL_ERROR_NOT_SUPPORTED if not an expander.
+ */
+CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_get_id(cfn_hal_gpio_t *port, uint32_t *id_out)
+{
+    if (!port || !port->api || !id_out)
+    {
+        return CFN_HAL_ERROR_BAD_PARAM;
+    }
+    if (port->api->extender && port->api->extender->get_id)
+    {
+        return port->api->extender->get_id(port, id_out);
+    }
+    return CFN_HAL_ERROR_NOT_SUPPORTED;
+}
+
 cfn_hal_error_code_t cfn_hal_gpio_construct(cfn_hal_gpio_t           *driver,
                                             const cfn_hal_gpio_phy_t *phy,
                                             struct cfn_hal_clock_s   *clock,
