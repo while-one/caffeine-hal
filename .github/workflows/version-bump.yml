@@ -9,5 +9,4 @@ on:
 jobs:
   bump-version:
     uses: while-one/caffeine-build/.github/workflows/version-bump.yml@main
-    secrets:
-      SEMVER_BUMP_TOKEN: ${{ secrets.SEMVER_BUMP_TOKEN }}
+    secrets: inherit
