@@ -121,10 +121,10 @@ typedef struct cfn_hal_sdio_api_s cfn_hal_sdio_api_t;
 
 /**
  * @brief SDIO callback signature.
- * @param driver Pointer to the SDIO driver instance.
+ * @param p_driver Pointer to the SDIO driver instance.
  * @param event_mask Mask of triggered nominal events.
  * @param error_mask Mask of triggered exception errors.
- * @param user_arg User-defined argument passed during registration.
+ * @param p_user_arg User-defined argument passed during registration.
  */
 typedef void (*cfn_hal_sdio_callback_t)(cfn_hal_sdio_t *p_driver,
                                         uint32_t        event_mask,
@@ -180,8 +180,8 @@ cfn_hal_sdio_populate (cfn_hal_sdio_t              *p_driver,
 
 /**
  * @brief Validates the SDIO configuration.
- * @param driver Pointer to the SDIO driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the SDIO driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -197,7 +197,7 @@ cfn_hal_sdio_config_validate (const cfn_hal_sdio_t *p_driver, const cfn_hal_sdio
 
 /**
  * @brief Initializes the SDIO driver.
- * @param driver Pointer to the SDIO driver instance.
+ * @param p_driver Pointer to the SDIO driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -218,7 +218,7 @@ cfn_hal_sdio_init (cfn_hal_sdio_t *p_driver)
 
 /**
  * @brief Deinitializes the SDIO driver.
- * @param driver Pointer to the SDIO driver instance.
+ * @param p_driver Pointer to the SDIO driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -233,8 +233,8 @@ cfn_hal_sdio_deinit (cfn_hal_sdio_t *p_driver)
 
 /**
  * @brief Sets the SDIO configuration.
- * @param driver Pointer to the SDIO driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the SDIO driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -257,8 +257,8 @@ cfn_hal_sdio_config_set (cfn_hal_sdio_t *p_driver, const cfn_hal_sdio_config_t *
 
 /**
  * @brief Gets the current SDIO configuration.
- * @param driver Pointer to the SDIO driver instance.
- * @param config [out] Pointer to store the configuration.
+ * @param p_driver Pointer to the SDIO driver instance.
+ * @param p_config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -274,9 +274,9 @@ cfn_hal_sdio_config_get (cfn_hal_sdio_t *p_driver, cfn_hal_sdio_config_t *p_conf
 
 /**
  * @brief Registers a callback for SDIO events and errors.
- * @param driver Pointer to the SDIO driver instance.
+ * @param p_driver Pointer to the SDIO driver instance.
  * @param callback The callback function to register.
- * @param user_arg User-defined argument passed to the callback.
+ * @param p_user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -296,7 +296,7 @@ cfn_hal_sdio_callback_register (cfn_hal_sdio_t *p_driver, const cfn_hal_sdio_cal
 
 /**
  * @brief Sets the SDIO power state.
- * @param driver Pointer to the SDIO driver instance.
+ * @param p_driver Pointer to the SDIO driver instance.
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -312,7 +312,7 @@ cfn_hal_sdio_power_state_set (cfn_hal_sdio_t *p_driver, cfn_hal_power_state_t st
 
 /**
  * @brief Enables one or more SDIO nominal events.
- * @param driver Pointer to the SDIO driver instance.
+ * @param p_driver Pointer to the SDIO driver instance.
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -328,7 +328,7 @@ cfn_hal_sdio_event_enable (cfn_hal_sdio_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Disables one or more SDIO nominal events.
- * @param driver Pointer to the SDIO driver instance.
+ * @param p_driver Pointer to the SDIO driver instance.
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -344,8 +344,8 @@ cfn_hal_sdio_event_disable (cfn_hal_sdio_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Retrieves the current SDIO nominal event status.
- * @param driver Pointer to the SDIO driver instance.
- * @param event_mask [out] Pointer to store the event mask.
+ * @param p_driver Pointer to the SDIO driver instance.
+ * @param p_event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -360,7 +360,7 @@ cfn_hal_sdio_event_get (cfn_hal_sdio_t *p_driver, uint32_t *p_event_mask)
 
 /**
  * @brief Enables one or more SDIO exception errors.
- * @param driver Pointer to the SDIO driver instance.
+ * @param p_driver Pointer to the SDIO driver instance.
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -376,7 +376,7 @@ cfn_hal_sdio_error_enable (cfn_hal_sdio_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Disables one or more SDIO exception errors.
- * @param driver Pointer to the SDIO driver instance.
+ * @param p_driver Pointer to the SDIO driver instance.
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -392,8 +392,8 @@ cfn_hal_sdio_error_disable (cfn_hal_sdio_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Retrieves the current SDIO exception error status.
- * @param driver Pointer to the SDIO driver instance.
- * @param error_mask [out] Pointer to store the error mask.
+ * @param p_driver Pointer to the SDIO driver instance.
+ * @param p_error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -410,9 +410,9 @@ cfn_hal_sdio_error_get (cfn_hal_sdio_t *p_driver, uint32_t *p_error_mask)
 
 /**
  * @brief Sends an SD/MMC command and waits for a response.
- * @param driver Pointer to the SDIO driver instance.
- * @param cmd Pointer to the command configuration structure.
- * @param response [out] Pointer to store the card response.
+ * @param p_driver Pointer to the SDIO driver instance.
+ * @param p_cmd Pointer to the command configuration structure.
+ * @param p_response [out] Pointer to store the card response.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -425,8 +425,8 @@ cfn_hal_sdio_send_command (cfn_hal_sdio_t *p_driver, const cfn_hal_sdio_cmd_t *p
 
 /**
  * @brief Reads data blocks from the SD card.
- * @param driver Pointer to the SDIO driver instance.
- * @param buffer Pointer to the destination memory.
+ * @param p_driver Pointer to the SDIO driver instance.
+ * @param p_buffer Pointer to the destination memory.
  * @param block_addr Address of the first block to read.
  * @param nbr_of_blocks Number of blocks to transfer.
  * @param timeout Timeout duration in milliseconds.
@@ -444,8 +444,8 @@ cfn_hal_sdio_read_blocks (
 
 /**
  * @brief Writes data blocks to the SD card.
- * @param driver Pointer to the SDIO driver instance.
- * @param data Pointer to the source data.
+ * @param p_driver Pointer to the SDIO driver instance.
+ * @param p_data Pointer to the source data.
  * @param block_addr Address of the first block to write.
  * @param nbr_of_blocks Number of blocks to transfer.
  * @param timeout Timeout duration in milliseconds.
@@ -463,8 +463,8 @@ cfn_hal_sdio_write_blocks (
 
 /**
  * @brief Retrieves card-specific registers and capacity.
- * @param driver Pointer to the SDIO driver instance.
- * @param info [out] Pointer to the card info structure.
+ * @param p_driver Pointer to the SDIO driver instance.
+ * @param p_info [out] Pointer to the card info structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -477,7 +477,7 @@ cfn_hal_sdio_get_card_info (cfn_hal_sdio_t *p_driver, cfn_hal_sdio_card_info_t *
 
 /**
  * @brief Waits until the SD card is no longer busy.
- * @param driver Pointer to the SDIO driver instance.
+ * @param p_driver Pointer to the SDIO driver instance.
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */

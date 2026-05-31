@@ -96,10 +96,10 @@ typedef struct cfn_hal_nvm_api_s cfn_hal_nvm_api_t;
 
 /**
  * @brief NVM callback signature.
- * @param driver Pointer to the NVM driver instance.
+ * @param p_driver Pointer to the NVM driver instance.
  * @param event_mask Mask of triggered nominal events.
  * @param error_mask Mask of triggered exception errors.
- * @param user_arg User-defined argument passed during registration.
+ * @param p_user_arg User-defined argument passed during registration.
  */
 typedef void (*cfn_hal_nvm_callback_t)(cfn_hal_nvm_t *p_driver,
                                        uint32_t       event_mask,
@@ -152,8 +152,8 @@ cfn_hal_nvm_populate (cfn_hal_nvm_t              *p_driver,
 
 /**
  * @brief Validates the NVM configuration.
- * @param driver Pointer to the NVM driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the NVM driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -169,7 +169,7 @@ cfn_hal_nvm_config_validate (const cfn_hal_nvm_t *p_driver, const cfn_hal_nvm_co
 
 /**
  * @brief Initializes the NVM controller driver.
- * @param driver Pointer to the NVM driver instance.
+ * @param p_driver Pointer to the NVM driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -190,7 +190,7 @@ cfn_hal_nvm_init (cfn_hal_nvm_t *p_driver)
 
 /**
  * @brief Deinitializes the NVM controller driver.
- * @param driver Pointer to the NVM driver instance.
+ * @param p_driver Pointer to the NVM driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -205,8 +205,8 @@ cfn_hal_nvm_deinit (cfn_hal_nvm_t *p_driver)
 
 /**
  * @brief Sets the NVM configuration.
- * @param driver Pointer to the NVM driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the NVM driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -229,8 +229,8 @@ cfn_hal_nvm_config_set (cfn_hal_nvm_t *p_driver, const cfn_hal_nvm_config_t *p_c
 
 /**
  * @brief Gets the current NVM configuration.
- * @param driver Pointer to the NVM driver instance.
- * @param config [out] Pointer to store the configuration.
+ * @param p_driver Pointer to the NVM driver instance.
+ * @param p_config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -246,9 +246,9 @@ cfn_hal_nvm_config_get (cfn_hal_nvm_t *p_driver, cfn_hal_nvm_config_t *p_config)
 
 /**
  * @brief Registers a callback for NVM events and errors.
- * @param driver Pointer to the NVM driver instance.
+ * @param p_driver Pointer to the NVM driver instance.
  * @param callback The callback function to register.
- * @param user_arg User-defined argument passed to the callback.
+ * @param p_user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -268,7 +268,7 @@ cfn_hal_nvm_callback_register (cfn_hal_nvm_t *p_driver, const cfn_hal_nvm_callba
 
 /**
  * @brief Sets the NVM power state.
- * @param driver Pointer to the NVM driver instance.
+ * @param p_driver Pointer to the NVM driver instance.
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -284,7 +284,7 @@ cfn_hal_nvm_power_state_set (cfn_hal_nvm_t *p_driver, cfn_hal_power_state_t stat
 
 /**
  * @brief Enables one or more NVM nominal events.
- * @param driver Pointer to the NVM driver instance.
+ * @param p_driver Pointer to the NVM driver instance.
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -300,7 +300,7 @@ cfn_hal_nvm_event_enable (cfn_hal_nvm_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Disables one or more NVM nominal events.
- * @param driver Pointer to the NVM driver instance.
+ * @param p_driver Pointer to the NVM driver instance.
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -316,8 +316,8 @@ cfn_hal_nvm_event_disable (cfn_hal_nvm_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Retrieves the current NVM nominal event status.
- * @param driver Pointer to the NVM driver instance.
- * @param event_mask [out] Pointer to store the event mask.
+ * @param p_driver Pointer to the NVM driver instance.
+ * @param p_event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -332,7 +332,7 @@ cfn_hal_nvm_event_get (cfn_hal_nvm_t *p_driver, uint32_t *p_event_mask)
 
 /**
  * @brief Enables one or more NVM exception errors.
- * @param driver Pointer to the NVM driver instance.
+ * @param p_driver Pointer to the NVM driver instance.
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -348,7 +348,7 @@ cfn_hal_nvm_error_enable (cfn_hal_nvm_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Disables one or more NVM exception errors.
- * @param driver Pointer to the NVM driver instance.
+ * @param p_driver Pointer to the NVM driver instance.
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -364,8 +364,8 @@ cfn_hal_nvm_error_disable (cfn_hal_nvm_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Retrieves the current NVM exception error status.
- * @param driver Pointer to the NVM driver instance.
- * @param error_mask [out] Pointer to store the error mask.
+ * @param p_driver Pointer to the NVM driver instance.
+ * @param p_error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -382,9 +382,9 @@ cfn_hal_nvm_error_get (cfn_hal_nvm_t *p_driver, uint32_t *p_error_mask)
 
 /**
  * @brief Reads data from non-volatile memory.
- * @param driver Pointer to the NVM driver instance.
+ * @param p_driver Pointer to the NVM driver instance.
  * @param addr Source memory address.
- * @param buffer Pointer to the buffer where data will be stored.
+ * @param p_buffer Pointer to the buffer where data will be stored.
  * @param size Number of bytes to read.
  * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
@@ -399,9 +399,9 @@ cfn_hal_nvm_read (cfn_hal_nvm_t *p_driver, uint32_t addr, uint8_t *p_buffer, siz
 
 /**
  * @brief Programs data into non-volatile memory.
- * @param driver Pointer to the NVM driver instance.
+ * @param p_driver Pointer to the NVM driver instance.
  * @param addr Destination memory address.
- * @param data Pointer to the data to be written.
+ * @param p_data Pointer to the data to be written.
  * @param size Number of bytes to write.
  * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
@@ -416,7 +416,7 @@ cfn_hal_nvm_write (cfn_hal_nvm_t *p_driver, uint32_t addr, const uint8_t *p_data
 
 /**
  * @brief Erases a specific sector or page of memory.
- * @param driver Pointer to the NVM driver instance.
+ * @param p_driver Pointer to the NVM driver instance.
  * @param sector_addr Address within the sector to be erased.
  * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
@@ -431,7 +431,7 @@ cfn_hal_nvm_erase_sector (cfn_hal_nvm_t *p_driver, uint32_t sector_addr, uint32_
 
 /**
  * @brief Erases the entire non-volatile memory (Bulk Erase).
- * @param driver Pointer to the NVM driver instance.
+ * @param p_driver Pointer to the NVM driver instance.
  * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -445,9 +445,9 @@ cfn_hal_nvm_erase_chip (cfn_hal_nvm_t *p_driver, uint32_t timeout)
 
 /**
  * @brief Retrieves information about memory organization and endurance for a specific address.
- * @param driver Pointer to the NVM driver instance.
+ * @param p_driver Pointer to the NVM driver instance.
  * @param addr Address within the target sector/region.
- * @param info [out] Pointer to the information structure.
+ * @param p_info [out] Pointer to the information structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t

@@ -181,10 +181,10 @@ typedef struct cfn_hal_eth_api_s cfn_hal_eth_api_t;
 
 /**
  * @brief Ethernet callback signature.
- * @param driver Pointer to the Ethernet driver instance.
+ * @param p_driver Pointer to the Ethernet driver instance.
  * @param event_mask Mask of triggered nominal events.
  * @param error_mask Mask of triggered exception errors.
- * @param user_arg User-defined argument passed during registration.
+ * @param p_user_arg User-defined argument passed during registration.
  */
 typedef void (*cfn_hal_eth_callback_t)(cfn_hal_eth_t *p_driver,
                                        uint32_t       event_mask,
@@ -245,8 +245,8 @@ cfn_hal_eth_populate (cfn_hal_eth_t              *p_driver,
 
 /**
  * @brief Validates the Ethernet configuration.
- * @param driver Pointer to the ETH driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the ETH driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -267,7 +267,7 @@ cfn_hal_eth_config_validate (const cfn_hal_eth_t *p_driver, const cfn_hal_eth_co
 
 /**
  * @brief Initializes the Ethernet driver.
- * @param driver Pointer to the Ethernet driver instance.
+ * @param p_driver Pointer to the Ethernet driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -288,7 +288,7 @@ cfn_hal_eth_init (cfn_hal_eth_t *p_driver)
 
 /**
  * @brief Deinitializes the Ethernet driver.
- * @param driver Pointer to the Ethernet driver instance.
+ * @param p_driver Pointer to the Ethernet driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -303,8 +303,8 @@ cfn_hal_eth_deinit (cfn_hal_eth_t *p_driver)
 
 /**
  * @brief Sets the Ethernet configuration.
- * @param driver Pointer to the Ethernet driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the Ethernet driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -327,8 +327,8 @@ cfn_hal_eth_config_set (cfn_hal_eth_t *p_driver, const cfn_hal_eth_config_t *p_c
 
 /**
  * @brief Gets the current Ethernet configuration.
- * @param driver Pointer to the Ethernet driver instance.
- * @param config [out] Pointer to store the configuration.
+ * @param p_driver Pointer to the Ethernet driver instance.
+ * @param p_config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -344,9 +344,9 @@ cfn_hal_eth_config_get (cfn_hal_eth_t *p_driver, cfn_hal_eth_config_t *p_config)
 
 /**
  * @brief Registers a callback for Ethernet events and errors.
- * @param driver Pointer to the Ethernet driver instance.
+ * @param p_driver Pointer to the Ethernet driver instance.
  * @param callback The callback function to register.
- * @param user_arg User-defined argument passed to the callback.
+ * @param p_user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -366,7 +366,7 @@ cfn_hal_eth_callback_register (cfn_hal_eth_t *p_driver, const cfn_hal_eth_callba
 
 /**
  * @brief Sets the Ethernet power state.
- * @param driver Pointer to the Ethernet driver instance.
+ * @param p_driver Pointer to the Ethernet driver instance.
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -382,7 +382,7 @@ cfn_hal_eth_power_state_set (cfn_hal_eth_t *p_driver, cfn_hal_power_state_t stat
 
 /**
  * @brief Enables one or more Ethernet nominal events.
- * @param driver Pointer to the Ethernet driver instance.
+ * @param p_driver Pointer to the Ethernet driver instance.
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -398,7 +398,7 @@ cfn_hal_eth_event_enable (cfn_hal_eth_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Disables one or more Ethernet nominal events.
- * @param driver Pointer to the Ethernet driver instance.
+ * @param p_driver Pointer to the Ethernet driver instance.
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -414,8 +414,8 @@ cfn_hal_eth_event_disable (cfn_hal_eth_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Retrieves the current Ethernet nominal event status.
- * @param driver Pointer to the Ethernet driver instance.
- * @param event_mask [out] Pointer to store the event mask.
+ * @param p_driver Pointer to the Ethernet driver instance.
+ * @param p_event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -430,7 +430,7 @@ cfn_hal_eth_event_get (cfn_hal_eth_t *p_driver, uint32_t *p_event_mask)
 
 /**
  * @brief Enables one or more Ethernet exception errors.
- * @param driver Pointer to the Ethernet driver instance.
+ * @param p_driver Pointer to the Ethernet driver instance.
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -446,7 +446,7 @@ cfn_hal_eth_error_enable (cfn_hal_eth_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Disables one or more Ethernet exception errors.
- * @param driver Pointer to the Ethernet driver instance.
+ * @param p_driver Pointer to the Ethernet driver instance.
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -462,8 +462,8 @@ cfn_hal_eth_error_disable (cfn_hal_eth_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Retrieves the current Ethernet exception error status.
- * @param driver Pointer to the Ethernet driver instance.
- * @param error_mask [out] Pointer to store the error mask.
+ * @param p_driver Pointer to the Ethernet driver instance.
+ * @param p_error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -480,7 +480,7 @@ cfn_hal_eth_error_get (cfn_hal_eth_t *p_driver, uint32_t *p_error_mask)
 
 /**
  * @brief Starts the Ethernet MAC and DMA operations.
- * @param driver Pointer to the Ethernet driver instance.
+ * @param p_driver Pointer to the Ethernet driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -493,7 +493,7 @@ cfn_hal_eth_start (cfn_hal_eth_t *p_driver)
 
 /**
  * @brief Stops the Ethernet MAC and DMA operations.
- * @param driver Pointer to the Ethernet driver instance.
+ * @param p_driver Pointer to the Ethernet driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -506,8 +506,8 @@ cfn_hal_eth_stop (cfn_hal_eth_t *p_driver)
 
 /**
  * @brief Transmits an Ethernet frame.
- * @param driver Pointer to the Ethernet driver instance.
- * @param frame Pointer to the raw frame data.
+ * @param p_driver Pointer to the Ethernet driver instance.
+ * @param p_frame Pointer to the raw frame data.
  * @param length Length of the frame in bytes.
  * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
@@ -523,10 +523,10 @@ cfn_hal_eth_transmit_frame (cfn_hal_eth_t *p_driver, const uint8_t *p_frame, siz
 
 /**
  * @brief Receives an Ethernet frame.
- * @param driver Pointer to the Ethernet driver instance.
- * @param buffer Pointer to the buffer where the frame will be stored.
+ * @param p_driver Pointer to the Ethernet driver instance.
+ * @param p_buffer Pointer to the buffer where the frame will be stored.
  * @param max_length Maximum capacity of the buffer.
- * @param received_length [out] Actual number of bytes received.
+ * @param p_received_length [out] Actual number of bytes received.
  * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -542,10 +542,10 @@ cfn_hal_eth_receive_frame (
 
 /**
  * @brief Reads a PHY register via MDIO.
- * @param driver Pointer to the Ethernet driver instance.
+ * @param p_driver Pointer to the Ethernet driver instance.
  * @param phy_addr Address of the target PHY.
  * @param reg_addr Address of the target register.
- * @param value [out] Pointer to store the read value.
+ * @param p_value [out] Pointer to store the read value.
  * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -561,7 +561,7 @@ cfn_hal_eth_read_phy_reg (
 
 /**
  * @brief Writes a PHY register via MDIO.
- * @param driver Pointer to the Ethernet driver instance.
+ * @param p_driver Pointer to the Ethernet driver instance.
  * @param phy_addr Address of the target PHY.
  * @param reg_addr Address of the target register.
  * @param value Value to write.
@@ -580,8 +580,8 @@ cfn_hal_eth_write_phy_reg (
 
 /**
  * @brief Retrieves the current link status.
- * @param driver Pointer to the Ethernet driver instance.
- * @param status [out] Pointer to the link status structure.
+ * @param p_driver Pointer to the Ethernet driver instance.
+ * @param p_status [out] Pointer to the link status structure.
  * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */

@@ -110,11 +110,11 @@ typedef struct cfn_hal_usb_api_s cfn_hal_usb_api_t;
 
 /**
  * @brief USB callback signature.
- * @param driver Pointer to the USB driver instance.
+ * @param p_driver Pointer to the USB driver instance.
  * @param event_mask Mask of triggered nominal events.
  * @param error_mask Mask of triggered exception errors.
  * @param ep_addr Endpoint address associated with the event (if applicable).
- * @param user_arg User-defined argument passed during registration.
+ * @param p_user_arg User-defined argument passed during registration.
  */
 typedef void (*cfn_hal_usb_callback_t)(
     cfn_hal_usb_t *p_driver, uint32_t event_mask, uint32_t error_mask, uint8_t ep_addr, void *p_user_arg);
@@ -175,8 +175,8 @@ cfn_hal_usb_populate (cfn_hal_usb_t              *p_driver,
 
 /**
  * @brief Validates the USB configuration.
- * @param driver Pointer to the USB driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the USB driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -197,7 +197,7 @@ cfn_hal_usb_config_validate (const cfn_hal_usb_t *p_driver, const cfn_hal_usb_co
 
 /**
  * @brief Initializes the USB driver.
- * @param driver Pointer to the USB driver instance.
+ * @param p_driver Pointer to the USB driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -218,7 +218,7 @@ cfn_hal_usb_init (cfn_hal_usb_t *p_driver)
 
 /**
  * @brief Deinitializes the USB driver.
- * @param driver Pointer to the USB driver instance.
+ * @param p_driver Pointer to the USB driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -233,8 +233,8 @@ cfn_hal_usb_deinit (cfn_hal_usb_t *p_driver)
 
 /**
  * @brief Sets the USB configuration.
- * @param driver Pointer to the USB driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the USB driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -257,8 +257,8 @@ cfn_hal_usb_config_set (cfn_hal_usb_t *p_driver, const cfn_hal_usb_config_t *p_c
 
 /**
  * @brief Gets the current USB configuration.
- * @param driver Pointer to the USB driver instance.
- * @param config [out] Pointer to store the configuration.
+ * @param p_driver Pointer to the USB driver instance.
+ * @param p_config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -274,9 +274,9 @@ cfn_hal_usb_config_get (cfn_hal_usb_t *p_driver, cfn_hal_usb_config_t *p_config)
 
 /**
  * @brief Registers a callback for USB events and errors.
- * @param driver Pointer to the USB driver instance.
+ * @param p_driver Pointer to the USB driver instance.
  * @param callback The callback function to register.
- * @param user_arg User-defined argument passed to the callback.
+ * @param p_user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -296,7 +296,7 @@ cfn_hal_usb_callback_register (cfn_hal_usb_t *p_driver, const cfn_hal_usb_callba
 
 /**
  * @brief Sets the USB power state.
- * @param driver Pointer to the USB driver instance.
+ * @param p_driver Pointer to the USB driver instance.
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -312,7 +312,7 @@ cfn_hal_usb_power_state_set (cfn_hal_usb_t *p_driver, cfn_hal_power_state_t stat
 
 /**
  * @brief Enables one or more USB nominal events.
- * @param driver Pointer to the USB driver instance.
+ * @param p_driver Pointer to the USB driver instance.
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -328,7 +328,7 @@ cfn_hal_usb_event_enable (cfn_hal_usb_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Disables one or more USB nominal events.
- * @param driver Pointer to the USB driver instance.
+ * @param p_driver Pointer to the USB driver instance.
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -344,8 +344,8 @@ cfn_hal_usb_event_disable (cfn_hal_usb_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Retrieves the current USB nominal event status.
- * @param driver Pointer to the USB driver instance.
- * @param event_mask [out] Pointer to store the event mask.
+ * @param p_driver Pointer to the USB driver instance.
+ * @param p_event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -360,7 +360,7 @@ cfn_hal_usb_event_get (cfn_hal_usb_t *p_driver, uint32_t *p_event_mask)
 
 /**
  * @brief Enables one or more USB exception errors.
- * @param driver Pointer to the USB driver instance.
+ * @param p_driver Pointer to the USB driver instance.
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -376,7 +376,7 @@ cfn_hal_usb_error_enable (cfn_hal_usb_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Disables one or more USB exception errors.
- * @param driver Pointer to the USB driver instance.
+ * @param p_driver Pointer to the USB driver instance.
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -392,8 +392,8 @@ cfn_hal_usb_error_disable (cfn_hal_usb_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Retrieves the current USB exception error status.
- * @param driver Pointer to the USB driver instance.
- * @param error_mask [out] Pointer to store the error mask.
+ * @param p_driver Pointer to the USB driver instance.
+ * @param p_error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -410,7 +410,7 @@ cfn_hal_usb_error_get (cfn_hal_usb_t *p_driver, uint32_t *p_error_mask)
 
 /**
  * @brief Starts the USB device controller (connects pull-up).
- * @param driver Pointer to the USB driver instance.
+ * @param p_driver Pointer to the USB driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -423,7 +423,7 @@ cfn_hal_usb_start (cfn_hal_usb_t *p_driver)
 
 /**
  * @brief Stops the USB device controller (disconnects pull-up).
- * @param driver Pointer to the USB driver instance.
+ * @param p_driver Pointer to the USB driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -436,7 +436,7 @@ cfn_hal_usb_stop (cfn_hal_usb_t *p_driver)
 
 /**
  * @brief Sets the USB device address.
- * @param driver Pointer to the USB driver instance.
+ * @param p_driver Pointer to the USB driver instance.
  * @param address Address assigned by the host (0 to 127).
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -450,7 +450,7 @@ cfn_hal_usb_set_address (cfn_hal_usb_t *p_driver, uint8_t address)
 
 /**
  * @brief Configures and enables a USB endpoint.
- * @param driver Pointer to the USB driver instance.
+ * @param p_driver Pointer to the USB driver instance.
  * @param ep_addr Endpoint address (including direction bit).
  * @param ep_type Endpoint transfer type (Bulk, Interrupt, etc.).
  * @param ep_mps Maximum Packet Size for the endpoint.
@@ -466,7 +466,7 @@ cfn_hal_usb_ep_open (cfn_hal_usb_t *p_driver, uint8_t ep_addr, cfn_hal_usb_ep_ty
 
 /**
  * @brief Disables and closes a USB endpoint.
- * @param driver Pointer to the USB driver instance.
+ * @param p_driver Pointer to the USB driver instance.
  * @param ep_addr Endpoint address.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -480,9 +480,9 @@ cfn_hal_usb_ep_close (cfn_hal_usb_t *p_driver, uint8_t ep_addr)
 
 /**
  * @brief Initiates data transmission on an IN endpoint.
- * @param driver Pointer to the USB driver instance.
+ * @param p_driver Pointer to the USB driver instance.
  * @param ep_addr IN endpoint address.
- * @param data Pointer to the buffer containing data to send.
+ * @param p_data Pointer to the buffer containing data to send.
  * @param length Number of bytes to transmit.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -497,9 +497,9 @@ cfn_hal_usb_ep_transmit (cfn_hal_usb_t *p_driver, uint8_t ep_addr, const uint8_t
 
 /**
  * @brief Prepares an OUT endpoint for data reception.
- * @param driver Pointer to the USB driver instance.
+ * @param p_driver Pointer to the USB driver instance.
  * @param ep_addr OUT endpoint address.
- * @param buffer Pointer to the buffer where received data will be stored.
+ * @param p_buffer Pointer to the buffer where received data will be stored.
  * @param length Maximum number of bytes to receive.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -514,7 +514,7 @@ cfn_hal_usb_ep_receive (cfn_hal_usb_t *p_driver, uint8_t ep_addr, uint8_t *p_buf
 
 /**
  * @brief Controls the stall condition of an endpoint.
- * @param driver Pointer to the USB driver instance.
+ * @param p_driver Pointer to the USB driver instance.
  * @param ep_addr Endpoint address.
  * @param stall True to set STALL, False to clear.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
@@ -529,8 +529,8 @@ cfn_hal_usb_ep_stall (cfn_hal_usb_t *p_driver, uint8_t ep_addr, bool stall)
 
 /**
  * @brief Reads the latest received 8-byte setup packet.
- * @param driver Pointer to the USB driver instance.
- * @param buffer Pointer to the 8-byte buffer to store the setup packet.
+ * @param p_driver Pointer to the USB driver instance.
+ * @param p_buffer Pointer to the 8-byte buffer to store the setup packet.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -543,9 +543,9 @@ cfn_hal_usb_read_setup_packet (cfn_hal_usb_t *p_driver, uint8_t *p_buffer)
 
 /**
  * @brief Retrieves the size of the last received data on an endpoint.
- * @param driver Pointer to the USB driver instance.
+ * @param p_driver Pointer to the USB driver instance.
  * @param ep_addr Endpoint address.
- * @param size [out] Pointer to store the number of bytes received.
+ * @param p_size [out] Pointer to store the number of bytes received.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t

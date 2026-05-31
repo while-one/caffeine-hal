@@ -183,12 +183,12 @@ typedef struct cfn_hal_uart_api_s cfn_hal_uart_api_t;
 
 /**
  * @brief UART callback signature.
- * @param driver Pointer to the UART driver instance.
+ * @param p_driver Pointer to the UART driver instance.
  * @param event_mask Mask of triggered nominal events.
  * @param error_mask Mask of triggered exception errors.
- * @param data Pointer to the transaction buffer (if applicable).
+ * @param p_data Pointer to the transaction buffer (if applicable).
  * @param nbr_of_bytes Number of bytes transferred.
- * @param user_arg User-defined argument passed during registration.
+ * @param p_user_arg User-defined argument passed during registration.
  */
 typedef void (*cfn_hal_uart_callback_t)(cfn_hal_uart_t *p_driver,
                                         uint32_t        event_mask,
@@ -253,8 +253,8 @@ cfn_hal_uart_populate (cfn_hal_uart_t              *p_driver,
 }
 /**
  * @brief Validates the UART configuration.
- * @param driver Pointer to the UART driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the UART driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -279,7 +279,7 @@ cfn_hal_uart_config_validate (const cfn_hal_uart_t *p_driver, const cfn_hal_uart
 
 /**
  * @brief Initializes the UART driver.
- * @param driver Pointer to the UART driver instance.
+ * @param p_driver Pointer to the UART driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -300,7 +300,7 @@ cfn_hal_uart_init (cfn_hal_uart_t *p_driver)
 
 /**
  * @brief Deinitializes the UART driver.
- * @param driver Pointer to the UART driver instance.
+ * @param p_driver Pointer to the UART driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -315,8 +315,8 @@ cfn_hal_uart_deinit (cfn_hal_uart_t *p_driver)
 
 /**
  * @brief Sets the UART configuration.
- * @param driver Pointer to the UART driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the UART driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -339,8 +339,8 @@ cfn_hal_uart_config_set (cfn_hal_uart_t *p_driver, const cfn_hal_uart_config_t *
 
 /**
  * @brief Gets the current UART configuration.
- * @param driver Pointer to the UART driver instance.
- * @param config [out] Pointer to store the configuration.
+ * @param p_driver Pointer to the UART driver instance.
+ * @param p_config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -356,9 +356,9 @@ cfn_hal_uart_config_get (cfn_hal_uart_t *p_driver, cfn_hal_uart_config_t *p_conf
 
 /**
  * @brief Registers a callback for UART events and errors.
- * @param driver Pointer to the UART driver instance.
+ * @param p_driver Pointer to the UART driver instance.
  * @param callback The callback function to register.
- * @param user_arg User-defined argument passed to the callback.
+ * @param p_user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -378,7 +378,7 @@ cfn_hal_uart_callback_register (cfn_hal_uart_t *p_driver, const cfn_hal_uart_cal
 
 /**
  * @brief Sets the UART power state.
- * @param driver Pointer to the UART driver instance.
+ * @param p_driver Pointer to the UART driver instance.
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -394,7 +394,7 @@ cfn_hal_uart_power_state_set (cfn_hal_uart_t *p_driver, cfn_hal_power_state_t st
 
 /**
  * @brief Enables one or more UART nominal events.
- * @param driver Pointer to the UART driver instance.
+ * @param p_driver Pointer to the UART driver instance.
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -410,7 +410,7 @@ cfn_hal_uart_event_enable (cfn_hal_uart_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Disables one or more UART nominal events.
- * @param driver Pointer to the UART driver instance.
+ * @param p_driver Pointer to the UART driver instance.
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -426,8 +426,8 @@ cfn_hal_uart_event_disable (cfn_hal_uart_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Retrieves the current UART nominal event status.
- * @param driver Pointer to the UART driver instance.
- * @param event_mask [out] Pointer to store the event mask.
+ * @param p_driver Pointer to the UART driver instance.
+ * @param p_event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -442,7 +442,7 @@ cfn_hal_uart_event_get (cfn_hal_uart_t *p_driver, uint32_t *p_event_mask)
 
 /**
  * @brief Enables one or more UART exception errors.
- * @param driver Pointer to the UART driver instance.
+ * @param p_driver Pointer to the UART driver instance.
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -458,7 +458,7 @@ cfn_hal_uart_error_enable (cfn_hal_uart_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Disables one or more UART exception errors.
- * @param driver Pointer to the UART driver instance.
+ * @param p_driver Pointer to the UART driver instance.
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -474,8 +474,8 @@ cfn_hal_uart_error_disable (cfn_hal_uart_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Retrieves the current UART exception error status.
- * @param driver Pointer to the UART driver instance.
- * @param error_mask [out] Pointer to store the error mask.
+ * @param p_driver Pointer to the UART driver instance.
+ * @param p_error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -492,8 +492,8 @@ cfn_hal_uart_error_get (cfn_hal_uart_t *p_driver, uint32_t *p_error_mask)
 
 /**
  * @brief Starts UART data transmission using interrupts (non-blocking).
- * @param driver Pointer to the UART driver instance.
- * @param data Pointer to the buffer containing data to transmit.
+ * @param p_driver Pointer to the UART driver instance.
+ * @param p_data Pointer to the buffer containing data to transmit.
  * @param nbr_of_bytes Number of bytes to transmit.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -507,7 +507,7 @@ cfn_hal_uart_tx_irq (cfn_hal_uart_t *p_driver, const uint8_t *p_data, size_t nbr
 
 /**
  * @brief Aborts an ongoing interrupt-based transmission.
- * @param driver Pointer to the UART driver instance.
+ * @param p_driver Pointer to the UART driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -521,8 +521,8 @@ cfn_hal_uart_tx_irq_abort (cfn_hal_uart_t *p_driver)
 /**
  * @brief Starts UART data reception using interrupts to receive exactly N
  * bytes.
- * @param driver Pointer to the UART driver instance.
- * @param data Pointer to the buffer to store received data.
+ * @param p_driver Pointer to the UART driver instance.
+ * @param p_data Pointer to the buffer to store received data.
  * @param nbr_of_bytes Number of bytes to receive.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -536,7 +536,7 @@ cfn_hal_uart_rx_n_irq (cfn_hal_uart_t *p_driver, uint8_t *p_data, size_t nbr_of_
 
 /**
  * @brief Starts UART data reception in continuous interrupt mode.
- * @param driver Pointer to the UART driver instance.
+ * @param p_driver Pointer to the UART driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -549,7 +549,7 @@ cfn_hal_uart_rx_irq (cfn_hal_uart_t *p_driver)
 
 /**
  * @brief Aborts an ongoing interrupt-based reception.
- * @param driver Pointer to the UART driver instance.
+ * @param p_driver Pointer to the UART driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -562,8 +562,8 @@ cfn_hal_uart_rx_irq_abort (cfn_hal_uart_t *p_driver)
 
 /**
  * @brief Transmits data using polling (blocking).
- * @param driver Pointer to the UART driver instance.
- * @param data Pointer to the buffer containing data to transmit.
+ * @param p_driver Pointer to the UART driver instance.
+ * @param p_data Pointer to the buffer containing data to transmit.
  * @param nbr_of_bytes Number of bytes to transmit.
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
@@ -579,8 +579,8 @@ cfn_hal_uart_tx_polling (cfn_hal_uart_t *p_driver, const uint8_t *p_data, size_t
 
 /**
  * @brief Receives data using polling (blocking).
- * @param driver Pointer to the UART driver instance.
- * @param data Pointer to the buffer to store received data.
+ * @param p_driver Pointer to the UART driver instance.
+ * @param p_data Pointer to the buffer to store received data.
  * @param nbr_of_bytes Number of bytes to receive.
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
@@ -596,10 +596,10 @@ cfn_hal_uart_rx_polling (cfn_hal_uart_t *p_driver, uint8_t *p_data, size_t nbr_o
 
 /**
  * @brief Receives data until an idle condition or max bytes reached.
- * @param driver Pointer to the UART driver instance.
- * @param data Pointer to the buffer to store received data.
+ * @param p_driver Pointer to the UART driver instance.
+ * @param p_data Pointer to the buffer to store received data.
  * @param max_bytes Maximum capacity of the data buffer.
- * @param received_bytes [out] Actual number of bytes received.
+ * @param p_received_bytes [out] Actual number of bytes received.
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -615,8 +615,8 @@ cfn_hal_uart_rx_to_idle (
 
 /**
  * @brief Transmits data using DMA (non-blocking).
- * @param driver Pointer to the UART driver instance.
- * @param data Pointer to the buffer containing data to transmit.
+ * @param p_driver Pointer to the UART driver instance.
+ * @param p_data Pointer to the buffer containing data to transmit.
  * @param nbr_of_bytes Number of bytes to transmit.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -630,8 +630,8 @@ cfn_hal_uart_tx_dma (cfn_hal_uart_t *p_driver, const uint8_t *p_data, size_t nbr
 
 /**
  * @brief Receives data using DMA (non-blocking).
- * @param driver Pointer to the UART driver instance.
- * @param data Pointer to the buffer to store received data.
+ * @param p_driver Pointer to the UART driver instance.
+ * @param p_data Pointer to the buffer to store received data.
  * @param nbr_of_bytes Number of bytes to receive.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */

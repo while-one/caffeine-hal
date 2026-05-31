@@ -81,10 +81,10 @@ typedef struct cfn_hal_irq_api_s cfn_hal_irq_api_t;
 
 /**
  * @brief IRQ callback signature.
- * @param driver Pointer to the IRQ driver instance.
+ * @param p_driver Pointer to the IRQ driver instance.
  * @param event_mask Mask of triggered nominal events.
  * @param error_mask Mask of triggered exception errors.
- * @param user_arg User-defined argument passed during registration.
+ * @param p_user_arg User-defined argument passed during registration.
  */
 typedef void (*cfn_hal_irq_callback_t)(cfn_hal_irq_t *p_driver,
                                        uint32_t       event_mask,
@@ -135,8 +135,8 @@ cfn_hal_irq_populate (cfn_hal_irq_t              *p_driver,
 
 /**
  * @brief Validates the IRQ configuration.
- * @param driver Pointer to the IRQ driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the IRQ driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -152,7 +152,7 @@ cfn_hal_irq_config_validate (const cfn_hal_irq_t *p_driver, const cfn_hal_irq_co
 
 /**
  * @brief Initializes the IRQ controller driver.
- * @param driver Pointer to the IRQ driver instance.
+ * @param p_driver Pointer to the IRQ driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -173,7 +173,7 @@ cfn_hal_irq_init (cfn_hal_irq_t *p_driver)
 
 /**
  * @brief Deinitializes the IRQ controller driver.
- * @param driver Pointer to the IRQ driver instance.
+ * @param p_driver Pointer to the IRQ driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -188,8 +188,8 @@ cfn_hal_irq_deinit (cfn_hal_irq_t *p_driver)
 
 /**
  * @brief Sets the IRQ configuration.
- * @param driver Pointer to the IRQ driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the IRQ driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -212,8 +212,8 @@ cfn_hal_irq_config_set (cfn_hal_irq_t *p_driver, const cfn_hal_irq_config_t *p_c
 
 /**
  * @brief Gets the current IRQ configuration.
- * @param driver Pointer to the IRQ driver instance.
- * @param config [out] Pointer to store the configuration.
+ * @param p_driver Pointer to the IRQ driver instance.
+ * @param p_config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -229,9 +229,9 @@ cfn_hal_irq_config_get (cfn_hal_irq_t *p_driver, cfn_hal_irq_config_t *p_config)
 
 /**
  * @brief Registers a callback for IRQ events and errors.
- * @param driver Pointer to the IRQ driver instance.
+ * @param p_driver Pointer to the IRQ driver instance.
  * @param callback The callback function to register.
- * @param user_arg User-defined argument passed to the callback.
+ * @param p_user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -251,7 +251,7 @@ cfn_hal_irq_callback_register (cfn_hal_irq_t *p_driver, const cfn_hal_irq_callba
 
 /**
  * @brief Sets the IRQ power state.
- * @param driver Pointer to the IRQ driver instance.
+ * @param p_driver Pointer to the IRQ driver instance.
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -267,7 +267,7 @@ cfn_hal_irq_power_state_set (cfn_hal_irq_t *p_driver, cfn_hal_power_state_t stat
 
 /**
  * @brief Enables one or more IRQ nominal events.
- * @param driver Pointer to the IRQ driver instance.
+ * @param p_driver Pointer to the IRQ driver instance.
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -283,7 +283,7 @@ cfn_hal_irq_event_enable (cfn_hal_irq_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Disables one or more IRQ nominal events.
- * @param driver Pointer to the IRQ driver instance.
+ * @param p_driver Pointer to the IRQ driver instance.
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -299,8 +299,8 @@ cfn_hal_irq_event_disable (cfn_hal_irq_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Retrieves the current IRQ nominal event status.
- * @param driver Pointer to the IRQ driver instance.
- * @param event_mask [out] Pointer to store the event mask.
+ * @param p_driver Pointer to the IRQ driver instance.
+ * @param p_event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -315,7 +315,7 @@ cfn_hal_irq_event_get (cfn_hal_irq_t *p_driver, uint32_t *p_event_mask)
 
 /**
  * @brief Enables one or more IRQ exception errors.
- * @param driver Pointer to the IRQ driver instance.
+ * @param p_driver Pointer to the IRQ driver instance.
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -331,7 +331,7 @@ cfn_hal_irq_error_enable (cfn_hal_irq_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Disables one or more IRQ exception errors.
- * @param driver Pointer to the IRQ driver instance.
+ * @param p_driver Pointer to the IRQ driver instance.
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -347,8 +347,8 @@ cfn_hal_irq_error_disable (cfn_hal_irq_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Retrieves the current IRQ exception error status.
- * @param driver Pointer to the IRQ driver instance.
- * @param error_mask [out] Pointer to store the error mask.
+ * @param p_driver Pointer to the IRQ driver instance.
+ * @param p_error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -365,7 +365,7 @@ cfn_hal_irq_error_get (cfn_hal_irq_t *p_driver, uint32_t *p_error_mask)
 
 /**
  * @brief Enables interrupts globally at the processor level.
- * @param driver Pointer to the IRQ driver instance.
+ * @param p_driver Pointer to the IRQ driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -378,7 +378,7 @@ cfn_hal_irq_global_enable (cfn_hal_irq_t *p_driver)
 
 /**
  * @brief Disables interrupts globally at the processor level.
- * @param driver Pointer to the IRQ driver instance.
+ * @param p_driver Pointer to the IRQ driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -391,7 +391,7 @@ cfn_hal_irq_global_disable (cfn_hal_irq_t *p_driver)
 
 /**
  * @brief Enables a specific interrupt vector.
- * @param driver Pointer to the IRQ driver instance.
+ * @param p_driver Pointer to the IRQ driver instance.
  * @param irq_id Numeric identifier of the target interrupt.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -405,7 +405,7 @@ cfn_hal_irq_enable_vector (cfn_hal_irq_t *p_driver, uint32_t irq_id)
 
 /**
  * @brief Disables a specific interrupt vector.
- * @param driver Pointer to the IRQ driver instance.
+ * @param p_driver Pointer to the IRQ driver instance.
  * @param irq_id Numeric identifier of the target interrupt.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -419,7 +419,7 @@ cfn_hal_irq_disable_vector (cfn_hal_irq_t *p_driver, uint32_t irq_id)
 
 /**
  * @brief Sets the priority level for a specific interrupt vector.
- * @param driver Pointer to the IRQ driver instance.
+ * @param p_driver Pointer to the IRQ driver instance.
  * @param irq_id Numeric identifier of the target interrupt.
  * @param priority Target priority level (architecture dependent).
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
@@ -434,7 +434,7 @@ cfn_hal_irq_set_priority (cfn_hal_irq_t *p_driver, uint32_t irq_id, uint32_t pri
 
 /**
  * @brief Clears the pending status of a specific interrupt vector.
- * @param driver Pointer to the IRQ driver instance.
+ * @param p_driver Pointer to the IRQ driver instance.
  * @param irq_id Numeric identifier of the target interrupt.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */

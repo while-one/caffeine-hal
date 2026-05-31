@@ -149,12 +149,12 @@ typedef struct cfn_hal_i2c_api_s cfn_hal_i2c_api_t;
 
 /**
  * @brief I2C callback signature.
- * @param driver Pointer to the I2C driver instance.
+ * @param p_driver Pointer to the I2C driver instance.
  * @param event_mask Mask of triggered nominal events.
  * @param error_mask Mask of triggered exception errors.
- * @param payload Pointer to the transaction buffer (if applicable).
+ * @param p_payload Pointer to the transaction buffer (if applicable).
  * @param nbr_of_bytes Number of bytes transferred.
- * @param user_arg User-defined argument passed during registration.
+ * @param p_user_arg User-defined argument passed during registration.
  */
 typedef void (*cfn_hal_i2c_callback_t)(cfn_hal_i2c_t *p_driver,
                                        uint32_t       event_mask,
@@ -215,8 +215,8 @@ cfn_hal_i2c_populate (cfn_hal_i2c_t              *p_driver,
 
 /**
  * @brief Validates the I2C configuration.
- * @param driver Pointer to the I2C driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the I2C driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -237,7 +237,7 @@ cfn_hal_i2c_config_validate (const cfn_hal_i2c_t *p_driver, const cfn_hal_i2c_co
 
 /**
  * @brief Initializes the I2C driver.
- * @param driver Pointer to the I2C driver instance.
+ * @param p_driver Pointer to the I2C driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -258,7 +258,7 @@ cfn_hal_i2c_init (cfn_hal_i2c_t *p_driver)
 
 /**
  * @brief Deinitializes the I2C driver.
- * @param driver Pointer to the I2C driver instance.
+ * @param p_driver Pointer to the I2C driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -273,8 +273,8 @@ cfn_hal_i2c_deinit (cfn_hal_i2c_t *p_driver)
 
 /**
  * @brief Sets the I2C configuration.
- * @param driver Pointer to the I2C driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the I2C driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -297,8 +297,8 @@ cfn_hal_i2c_config_set (cfn_hal_i2c_t *p_driver, const cfn_hal_i2c_config_t *p_c
 
 /**
  * @brief Gets the current I2C configuration.
- * @param driver Pointer to the I2C driver instance.
- * @param config [out] Pointer to store the configuration.
+ * @param p_driver Pointer to the I2C driver instance.
+ * @param p_config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -314,9 +314,9 @@ cfn_hal_i2c_config_get (cfn_hal_i2c_t *p_driver, cfn_hal_i2c_config_t *p_config)
 
 /**
  * @brief Registers a callback for I2C events and errors.
- * @param driver Pointer to the I2C driver instance.
+ * @param p_driver Pointer to the I2C driver instance.
  * @param callback The callback function to register.
- * @param user_arg User-defined argument passed to the callback.
+ * @param p_user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -336,7 +336,7 @@ cfn_hal_i2c_callback_register (cfn_hal_i2c_t *p_driver, const cfn_hal_i2c_callba
 
 /**
  * @brief Sets the I2C power state.
- * @param driver Pointer to the I2C driver instance.
+ * @param p_driver Pointer to the I2C driver instance.
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -352,7 +352,7 @@ cfn_hal_i2c_power_state_set (cfn_hal_i2c_t *p_driver, cfn_hal_power_state_t stat
 
 /**
  * @brief Enables one or more I2C nominal events.
- * @param driver Pointer to the I2C driver instance.
+ * @param p_driver Pointer to the I2C driver instance.
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -368,7 +368,7 @@ cfn_hal_i2c_event_enable (cfn_hal_i2c_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Disables one or more I2C nominal events.
- * @param driver Pointer to the I2C driver instance.
+ * @param p_driver Pointer to the I2C driver instance.
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -384,8 +384,8 @@ cfn_hal_i2c_event_disable (cfn_hal_i2c_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Retrieves the current I2C nominal event status.
- * @param driver Pointer to the I2C driver instance.
- * @param event_mask [out] Pointer to store the event mask.
+ * @param p_driver Pointer to the I2C driver instance.
+ * @param p_event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -400,7 +400,7 @@ cfn_hal_i2c_event_get (cfn_hal_i2c_t *p_driver, uint32_t *p_event_mask)
 
 /**
  * @brief Enables one or more I2C exception errors.
- * @param driver Pointer to the I2C driver instance.
+ * @param p_driver Pointer to the I2C driver instance.
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -416,7 +416,7 @@ cfn_hal_i2c_error_enable (cfn_hal_i2c_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Disables one or more I2C exception errors.
- * @param driver Pointer to the I2C driver instance.
+ * @param p_driver Pointer to the I2C driver instance.
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -432,8 +432,8 @@ cfn_hal_i2c_error_disable (cfn_hal_i2c_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Retrieves the current I2C exception error status.
- * @param driver Pointer to the I2C driver instance.
- * @param error_mask [out] Pointer to store the error mask.
+ * @param p_driver Pointer to the I2C driver instance.
+ * @param p_error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -450,8 +450,8 @@ cfn_hal_i2c_error_get (cfn_hal_i2c_t *p_driver, uint32_t *p_error_mask)
 
 /**
  * @brief Starts an I2C transaction using interrupts (non-blocking).
- * @param driver Pointer to the I2C driver instance.
- * @param xfr Pointer to the transaction structure.
+ * @param p_driver Pointer to the I2C driver instance.
+ * @param p_xfr Pointer to the transaction structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -464,7 +464,7 @@ cfn_hal_i2c_xfr_irq (cfn_hal_i2c_t *p_driver, const cfn_hal_i2c_transaction_t *p
 
 /**
  * @brief Aborts an ongoing non-blocking I2C transaction.
- * @param driver Pointer to the I2C driver instance.
+ * @param p_driver Pointer to the I2C driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -477,8 +477,8 @@ cfn_hal_i2c_xfr_irq_abort (cfn_hal_i2c_t *p_driver)
 
 /**
  * @brief Executes an I2C transaction using polling (blocking).
- * @param driver Pointer to the I2C driver instance.
- * @param xfr Pointer to the transaction structure.
+ * @param p_driver Pointer to the I2C driver instance.
+ * @param p_xfr Pointer to the transaction structure.
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -492,8 +492,8 @@ cfn_hal_i2c_xfr_polling (cfn_hal_i2c_t *p_driver, const cfn_hal_i2c_transaction_
 
 /**
  * @brief Reads data from a specific memory address on an I2C device (blocking).
- * @param driver Pointer to the I2C driver instance.
- * @param mem_xfr Pointer to the memory transaction structure.
+ * @param p_driver Pointer to the I2C driver instance.
+ * @param p_mem_xfr Pointer to the memory transaction structure.
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -507,8 +507,8 @@ cfn_hal_i2c_mem_read (cfn_hal_i2c_t *p_driver, const cfn_hal_i2c_mem_transaction
 
 /**
  * @brief Writes data to a specific memory address on an I2C device (blocking).
- * @param driver Pointer to the I2C driver instance.
- * @param mem_xfr Pointer to the memory transaction structure.
+ * @param p_driver Pointer to the I2C driver instance.
+ * @param p_mem_xfr Pointer to the memory transaction structure.
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -522,8 +522,8 @@ cfn_hal_i2c_mem_write (cfn_hal_i2c_t *p_driver, const cfn_hal_i2c_mem_transactio
 
 /**
  * @brief Starts an I2C transaction using DMA (non-blocking).
- * @param driver Pointer to the I2C driver instance.
- * @param xfr Pointer to the transaction structure.
+ * @param p_driver Pointer to the I2C driver instance.
+ * @param p_xfr Pointer to the transaction structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t

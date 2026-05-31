@@ -110,10 +110,10 @@ typedef struct cfn_hal_dac_api_s cfn_hal_dac_api_t;
 
 /**
  * @brief DAC callback signature.
- * @param driver Pointer to the DAC driver instance.
+ * @param p_driver Pointer to the DAC driver instance.
  * @param event_mask Mask of triggered nominal events.
  * @param error_mask Mask of triggered exception errors.
- * @param user_arg User-defined argument passed during registration.
+ * @param p_user_arg User-defined argument passed during registration.
  */
 typedef void (*cfn_hal_dac_callback_t)(cfn_hal_dac_t *p_driver,
                                        uint32_t       event_mask,
@@ -164,8 +164,8 @@ cfn_hal_dac_populate (cfn_hal_dac_t              *p_driver,
 
 /**
  * @brief Validates the DAC configuration.
- * @param driver Pointer to the DAC driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the DAC driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -186,7 +186,7 @@ cfn_hal_dac_config_validate (const cfn_hal_dac_t *p_driver, const cfn_hal_dac_co
 
 /**
  * @brief Initializes the DAC driver.
- * @param driver Pointer to the DAC driver instance.
+ * @param p_driver Pointer to the DAC driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -207,7 +207,7 @@ cfn_hal_dac_init (cfn_hal_dac_t *p_driver)
 
 /**
  * @brief Deinitializes the DAC driver.
- * @param driver Pointer to the DAC driver instance.
+ * @param p_driver Pointer to the DAC driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -222,8 +222,8 @@ cfn_hal_dac_deinit (cfn_hal_dac_t *p_driver)
 
 /**
  * @brief Sets the DAC configuration.
- * @param driver Pointer to the DAC driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the DAC driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -246,8 +246,8 @@ cfn_hal_dac_config_set (cfn_hal_dac_t *p_driver, const cfn_hal_dac_config_t *p_c
 
 /**
  * @brief Gets the current DAC configuration.
- * @param driver Pointer to the DAC driver instance.
- * @param config [out] Pointer to store the configuration.
+ * @param p_driver Pointer to the DAC driver instance.
+ * @param p_config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -263,9 +263,9 @@ cfn_hal_dac_config_get (cfn_hal_dac_t *p_driver, cfn_hal_dac_config_t *p_config)
 
 /**
  * @brief Registers a callback for DAC events and errors.
- * @param driver Pointer to the DAC driver instance.
+ * @param p_driver Pointer to the DAC driver instance.
  * @param callback The callback function to register.
- * @param user_arg User-defined argument passed to the callback.
+ * @param p_user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -285,7 +285,7 @@ cfn_hal_dac_callback_register (cfn_hal_dac_t *p_driver, const cfn_hal_dac_callba
 
 /**
  * @brief Sets the DAC power state.
- * @param driver Pointer to the DAC driver instance.
+ * @param p_driver Pointer to the DAC driver instance.
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -301,7 +301,7 @@ cfn_hal_dac_power_state_set (cfn_hal_dac_t *p_driver, cfn_hal_power_state_t stat
 
 /**
  * @brief Enables one or more DAC nominal events.
- * @param driver Pointer to the DAC driver instance.
+ * @param p_driver Pointer to the DAC driver instance.
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -317,7 +317,7 @@ cfn_hal_dac_event_enable (cfn_hal_dac_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Disables one or more DAC nominal events.
- * @param driver Pointer to the DAC driver instance.
+ * @param p_driver Pointer to the DAC driver instance.
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -333,8 +333,8 @@ cfn_hal_dac_event_disable (cfn_hal_dac_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Retrieves the current DAC nominal event status.
- * @param driver Pointer to the DAC driver instance.
- * @param event_mask [out] Pointer to store the event mask.
+ * @param p_driver Pointer to the DAC driver instance.
+ * @param p_event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -349,7 +349,7 @@ cfn_hal_dac_event_get (cfn_hal_dac_t *p_driver, uint32_t *p_event_mask)
 
 /**
  * @brief Enables one or more DAC exception errors.
- * @param driver Pointer to the DAC driver instance.
+ * @param p_driver Pointer to the DAC driver instance.
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -365,7 +365,7 @@ cfn_hal_dac_error_enable (cfn_hal_dac_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Disables one or more DAC exception errors.
- * @param driver Pointer to the DAC driver instance.
+ * @param p_driver Pointer to the DAC driver instance.
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -381,8 +381,8 @@ cfn_hal_dac_error_disable (cfn_hal_dac_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Retrieves the current DAC exception error status.
- * @param driver Pointer to the DAC driver instance.
- * @param error_mask [out] Pointer to store the error mask.
+ * @param p_driver Pointer to the DAC driver instance.
+ * @param p_error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -399,7 +399,7 @@ cfn_hal_dac_error_get (cfn_hal_dac_t *p_driver, uint32_t *p_error_mask)
 
 /**
  * @brief Sets the analog output value (blocking).
- * @param driver Pointer to the DAC driver instance.
+ * @param p_driver Pointer to the DAC driver instance.
  * @param value The raw digital value to convert.
  * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
@@ -414,7 +414,7 @@ cfn_hal_dac_set_value (cfn_hal_dac_t *p_driver, uint32_t value, uint32_t timeout
 
 /**
  * @brief Starts DAC conversion (e.g., enables output).
- * @param driver Pointer to the DAC driver instance.
+ * @param p_driver Pointer to the DAC driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -427,7 +427,7 @@ cfn_hal_dac_start (cfn_hal_dac_t *p_driver)
 
 /**
  * @brief Stops DAC conversion (e.g., disables output).
- * @param driver Pointer to the DAC driver instance.
+ * @param p_driver Pointer to the DAC driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -440,8 +440,8 @@ cfn_hal_dac_stop (cfn_hal_dac_t *p_driver)
 
 /**
  * @brief Starts continuous DAC output using DMA.
- * @param driver Pointer to the DAC driver instance.
- * @param data Pointer to the buffer containing samples to write.
+ * @param p_driver Pointer to the DAC driver instance.
+ * @param p_data Pointer to the buffer containing samples to write.
  * @param nbr_of_samples Number of samples to output.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */

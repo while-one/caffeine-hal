@@ -135,10 +135,10 @@ typedef struct cfn_hal_i2s_api_s cfn_hal_i2s_api_t;
 
 /**
  * @brief I2S callback signature.
- * @param driver Pointer to the I2S driver instance.
+ * @param p_driver Pointer to the I2S driver instance.
  * @param event_mask Mask of triggered nominal events.
  * @param error_mask Mask of triggered exception errors.
- * @param user_arg User-defined argument passed during registration.
+ * @param p_user_arg User-defined argument passed during registration.
  */
 typedef void (*cfn_hal_i2s_callback_t)(cfn_hal_i2s_t *p_driver,
                                        uint32_t       event_mask,
@@ -190,8 +190,8 @@ cfn_hal_i2s_populate (cfn_hal_i2s_t              *p_driver,
 
 /**
  * @brief Validates the I2S configuration.
- * @param driver Pointer to the I2S driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the I2S driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -213,7 +213,7 @@ cfn_hal_i2s_config_validate (const cfn_hal_i2s_t *p_driver, const cfn_hal_i2s_co
 
 /**
  * @brief Initializes the I2S driver.
- * @param driver Pointer to the I2S driver instance.
+ * @param p_driver Pointer to the I2S driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -234,7 +234,7 @@ cfn_hal_i2s_init (cfn_hal_i2s_t *p_driver)
 
 /**
  * @brief Deinitializes the I2S driver.
- * @param driver Pointer to the I2S driver instance.
+ * @param p_driver Pointer to the I2S driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -249,8 +249,8 @@ cfn_hal_i2s_deinit (cfn_hal_i2s_t *p_driver)
 
 /**
  * @brief Sets the I2S configuration.
- * @param driver Pointer to the I2S driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the I2S driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -273,8 +273,8 @@ cfn_hal_i2s_config_set (cfn_hal_i2s_t *p_driver, const cfn_hal_i2s_config_t *p_c
 
 /**
  * @brief Gets the current I2S configuration.
- * @param driver Pointer to the I2S driver instance.
- * @param config [out] Pointer to store the configuration.
+ * @param p_driver Pointer to the I2S driver instance.
+ * @param p_config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -290,9 +290,9 @@ cfn_hal_i2s_config_get (cfn_hal_i2s_t *p_driver, cfn_hal_i2s_config_t *p_config)
 
 /**
  * @brief Registers a callback for I2S events and errors.
- * @param driver Pointer to the I2S driver instance.
+ * @param p_driver Pointer to the I2S driver instance.
  * @param callback The callback function to register.
- * @param user_arg User-defined argument passed to the callback.
+ * @param p_user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -312,7 +312,7 @@ cfn_hal_i2s_callback_register (cfn_hal_i2s_t *p_driver, const cfn_hal_i2s_callba
 
 /**
  * @brief Sets the I2S power state.
- * @param driver Pointer to the I2S driver instance.
+ * @param p_driver Pointer to the I2S driver instance.
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -328,7 +328,7 @@ cfn_hal_i2s_power_state_set (cfn_hal_i2s_t *p_driver, cfn_hal_power_state_t stat
 
 /**
  * @brief Enables one or more I2S nominal events.
- * @param driver Pointer to the I2S driver instance.
+ * @param p_driver Pointer to the I2S driver instance.
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -344,7 +344,7 @@ cfn_hal_i2s_event_enable (cfn_hal_i2s_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Disables one or more I2S nominal events.
- * @param driver Pointer to the I2S driver instance.
+ * @param p_driver Pointer to the I2S driver instance.
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -360,8 +360,8 @@ cfn_hal_i2s_event_disable (cfn_hal_i2s_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Retrieves the current I2S nominal event status.
- * @param driver Pointer to the I2S driver instance.
- * @param event_mask [out] Pointer to store the event mask.
+ * @param p_driver Pointer to the I2S driver instance.
+ * @param p_event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -376,7 +376,7 @@ cfn_hal_i2s_event_get (cfn_hal_i2s_t *p_driver, uint32_t *p_event_mask)
 
 /**
  * @brief Enables one or more I2S exception errors.
- * @param driver Pointer to the I2S driver instance.
+ * @param p_driver Pointer to the I2S driver instance.
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -392,7 +392,7 @@ cfn_hal_i2s_error_enable (cfn_hal_i2s_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Disables one or more I2S exception errors.
- * @param driver Pointer to the I2S driver instance.
+ * @param p_driver Pointer to the I2S driver instance.
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -408,8 +408,8 @@ cfn_hal_i2s_error_disable (cfn_hal_i2s_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Retrieves the current I2S exception error status.
- * @param driver Pointer to the I2S driver instance.
- * @param error_mask [out] Pointer to store the error mask.
+ * @param p_driver Pointer to the I2S driver instance.
+ * @param p_error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -426,8 +426,8 @@ cfn_hal_i2s_error_get (cfn_hal_i2s_t *p_driver, uint32_t *p_error_mask)
 
 /**
  * @brief Starts non-blocking audio transmission via DMA.
- * @param driver Pointer to the I2S driver instance.
- * @param data Pointer to the buffer containing audio samples.
+ * @param p_driver Pointer to the I2S driver instance.
+ * @param p_data Pointer to the buffer containing audio samples.
  * @param size Number of samples to transmit.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -441,8 +441,8 @@ cfn_hal_i2s_transmit_dma (cfn_hal_i2s_t *p_driver, const uint16_t *p_data, size_
 
 /**
  * @brief Starts non-blocking audio reception via DMA.
- * @param driver Pointer to the I2S driver instance.
- * @param data Pointer to the buffer where received samples will be stored.
+ * @param p_driver Pointer to the I2S driver instance.
+ * @param p_data Pointer to the buffer where received samples will be stored.
  * @param size Number of samples to receive.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -456,7 +456,7 @@ cfn_hal_i2s_receive_dma (cfn_hal_i2s_t *p_driver, uint16_t *p_data, size_t size)
 
 /**
  * @brief Pauses the ongoing I2S audio stream.
- * @param driver Pointer to the I2S driver instance.
+ * @param p_driver Pointer to the I2S driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -469,7 +469,7 @@ cfn_hal_i2s_pause (cfn_hal_i2s_t *p_driver)
 
 /**
  * @brief Resumes a previously paused I2S audio stream.
- * @param driver Pointer to the I2S driver instance.
+ * @param p_driver Pointer to the I2S driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -482,7 +482,7 @@ cfn_hal_i2s_resume (cfn_hal_i2s_t *p_driver)
 
 /**
  * @brief Stops the I2S audio operation and DMA transfers.
- * @param driver Pointer to the I2S driver instance.
+ * @param p_driver Pointer to the I2S driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t

@@ -99,11 +99,11 @@ typedef struct cfn_hal_timer_api_s cfn_hal_timer_api_t;
 
 /**
  * @brief Timer callback signature.
- * @param driver Pointer to the Timer driver instance.
+ * @param p_driver Pointer to the Timer driver instance.
  * @param event_mask Mask of triggered nominal events.
  * @param error_mask Mask of triggered exception errors.
  * @param channel Source channel index (if applicable).
- * @param user_arg User-defined argument passed during registration.
+ * @param p_user_arg User-defined argument passed during registration.
  */
 typedef void (*cfn_hal_timer_callback_t)(
     cfn_hal_timer_t *p_driver, uint32_t event_mask, uint32_t error_mask, uint32_t channel, void *p_user_arg);
@@ -153,8 +153,8 @@ cfn_hal_timer_populate (cfn_hal_timer_t              *p_driver,
 }
 /**
  * @brief Validates the Timer configuration.
- * @param driver Pointer to the TIMER driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the TIMER driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -170,7 +170,7 @@ cfn_hal_timer_config_validate (const cfn_hal_timer_t *p_driver, const cfn_hal_ti
 
 /**
  * @brief Initializes the Timer driver.
- * @param driver Pointer to the Timer driver instance.
+ * @param p_driver Pointer to the Timer driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -191,7 +191,7 @@ cfn_hal_timer_init (cfn_hal_timer_t *p_driver)
 
 /**
  * @brief Deinitializes the Timer driver.
- * @param driver Pointer to the Timer driver instance.
+ * @param p_driver Pointer to the Timer driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -206,8 +206,8 @@ cfn_hal_timer_deinit (cfn_hal_timer_t *p_driver)
 
 /**
  * @brief Sets the Timer configuration.
- * @param driver Pointer to the Timer driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the Timer driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -225,8 +225,8 @@ cfn_hal_timer_config_set (cfn_hal_timer_t *p_driver, const cfn_hal_timer_config_
 
 /**
  * @brief Gets the current Timer configuration.
- * @param driver Pointer to the Timer driver instance.
- * @param config [out] Pointer to store the configuration.
+ * @param p_driver Pointer to the Timer driver instance.
+ * @param p_config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -242,9 +242,9 @@ cfn_hal_timer_config_get (cfn_hal_timer_t *p_driver, cfn_hal_timer_config_t *p_c
 
 /**
  * @brief Registers a callback for Timer events and errors.
- * @param driver Pointer to the Timer driver instance.
+ * @param p_driver Pointer to the Timer driver instance.
  * @param callback The callback function to register.
- * @param user_arg User-defined argument passed to the callback.
+ * @param p_user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -264,7 +264,7 @@ cfn_hal_timer_callback_register (cfn_hal_timer_t *p_driver, const cfn_hal_timer_
 
 /**
  * @brief Sets the Timer power state.
- * @param driver Pointer to the Timer driver instance.
+ * @param p_driver Pointer to the Timer driver instance.
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -280,7 +280,7 @@ cfn_hal_timer_power_state_set (cfn_hal_timer_t *p_driver, cfn_hal_power_state_t 
 
 /**
  * @brief Enables one or more Timer nominal events.
- * @param driver Pointer to the Timer driver instance.
+ * @param p_driver Pointer to the Timer driver instance.
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -296,7 +296,7 @@ cfn_hal_timer_event_enable (cfn_hal_timer_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Disables one or more Timer nominal events.
- * @param driver Pointer to the Timer driver instance.
+ * @param p_driver Pointer to the Timer driver instance.
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -312,8 +312,8 @@ cfn_hal_timer_event_disable (cfn_hal_timer_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Retrieves the current Timer nominal event status.
- * @param driver Pointer to the Timer driver instance.
- * @param event_mask [out] Pointer to store the event mask.
+ * @param p_driver Pointer to the Timer driver instance.
+ * @param p_event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -328,7 +328,7 @@ cfn_hal_timer_event_get (cfn_hal_timer_t *p_driver, uint32_t *p_event_mask)
 
 /**
  * @brief Enables one or more Timer exception errors.
- * @param driver Pointer to the Timer driver instance.
+ * @param p_driver Pointer to the Timer driver instance.
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -344,7 +344,7 @@ cfn_hal_timer_error_enable (cfn_hal_timer_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Disables one or more Timer exception errors.
- * @param driver Pointer to the Timer driver instance.
+ * @param p_driver Pointer to the Timer driver instance.
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -360,8 +360,8 @@ cfn_hal_timer_error_disable (cfn_hal_timer_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Retrieves the current Timer exception error status.
- * @param driver Pointer to the Timer driver instance.
- * @param error_mask [out] Pointer to store the error mask.
+ * @param p_driver Pointer to the Timer driver instance.
+ * @param p_error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -378,7 +378,7 @@ cfn_hal_timer_error_get (cfn_hal_timer_t *p_driver, uint32_t *p_error_mask)
 
 /**
  * @brief Starts the timer counter.
- * @param driver Pointer to the Timer driver instance.
+ * @param p_driver Pointer to the Timer driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -391,7 +391,7 @@ cfn_hal_timer_start (cfn_hal_timer_t *p_driver)
 
 /**
  * @brief Stops the timer counter.
- * @param driver Pointer to the Timer driver instance.
+ * @param p_driver Pointer to the Timer driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -404,9 +404,9 @@ cfn_hal_timer_stop (cfn_hal_timer_t *p_driver)
 
 /**
  * @brief Reads the current tick count for a specific channel (32-bit).
- * @param driver Pointer to the Timer driver instance.
+ * @param p_driver Pointer to the Timer driver instance.
  * @param channel Channel index.
- * @param ticks [out] Pointer to store the tick count.
+ * @param p_ticks [out] Pointer to store the tick count.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -419,9 +419,9 @@ cfn_hal_timer_get_ticks (cfn_hal_timer_t *p_driver, uint32_t channel, uint32_t *
 
 /**
  * @brief Reads the current tick count for a specific channel (64-bit).
- * @param driver Pointer to the Timer driver instance.
+ * @param p_driver Pointer to the Timer driver instance.
  * @param channel Channel index.
- * @param ticks [out] Pointer to store the tick count.
+ * @param p_ticks [out] Pointer to store the tick count.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -436,8 +436,8 @@ cfn_hal_timer_get_ticks_u64 (cfn_hal_timer_t *p_driver,
 
 /**
  * @brief Updates the timer period/reload value for a specific channel.
- * @param driver Pointer to the Timer driver instance.
- * @param period Pointer to the structure defining channel and new tick value.
+ * @param p_driver Pointer to the Timer driver instance.
+ * @param p_period Pointer to the structure defining channel and new tick value.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t

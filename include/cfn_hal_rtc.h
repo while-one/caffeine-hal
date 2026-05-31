@@ -118,11 +118,11 @@ typedef struct cfn_hal_rtc_api_s cfn_hal_rtc_api_t;
 
 /**
  * @brief RTC callback signature.
- * @param driver Pointer to the RTC driver instance.
+ * @param p_driver Pointer to the RTC driver instance.
  * @param event_mask Mask of triggered nominal events.
  * @param error_mask Mask of triggered exception errors.
- * @param id Identifier of the source (e.g., Alarm index).
- * @param user_arg User-defined argument passed during registration.
+ * @param source_id Identifier of the source (e.g., Alarm index).
+ * @param p_user_arg User-defined argument passed during registration.
  */
 typedef void (*cfn_hal_rtc_callback_t)(
     cfn_hal_rtc_t *p_driver, uint32_t event_mask, uint32_t error_mask, uint32_t source_id, void *p_user_arg);
@@ -173,8 +173,8 @@ cfn_hal_rtc_populate (cfn_hal_rtc_t              *p_driver,
 }
 /**
  * @brief Validates the RTC configuration.
- * @param driver Pointer to the RTC driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the RTC driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -196,7 +196,7 @@ cfn_hal_rtc_config_validate (const cfn_hal_rtc_t *p_driver, const cfn_hal_rtc_co
 
 /**
  * @brief Initializes the RTC driver.
- * @param driver Pointer to the RTC driver instance.
+ * @param p_driver Pointer to the RTC driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -217,7 +217,7 @@ cfn_hal_rtc_init (cfn_hal_rtc_t *p_driver)
 
 /**
  * @brief Deinitializes the RTC driver.
- * @param driver Pointer to the RTC driver instance.
+ * @param p_driver Pointer to the RTC driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -232,8 +232,8 @@ cfn_hal_rtc_deinit (cfn_hal_rtc_t *p_driver)
 
 /**
  * @brief Sets the RTC configuration.
- * @param driver Pointer to the RTC driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the RTC driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -256,8 +256,8 @@ cfn_hal_rtc_config_set (cfn_hal_rtc_t *p_driver, const cfn_hal_rtc_config_t *p_c
 
 /**
  * @brief Gets the current RTC configuration.
- * @param driver Pointer to the RTC driver instance.
- * @param config [out] Pointer to store the configuration.
+ * @param p_driver Pointer to the RTC driver instance.
+ * @param p_config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -273,9 +273,9 @@ cfn_hal_rtc_config_get (cfn_hal_rtc_t *p_driver, cfn_hal_rtc_config_t *p_config)
 
 /**
  * @brief Registers a callback for RTC events and errors.
- * @param driver Pointer to the RTC driver instance.
+ * @param p_driver Pointer to the RTC driver instance.
  * @param callback The callback function to register.
- * @param user_arg User-defined argument passed to the callback.
+ * @param p_user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -295,7 +295,7 @@ cfn_hal_rtc_callback_register (cfn_hal_rtc_t *p_driver, const cfn_hal_rtc_callba
 
 /**
  * @brief Sets the RTC power state.
- * @param driver Pointer to the RTC driver instance.
+ * @param p_driver Pointer to the RTC driver instance.
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -311,7 +311,7 @@ cfn_hal_rtc_power_state_set (cfn_hal_rtc_t *p_driver, cfn_hal_power_state_t stat
 
 /**
  * @brief Enables one or more RTC nominal events.
- * @param driver Pointer to the RTC driver instance.
+ * @param p_driver Pointer to the RTC driver instance.
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -327,7 +327,7 @@ cfn_hal_rtc_event_enable (cfn_hal_rtc_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Disables one or more RTC nominal events.
- * @param driver Pointer to the RTC driver instance.
+ * @param p_driver Pointer to the RTC driver instance.
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -343,8 +343,8 @@ cfn_hal_rtc_event_disable (cfn_hal_rtc_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Retrieves the current RTC nominal event status.
- * @param driver Pointer to the RTC driver instance.
- * @param event_mask [out] Pointer to store the event mask.
+ * @param p_driver Pointer to the RTC driver instance.
+ * @param p_event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -359,7 +359,7 @@ cfn_hal_rtc_event_get (cfn_hal_rtc_t *p_driver, uint32_t *p_event_mask)
 
 /**
  * @brief Enables one or more RTC exception errors.
- * @param driver Pointer to the RTC driver instance.
+ * @param p_driver Pointer to the RTC driver instance.
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -375,7 +375,7 @@ cfn_hal_rtc_error_enable (cfn_hal_rtc_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Disables one or more RTC exception errors.
- * @param driver Pointer to the RTC driver instance.
+ * @param p_driver Pointer to the RTC driver instance.
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -391,8 +391,8 @@ cfn_hal_rtc_error_disable (cfn_hal_rtc_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Retrieves the current RTC exception error status.
- * @param driver Pointer to the RTC driver instance.
- * @param error_mask [out] Pointer to store the error mask.
+ * @param p_driver Pointer to the RTC driver instance.
+ * @param p_error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -409,8 +409,8 @@ cfn_hal_rtc_error_get (cfn_hal_rtc_t *p_driver, uint32_t *p_error_mask)
 
 /**
  * @brief Sets the RTC current wall-clock time.
- * @param driver Pointer to the RTC driver instance.
- * @param time Pointer to the structure containing the new time.
+ * @param p_driver Pointer to the RTC driver instance.
+ * @param p_time Pointer to the structure containing the new time.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -423,8 +423,8 @@ cfn_hal_rtc_set_time (cfn_hal_rtc_t *p_driver, cfn_hal_rtc_time_t *p_time)
 
 /**
  * @brief Retrieves the current wall-clock time from the RTC.
- * @param driver Pointer to the RTC driver instance.
- * @param time [out] Pointer to store the current time.
+ * @param p_driver Pointer to the RTC driver instance.
+ * @param p_time [out] Pointer to store the current time.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -437,9 +437,9 @@ cfn_hal_rtc_get_time (cfn_hal_rtc_t *p_driver, cfn_hal_rtc_time_t *p_time)
 
 /**
  * @brief Configures an alarm event for a specific time.
- * @param driver Pointer to the RTC driver instance.
- * @param id Index of the alarm to set.
- * @param time Pointer to the structure containing the alarm time.
+ * @param p_driver Pointer to the RTC driver instance.
+ * @param alarm_id Index of the alarm to set.
+ * @param p_time Pointer to the structure containing the alarm time.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -452,10 +452,10 @@ cfn_hal_rtc_set_alarm (cfn_hal_rtc_t *p_driver, uint32_t alarm_id, cfn_hal_rtc_t
 
 /**
  * @brief Retrieves configuration and status of a specific alarm.
- * @param driver Pointer to the RTC driver instance.
- * @param id Index of the alarm.
- * @param elapsed [out] Set to true if the alarm has triggered.
- * @param time [out] Pointer to store the configured alarm time.
+ * @param p_driver Pointer to the RTC driver instance.
+ * @param alarm_id Index of the alarm.
+ * @param p_elapsed [out] Set to true if the alarm has triggered.
+ * @param p_time [out] Pointer to store the configured alarm time.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -469,8 +469,8 @@ cfn_hal_rtc_get_alarm (cfn_hal_rtc_t *p_driver, uint32_t alarm_id, bool *p_elaps
 
 /**
  * @brief Disables a previously configured alarm.
- * @param driver Pointer to the RTC driver instance.
- * @param id Index of the alarm to stop.
+ * @param p_driver Pointer to the RTC driver instance.
+ * @param alarm_id Index of the alarm to stop.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t

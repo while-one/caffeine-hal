@@ -95,10 +95,10 @@ typedef struct cfn_hal_comp_api_s cfn_hal_comp_api_t;
 
 /**
  * @brief COMP callback signature.
- * @param driver Pointer to the COMP driver instance.
+ * @param p_driver Pointer to the COMP driver instance.
  * @param event_mask Mask of triggered nominal events.
  * @param error_mask Mask of triggered exception errors.
- * @param user_arg User-defined argument passed during registration.
+ * @param p_user_arg User-defined argument passed during registration.
  */
 typedef void (*cfn_hal_comp_callback_t)(cfn_hal_comp_t *p_driver,
                                         uint32_t        event_mask,
@@ -150,8 +150,8 @@ cfn_hal_comp_populate (cfn_hal_comp_t              *p_driver,
 
 /**
  * @brief Validates the Comparator configuration.
- * @param driver Pointer to the COMP driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the COMP driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -167,7 +167,7 @@ cfn_hal_comp_config_validate (const cfn_hal_comp_t *p_driver, const cfn_hal_comp
 
 /**
  * @brief Initializes the Comparator driver.
- * @param driver Pointer to the COMP driver instance.
+ * @param p_driver Pointer to the COMP driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -188,7 +188,7 @@ cfn_hal_comp_init (cfn_hal_comp_t *p_driver)
 
 /**
  * @brief Deinitializes the Comparator driver.
- * @param driver Pointer to the COMP driver instance.
+ * @param p_driver Pointer to the COMP driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -203,8 +203,8 @@ cfn_hal_comp_deinit (cfn_hal_comp_t *p_driver)
 
 /**
  * @brief Sets the Comparator configuration.
- * @param driver Pointer to the COMP driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the COMP driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -227,8 +227,8 @@ cfn_hal_comp_config_set (cfn_hal_comp_t *p_driver, const cfn_hal_comp_config_t *
 
 /**
  * @brief Gets the current Comparator configuration.
- * @param driver Pointer to the COMP driver instance.
- * @param config [out] Pointer to store the configuration.
+ * @param p_driver Pointer to the COMP driver instance.
+ * @param p_config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -244,9 +244,9 @@ cfn_hal_comp_config_get (cfn_hal_comp_t *p_driver, cfn_hal_comp_config_t *p_conf
 
 /**
  * @brief Registers a callback for Comparator events and errors.
- * @param driver Pointer to the COMP driver instance.
+ * @param p_driver Pointer to the COMP driver instance.
  * @param callback The callback function to register.
- * @param user_arg User-defined argument passed to the callback.
+ * @param p_user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -266,7 +266,7 @@ cfn_hal_comp_callback_register (cfn_hal_comp_t *p_driver, const cfn_hal_comp_cal
 
 /**
  * @brief Sets the Comparator power state.
- * @param driver Pointer to the COMP driver instance.
+ * @param p_driver Pointer to the COMP driver instance.
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -282,7 +282,7 @@ cfn_hal_comp_power_state_set (cfn_hal_comp_t *p_driver, cfn_hal_power_state_t st
 
 /**
  * @brief Enables one or more Comparator nominal events.
- * @param driver Pointer to the COMP driver instance.
+ * @param p_driver Pointer to the COMP driver instance.
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -298,7 +298,7 @@ cfn_hal_comp_event_enable (cfn_hal_comp_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Disables one or more Comparator nominal events.
- * @param driver Pointer to the COMP driver instance.
+ * @param p_driver Pointer to the COMP driver instance.
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -314,8 +314,8 @@ cfn_hal_comp_event_disable (cfn_hal_comp_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Retrieves the current Comparator nominal event status.
- * @param driver Pointer to the COMP driver instance.
- * @param event_mask [out] Pointer to store the event mask.
+ * @param p_driver Pointer to the COMP driver instance.
+ * @param p_event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -330,7 +330,7 @@ cfn_hal_comp_event_get (cfn_hal_comp_t *p_driver, uint32_t *p_event_mask)
 
 /**
  * @brief Enables one or more Comparator exception errors.
- * @param driver Pointer to the COMP driver instance.
+ * @param p_driver Pointer to the COMP driver instance.
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -346,7 +346,7 @@ cfn_hal_comp_error_enable (cfn_hal_comp_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Disables one or more Comparator exception errors.
- * @param driver Pointer to the COMP driver instance.
+ * @param p_driver Pointer to the COMP driver instance.
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -362,8 +362,8 @@ cfn_hal_comp_error_disable (cfn_hal_comp_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Retrieves the current Comparator exception error status.
- * @param driver Pointer to the COMP driver instance.
- * @param error_mask [out] Pointer to store the error mask.
+ * @param p_driver Pointer to the COMP driver instance.
+ * @param p_error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -380,8 +380,8 @@ cfn_hal_comp_error_get (cfn_hal_comp_t *p_driver, uint32_t *p_error_mask)
 
 /**
  * @brief Reads the immediate logical output of the comparator.
- * @param driver Pointer to the COMP driver instance.
- * @param level [out] Pointer to store the current output level.
+ * @param p_driver Pointer to the COMP driver instance.
+ * @param p_level [out] Pointer to store the current output level.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -395,7 +395,7 @@ cfn_hal_comp_read_output (cfn_hal_comp_t *p_driver, cfn_hal_comp_level_t *p_leve
 /**
  * @brief Dynamically adjusts the reference threshold (if supported by
  * hardware).
- * @param driver Pointer to the COMP driver instance.
+ * @param p_driver Pointer to the COMP driver instance.
  * @param threshold The new threshold value to set.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -409,7 +409,7 @@ cfn_hal_comp_set_threshold (cfn_hal_comp_t *p_driver, uint32_t threshold)
 
 /**
  * @brief Enables/Starts the comparator operation.
- * @param driver Pointer to the COMP driver instance.
+ * @param p_driver Pointer to the COMP driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -422,7 +422,7 @@ cfn_hal_comp_start (cfn_hal_comp_t *p_driver)
 
 /**
  * @brief Disables/Stops the comparator operation.
- * @param driver Pointer to the COMP driver instance.
+ * @param p_driver Pointer to the COMP driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t

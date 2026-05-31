@@ -98,10 +98,10 @@ typedef struct cfn_hal_crypto_api_s cfn_hal_crypto_api_t;
 
 /**
  * @brief Crypto callback signature.
- * @param driver Pointer to the Crypto driver instance.
+ * @param p_driver Pointer to the Crypto driver instance.
  * @param event_mask Mask of triggered nominal events.
  * @param error_mask Mask of triggered exception errors.
- * @param user_arg User-defined argument passed during registration.
+ * @param p_user_arg User-defined argument passed during registration.
  */
 typedef void (*cfn_hal_crypto_callback_t)(cfn_hal_crypto_t *p_driver,
                                           uint32_t          event_mask,
@@ -156,8 +156,8 @@ cfn_hal_crypto_populate (cfn_hal_crypto_t              *p_driver,
 
 /**
  * @brief Validates the Crypto configuration.
- * @param driver Pointer to the CRYPTO driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the CRYPTO driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -178,7 +178,7 @@ cfn_hal_crypto_config_validate (const cfn_hal_crypto_t *p_driver, const cfn_hal_
 
 /**
  * @brief Initializes the Crypto driver.
- * @param driver Pointer to the Crypto driver instance.
+ * @param p_driver Pointer to the Crypto driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -199,7 +199,7 @@ cfn_hal_crypto_init (cfn_hal_crypto_t *p_driver)
 
 /**
  * @brief Deinitializes the Crypto driver.
- * @param driver Pointer to the Crypto driver instance.
+ * @param p_driver Pointer to the Crypto driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -214,8 +214,8 @@ cfn_hal_crypto_deinit (cfn_hal_crypto_t *p_driver)
 
 /**
  * @brief Sets the Crypto configuration.
- * @param driver Pointer to the Crypto driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the Crypto driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -233,8 +233,8 @@ cfn_hal_crypto_config_set (cfn_hal_crypto_t *p_driver, const cfn_hal_crypto_conf
 
 /**
  * @brief Gets the current Crypto configuration.
- * @param driver Pointer to the Crypto driver instance.
- * @param config [out] Pointer to store the configuration.
+ * @param p_driver Pointer to the Crypto driver instance.
+ * @param p_config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -250,9 +250,9 @@ cfn_hal_crypto_config_get (cfn_hal_crypto_t *p_driver, cfn_hal_crypto_config_t *
 
 /**
  * @brief Registers a callback for Crypto events and errors.
- * @param driver Pointer to the Crypto driver instance.
+ * @param p_driver Pointer to the Crypto driver instance.
  * @param callback The callback function to register.
- * @param user_arg User-defined argument passed to the callback.
+ * @param p_user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -274,7 +274,7 @@ cfn_hal_crypto_callback_register (cfn_hal_crypto_t               *p_driver,
 
 /**
  * @brief Sets the Crypto power state.
- * @param driver Pointer to the Crypto driver instance.
+ * @param p_driver Pointer to the Crypto driver instance.
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -290,7 +290,7 @@ cfn_hal_crypto_power_state_set (cfn_hal_crypto_t *p_driver, cfn_hal_power_state_
 
 /**
  * @brief Enables one or more Crypto nominal events.
- * @param driver Pointer to the Crypto driver instance.
+ * @param p_driver Pointer to the Crypto driver instance.
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -306,7 +306,7 @@ cfn_hal_crypto_event_enable (cfn_hal_crypto_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Disables one or more Crypto nominal events.
- * @param driver Pointer to the Crypto driver instance.
+ * @param p_driver Pointer to the Crypto driver instance.
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -322,8 +322,8 @@ cfn_hal_crypto_event_disable (cfn_hal_crypto_t *p_driver, uint32_t event_mask)
 
 /**
  * @brief Retrieves the current Crypto nominal event status.
- * @param driver Pointer to the Crypto driver instance.
- * @param event_mask [out] Pointer to store the event mask.
+ * @param p_driver Pointer to the Crypto driver instance.
+ * @param p_event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -338,7 +338,7 @@ cfn_hal_crypto_event_get (cfn_hal_crypto_t *p_driver, uint32_t *p_event_mask)
 
 /**
  * @brief Enables one or more Crypto exception errors.
- * @param driver Pointer to the Crypto driver instance.
+ * @param p_driver Pointer to the Crypto driver instance.
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -354,7 +354,7 @@ cfn_hal_crypto_error_enable (cfn_hal_crypto_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Disables one or more Crypto exception errors.
- * @param driver Pointer to the Crypto driver instance.
+ * @param p_driver Pointer to the Crypto driver instance.
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -370,8 +370,8 @@ cfn_hal_crypto_error_disable (cfn_hal_crypto_t *p_driver, uint32_t error_mask)
 
 /**
  * @brief Retrieves the current Crypto exception error status.
- * @param driver Pointer to the Crypto driver instance.
- * @param error_mask [out] Pointer to store the error mask.
+ * @param p_driver Pointer to the Crypto driver instance.
+ * @param p_error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
@@ -388,9 +388,9 @@ cfn_hal_crypto_error_get (cfn_hal_crypto_t *p_driver, uint32_t *p_error_mask)
 
 /**
  * @brief Encrypts a block of data.
- * @param driver Pointer to the Crypto driver instance.
- * @param in Pointer to the plaintext data.
- * @param out Pointer to the buffer where ciphertext will be stored.
+ * @param p_driver Pointer to the Crypto driver instance.
+ * @param p_in Pointer to the plaintext data.
+ * @param p_out Pointer to the buffer where ciphertext will be stored.
  * @param size Number of bytes to encrypt.
  * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
@@ -406,9 +406,9 @@ cfn_hal_crypto_encrypt (cfn_hal_crypto_t *p_driver, const uint8_t *p_in, uint8_t
 
 /**
  * @brief Decrypts a block of data.
- * @param driver Pointer to the Crypto driver instance.
- * @param in Pointer to the ciphertext data.
- * @param out Pointer to the buffer where plaintext will be stored.
+ * @param p_driver Pointer to the Crypto driver instance.
+ * @param p_in Pointer to the ciphertext data.
+ * @param p_out Pointer to the buffer where plaintext will be stored.
  * @param size Number of bytes to decrypt.
  * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
@@ -424,8 +424,8 @@ cfn_hal_crypto_decrypt (cfn_hal_crypto_t *p_driver, const uint8_t *p_in, uint8_t
 
 /**
  * @brief Feeds data into the hashing engine.
- * @param driver Pointer to the Crypto driver instance.
- * @param data Pointer to the data to be hashed.
+ * @param p_driver Pointer to the Crypto driver instance.
+ * @param p_data Pointer to the data to be hashed.
  * @param size Number of bytes to process.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -439,8 +439,8 @@ cfn_hal_crypto_hash_update (cfn_hal_crypto_t *p_driver, const uint8_t *p_data, s
 
 /**
  * @brief Finalizes the hash calculation and retrieves the digest.
- * @param driver Pointer to the Crypto driver instance.
- * @param hash [out] Pointer to the buffer where the digest will be stored.
+ * @param p_driver Pointer to the Crypto driver instance.
+ * @param p_hash [out] Pointer to the buffer where the digest will be stored.
  * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -454,8 +454,8 @@ cfn_hal_crypto_hash_finish (cfn_hal_crypto_t *p_driver, uint8_t *p_hash, uint32_
 
 /**
  * @brief Generates cryptographically secure random numbers.
- * @param driver Pointer to the Crypto driver instance.
- * @param buffer [out] Pointer to the buffer to be filled with random data.
+ * @param p_driver Pointer to the Crypto driver instance.
+ * @param p_buffer [out] Pointer to the buffer to be filled with random data.
  * @param size Number of bytes to generate.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
@@ -469,8 +469,8 @@ cfn_hal_crypto_generate_random (cfn_hal_crypto_t *p_driver, uint8_t *p_buffer, s
 
 /**
  * @brief Sets the cryptographic key for symmetric algorithms.
- * @param driver Pointer to the Crypto driver instance.
- * @param key Pointer to the key data.
+ * @param p_driver Pointer to the Crypto driver instance.
+ * @param p_key Pointer to the key data.
  * @param key_size Size of the key in bytes.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
