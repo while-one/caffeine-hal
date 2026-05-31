@@ -38,7 +38,7 @@ extern "C"
 #include "cfn_hal_types.h"
 
 /* Defines ----------------------------------------------------------*/
-
+#define CFN_HAL_PWM_DUTY_CYCLE_MAX (100U)
 /* Types Enums ------------------------------------------------------*/
 
 /**
@@ -106,7 +106,10 @@ typedef struct cfn_hal_pwm_api_s cfn_hal_pwm_api_t;
  * @param error_mask Mask of triggered exception errors.
  * @param user_arg User-defined argument passed during registration.
  */
-typedef void (*cfn_hal_pwm_callback_t)(cfn_hal_pwm_t *driver, uint32_t event_mask, uint32_t error_mask, void *user_arg);
+typedef void (*cfn_hal_pwm_callback_t)(cfn_hal_pwm_t *p_driver,
+                                       uint32_t       event_mask,
+                                       uint32_t       error_mask,
+                                       void          *p_user_arg);
 
 /**
  * @brief PWM Virtual Method Table (VMT).
@@ -116,28 +119,37 @@ struct cfn_hal_pwm_api_s
     cfn_hal_api_base_t base;
 
     /* PWM Specific Extensions */
-    cfn_hal_error_code_t (*start)(cfn_hal_pwm_t *driver);
-    cfn_hal_error_code_t (*stop)(cfn_hal_pwm_t *driver);
-    cfn_hal_error_code_t (*set_frequency)(cfn_hal_pwm_t *driver, uint32_t frequency_hz);
-    cfn_hal_error_code_t (*set_duty_cycle)(cfn_hal_pwm_t *driver, uint32_t duty_percent);
+    cfn_hal_error_code_t (*start)(cfn_hal_pwm_t *p_driver);
+    cfn_hal_error_code_t (*stop)(cfn_hal_pwm_t *p_driver);
+    cfn_hal_error_code_t (*set_frequency)(cfn_hal_pwm_t *p_driver, uint32_t frequency_hz);
+    cfn_hal_error_code_t (*set_duty_cycle)(cfn_hal_pwm_t *p_driver, uint32_t duty_percent);
 };
 
 CFN_HAL_VMT_CHECK(struct cfn_hal_pwm_api_s);
 
 CFN_HAL_CREATE_DRIVER_TYPE(pwm, cfn_hal_pwm_config_t, cfn_hal_pwm_api_t, cfn_hal_pwm_phy_t, cfn_hal_pwm_callback_t);
 /* Functions inline ------------------------------------------------- */
-CFN_HAL_INLINE void cfn_hal_pwm_populate(cfn_hal_pwm_t              *driver,
-                                         uint32_t                    peripheral_id,
-                                         struct cfn_hal_clock_s     *clock,
-                                         void                       *dependency,
-                                         const cfn_hal_pwm_api_t    *api,
-                                         const cfn_hal_pwm_phy_t    *phy,
-                                         const cfn_hal_pwm_config_t *config,
-                                         cfn_hal_pwm_callback_t      callback,
-                                         void                       *user_arg)
+CFN_HAL_INLINE void
+cfn_hal_pwm_populate (cfn_hal_pwm_t              *p_driver,
+                      uint32_t                    peripheral_id,
+                      struct cfn_hal_clock_s     *p_clock,
+                      void                       *p_dependency,
+                      const cfn_hal_pwm_api_t    *p_api,
+                      const cfn_hal_pwm_phy_t    *p_phy,
+                      const cfn_hal_pwm_config_t *p_config,
+                      cfn_hal_pwm_callback_t      p_callback,
+                      void                       *p_user_arg)
 {
-    CFN_HAL_POPULATE_DRIVER(
-        driver, CFN_HAL_PERIPHERAL_TYPE_PWM, peripheral_id, clock, dependency, api, phy, config, callback, user_arg);
+    CFN_HAL_POPULATE_DRIVER(p_driver,
+                            CFN_HAL_PERIPHERAL_TYPE_PWM,
+                            peripheral_id,
+                            p_clock,
+                            p_dependency,
+                            p_api,
+                            p_phy,
+                            p_config,
+                            p_callback,
+                            p_user_arg);
 }
 
 /**
@@ -146,20 +158,21 @@ CFN_HAL_INLINE void cfn_hal_pwm_populate(cfn_hal_pwm_t              *driver,
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_config_validate(const cfn_hal_pwm_t        *driver,
-                                                                const cfn_hal_pwm_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_pwm_config_validate (const cfn_hal_pwm_t *p_driver, const cfn_hal_pwm_config_t *p_config)
 {
-    if (driver == NULL || config == NULL)
+    if (p_driver == NULL || p_config == NULL)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
 
-    if (config->polarity > CFN_HAL_PWM_CONFIG_POLARITY_INVERTED || config->duty_cycle_percent > 100)
+    if (p_config->polarity > CFN_HAL_PWM_CONFIG_POLARITY_INVERTED ||
+        p_config->duty_cycle_percent > CFN_HAL_PWM_DUTY_CYCLE_MAX)
     {
         return CFN_HAL_ERROR_BAD_CONFIG;
     }
 
-    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM, config);
+    return cfn_hal_base_config_validate(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM, p_config);
 }
 
 /**
@@ -167,19 +180,20 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_config_validate(const cfn_hal_pw
  * @param driver Pointer to the PWM driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_init(cfn_hal_pwm_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_pwm_init (cfn_hal_pwm_t *p_driver)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    driver->base.vmt           = (const struct cfn_hal_api_base_s *) driver->api;
-    cfn_hal_error_code_t error = cfn_hal_pwm_config_validate(driver, driver->config);
+    p_driver->base.vmt         = (const struct cfn_hal_api_base_s *) p_driver->api;
+    cfn_hal_error_code_t error = cfn_hal_pwm_config_validate(p_driver, p_driver->config);
     if (error != CFN_HAL_ERROR_OK)
     {
         return error;
     }
-    return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM);
+    return cfn_hal_base_init(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM);
 }
 
 /**
@@ -187,13 +201,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_init(cfn_hal_pwm_t *driver)
  * @param driver Pointer to the PWM driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_deinit(cfn_hal_pwm_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_pwm_deinit (cfn_hal_pwm_t *p_driver)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_deinit(&driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM);
+    return cfn_hal_base_deinit(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM);
 }
 
 /**
@@ -202,21 +217,22 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_deinit(cfn_hal_pwm_t *driver)
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_config_set(cfn_hal_pwm_t *driver, const cfn_hal_pwm_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_pwm_config_set (cfn_hal_pwm_t *p_driver, const cfn_hal_pwm_config_t *p_config)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    cfn_hal_error_code_t error = cfn_hal_pwm_config_validate(driver, config);
+    cfn_hal_error_code_t error = cfn_hal_pwm_config_validate(p_driver, p_config);
     if (error != CFN_HAL_ERROR_OK)
     {
         return error;
     }
     {
-        driver->config = config;
+        p_driver->config = p_config;
     }
-    return cfn_hal_base_config_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM, (const void *) config);
+    return cfn_hal_base_config_set(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM, (const void *) p_config);
 }
 
 /**
@@ -225,13 +241,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_config_set(cfn_hal_pwm_t *driver
  * @param config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_config_get(cfn_hal_pwm_t *driver, cfn_hal_pwm_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_pwm_config_get (cfn_hal_pwm_t *p_driver, cfn_hal_pwm_config_t *p_config)
 {
-    if (!driver || !config || !driver->config)
+    if (!p_driver || !p_config || !p_driver->config)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    *config = *(driver->config);
+    *p_config = *(p_driver->config);
     return CFN_HAL_ERROR_OK;
 }
 
@@ -242,20 +259,19 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_config_get(cfn_hal_pwm_t *driver
  * @param user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_callback_register(cfn_hal_pwm_t               *driver,
-                                                                  const cfn_hal_pwm_callback_t callback,
-                                                                  void                        *user_arg)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_pwm_callback_register (cfn_hal_pwm_t *p_driver, const cfn_hal_pwm_callback_t callback, void *p_user_arg)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->cb          = callback;
-        driver->cb_user_arg = user_arg;
+        p_driver->cb          = callback;
+        p_driver->cb_user_arg = p_user_arg;
     }
     return cfn_hal_base_callback_register(
-        &driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM, (cfn_hal_callback_t) callback, user_arg);
+        &p_driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM, (cfn_hal_callback_t) callback, p_user_arg);
 }
 
 /**
@@ -264,13 +280,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_callback_register(cfn_hal_pwm_t 
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_power_state_set(cfn_hal_pwm_t *driver, cfn_hal_power_state_t state)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_pwm_power_state_set (cfn_hal_pwm_t *p_driver, cfn_hal_power_state_t state)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_power_state_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM, state);
+    return cfn_hal_power_state_set(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM, state);
 }
 
 /**
@@ -279,13 +296,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_power_state_set(cfn_hal_pwm_t *d
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_event_enable(cfn_hal_pwm_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_pwm_event_enable (cfn_hal_pwm_t *p_driver, uint32_t event_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_event_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM, event_mask);
+    return cfn_hal_base_event_enable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM, event_mask);
 }
 
 /**
@@ -294,13 +312,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_event_enable(cfn_hal_pwm_t *driv
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_event_disable(cfn_hal_pwm_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_pwm_event_disable (cfn_hal_pwm_t *p_driver, uint32_t event_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_event_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM, event_mask);
+    return cfn_hal_base_event_disable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM, event_mask);
 }
 
 /**
@@ -309,13 +328,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_event_disable(cfn_hal_pwm_t *dri
  * @param event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_event_get(cfn_hal_pwm_t *driver, uint32_t *event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_pwm_event_get (cfn_hal_pwm_t *p_driver, uint32_t *p_event_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_event_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM, event_mask);
+    return cfn_hal_base_event_get(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM, p_event_mask);
 }
 
 /**
@@ -324,13 +344,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_event_get(cfn_hal_pwm_t *driver,
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_error_enable(cfn_hal_pwm_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_pwm_error_enable (cfn_hal_pwm_t *p_driver, uint32_t error_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_error_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM, error_mask);
+    return cfn_hal_base_error_enable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM, error_mask);
 }
 
 /**
@@ -339,13 +360,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_error_enable(cfn_hal_pwm_t *driv
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_error_disable(cfn_hal_pwm_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_pwm_error_disable (cfn_hal_pwm_t *p_driver, uint32_t error_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_error_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM, error_mask);
+    return cfn_hal_base_error_disable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM, error_mask);
 }
 
 /**
@@ -354,13 +376,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_error_disable(cfn_hal_pwm_t *dri
  * @param error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_error_get(cfn_hal_pwm_t *driver, uint32_t *error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_pwm_error_get (cfn_hal_pwm_t *p_driver, uint32_t *p_error_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM, error_mask);
+    return cfn_hal_base_error_get(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_PWM, p_error_mask);
 }
 
 /* PWM Specific Functions ------------------------------------------- */
@@ -370,10 +393,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_error_get(cfn_hal_pwm_t *driver,
  * @param driver Pointer to the PWM driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_start(cfn_hal_pwm_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_pwm_start (cfn_hal_pwm_t *p_driver)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_PWM, start, driver, error);
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_PWM, start, p_driver, error);
     return error;
 }
 
@@ -382,10 +406,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_start(cfn_hal_pwm_t *driver)
  * @param driver Pointer to the PWM driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_stop(cfn_hal_pwm_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_pwm_stop (cfn_hal_pwm_t *p_driver)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_PWM, stop, driver, error);
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_PWM, stop, p_driver, error);
     return error;
 }
 
@@ -395,10 +420,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_stop(cfn_hal_pwm_t *driver)
  * @param frequency_hz The new target frequency in Hertz.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_set_frequency(cfn_hal_pwm_t *driver, uint32_t frequency_hz)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_pwm_set_frequency (cfn_hal_pwm_t *p_driver, uint32_t frequency_hz)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_PWM, set_frequency, driver, error, frequency_hz);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_PWM, set_frequency, p_driver, error, frequency_hz);
     return error;
 }
 
@@ -408,20 +434,21 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_set_frequency(cfn_hal_pwm_t *dri
  * @param duty_percent The new target duty cycle (0 to 100).
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_pwm_set_duty_cycle(cfn_hal_pwm_t *driver, uint32_t duty_percent)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_pwm_set_duty_cycle (cfn_hal_pwm_t *p_driver, uint32_t duty_percent)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_PWM, set_duty_cycle, driver, error, duty_percent);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_PWM, set_duty_cycle, p_driver, error, duty_percent);
     return error;
 }
-cfn_hal_error_code_t cfn_hal_pwm_construct(cfn_hal_pwm_t              *driver,
-                                           const cfn_hal_pwm_config_t *config,
-                                           const cfn_hal_pwm_phy_t    *phy,
-                                           struct cfn_hal_clock_s     *clock,
-                                           void                       *dependency,
-                                           cfn_hal_pwm_callback_t      callback,
-                                           void                       *user_arg);
-cfn_hal_error_code_t cfn_hal_pwm_destruct(cfn_hal_pwm_t *driver);
+cfn_hal_error_code_t cfn_hal_pwm_construct (cfn_hal_pwm_t              *p_driver,
+                                            const cfn_hal_pwm_config_t *p_config,
+                                            const cfn_hal_pwm_phy_t    *p_phy,
+                                            struct cfn_hal_clock_s     *p_clock,
+                                            void                       *p_dependency,
+                                            cfn_hal_pwm_callback_t      p_callback,
+                                            void                       *p_user_arg);
+cfn_hal_error_code_t cfn_hal_pwm_destruct (cfn_hal_pwm_t *p_driver);
 #ifdef __cplusplus
 }
 #endif

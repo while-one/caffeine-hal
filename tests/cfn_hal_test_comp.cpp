@@ -33,7 +33,8 @@ class CompTest : public ::testing::Test
     cfn_hal_comp_api_t    api{};
     cfn_hal_comp_config_t dummy_config{};
 
-    void SetUp() override
+    void
+    SetUp () override
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
@@ -69,9 +70,9 @@ TEST_F(CompTest, UnimplementedApiReturnsNotSupported)
 
 TEST_F(CompTest, OnConfigFailureAbortsInit)
 {
-    driver.base.on_config = [](cfn_hal_driver_t      *b,
-                               void                  *user_arg,
-                               cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_FAIL; };
+    driver.base.on_config = [] (cfn_hal_driver_t      *b,
+                                void                  *user_arg,
+                                cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_FAIL; };
     EXPECT_EQ(cfn_hal_comp_init(&driver), CFN_HAL_ERROR_FAIL);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
 }
@@ -80,7 +81,7 @@ TEST_F(CompTest, OnConfigFailureAbortsInit)
 
 TEST_F(CompTest, InitSuccess)
 {
-    api.base.init = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.init = [] (cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_comp_init(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_INITIALIZED);
 }
@@ -88,7 +89,7 @@ TEST_F(CompTest, InitSuccess)
 TEST_F(CompTest, DeinitSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.deinit    = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.deinit    = [] (cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_comp_deinit(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
 }
@@ -108,7 +109,7 @@ TEST_F(CompTest, ConfigSetGet)
 TEST_F(CompTest, CallbackRegister)
 {
     driver.base.status         = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.callback_register = [](cfn_hal_driver_t *b, cfn_hal_callback_t cb, void *arg) -> cfn_hal_error_code_t
+    api.base.callback_register = [] (cfn_hal_driver_t *b, cfn_hal_callback_t cb, void *arg) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_comp_callback_register(&driver, nullptr, nullptr), CFN_HAL_ERROR_OK);
@@ -118,7 +119,7 @@ TEST_F(CompTest, CallbackRegister)
 
 TEST_F(CompTest, ReadOutputSuccess)
 {
-    api.read_output = [](cfn_hal_comp_t *d, cfn_hal_comp_level_t *l) -> cfn_hal_error_code_t
+    api.read_output = [] (cfn_hal_comp_t *d, cfn_hal_comp_level_t *l) -> cfn_hal_error_code_t
     {
         *l = CFN_HAL_COMP_LEVEL_HIGH;
         return CFN_HAL_ERROR_OK;
@@ -130,14 +131,14 @@ TEST_F(CompTest, ReadOutputSuccess)
 
 TEST_F(CompTest, SetThresholdSuccess)
 {
-    api.set_threshold = [](cfn_hal_comp_t *d, uint32_t t) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.set_threshold = [] (cfn_hal_comp_t *d, uint32_t t) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_comp_set_threshold(&driver, 2048), CFN_HAL_ERROR_OK);
 }
 
 TEST_F(CompTest, StartStopSuccess)
 {
-    api.start = [](cfn_hal_comp_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    api.stop  = [](cfn_hal_comp_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.start = [] (cfn_hal_comp_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.stop  = [] (cfn_hal_comp_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_comp_start(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(cfn_hal_comp_stop(&driver), CFN_HAL_ERROR_OK);
@@ -146,8 +147,9 @@ TEST_F(CompTest, StartStopSuccess)
 TEST_F(CompTest, EventEnableDisable)
 {
     driver.base.status    = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.event_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    api.base.event_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
+    api.base.event_enable = [] (cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
+    { return CFN_HAL_ERROR_OK; };
+    api.base.event_disable = [] (cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_comp_event_enable(&driver, CFN_HAL_COMP_EVENT_TRIGGER), CFN_HAL_ERROR_OK);
@@ -157,8 +159,9 @@ TEST_F(CompTest, EventEnableDisable)
 TEST_F(CompTest, ErrorEnableDisable)
 {
     driver.base.status    = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.error_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    api.base.error_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
+    api.base.error_enable = [] (cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
+    { return CFN_HAL_ERROR_OK; };
+    api.base.error_disable = [] (cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_comp_error_enable(&driver, CFN_HAL_COMP_ERROR_GENERAL), CFN_HAL_ERROR_OK);
@@ -167,7 +170,7 @@ TEST_F(CompTest, ErrorEnableDisable)
 
 TEST_F(CompTest, WithLockMacroWorks)
 {
-    api.start = [](cfn_hal_comp_t *d) { return CFN_HAL_ERROR_OK; };
+    api.start = [] (cfn_hal_comp_t *d) { return CFN_HAL_ERROR_OK; };
     cfn_hal_error_code_t result;
     CFN_HAL_WITH_LOCK(&driver, 100, result, cfn_hal_comp_start);
     EXPECT_EQ(result, CFN_HAL_ERROR_OK);

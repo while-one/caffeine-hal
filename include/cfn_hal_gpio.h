@@ -182,7 +182,10 @@ typedef struct
  * @param error_mask Mask of triggered exception errors.
  * @param user_arg User-defined argument passed during registration.
  */
-typedef void (*cfn_hal_gpio_callback_t)(cfn_hal_gpio_t *port, uint32_t event_mask, uint32_t error_mask, void *user_arg);
+typedef void (*cfn_hal_gpio_callback_t)(cfn_hal_gpio_t *p_port,
+                                        uint32_t        event_mask,
+                                        uint32_t        error_mask,
+                                        void           *p_user_arg);
 
 /**
  * @brief GPIO Virtual Method Table (VMT).
@@ -192,14 +195,14 @@ struct cfn_hal_gpio_api_s
     cfn_hal_api_base_t base; /*!< base.config_set should return NOT_SUPPORTED by the port */
 
     /* GPIO Specific Extensions */
-    cfn_hal_error_code_t (*pin_config)(cfn_hal_gpio_t *port, const cfn_hal_gpio_pin_config_t *pin_cfg);
+    cfn_hal_error_code_t (*pin_config)(cfn_hal_gpio_t *p_port, const cfn_hal_gpio_pin_config_t *p_pin_cfg);
 
-    cfn_hal_error_code_t (*pin_read)(cfn_hal_gpio_t *port, cfn_hal_gpio_pin_t pin, cfn_hal_gpio_state_t *state);
-    cfn_hal_error_code_t (*pin_write)(cfn_hal_gpio_t *port, cfn_hal_gpio_pin_t pin, cfn_hal_gpio_state_t state);
-    cfn_hal_error_code_t (*pin_toggle)(cfn_hal_gpio_t *port, cfn_hal_gpio_pin_t pin);
+    cfn_hal_error_code_t (*pin_read)(cfn_hal_gpio_t *p_port, cfn_hal_gpio_pin_t pin, cfn_hal_gpio_state_t *p_state);
+    cfn_hal_error_code_t (*pin_write)(cfn_hal_gpio_t *p_port, cfn_hal_gpio_pin_t pin, cfn_hal_gpio_state_t state);
+    cfn_hal_error_code_t (*pin_toggle)(cfn_hal_gpio_t *p_port, cfn_hal_gpio_pin_t pin);
 
-    cfn_hal_error_code_t (*port_read)(cfn_hal_gpio_t *port, uint32_t *port_value);
-    cfn_hal_error_code_t (*port_write)(cfn_hal_gpio_t *port, uint32_t pin_mask, uint32_t port_value);
+    cfn_hal_error_code_t (*port_read)(cfn_hal_gpio_t *p_port, uint32_t *p_port_value);
+    cfn_hal_error_code_t (*port_write)(cfn_hal_gpio_t *p_port, uint32_t pin_mask, uint32_t port_value);
 };
 
 CFN_HAL_VMT_CHECK(struct cfn_hal_gpio_api_s);
@@ -209,17 +212,26 @@ CFN_HAL_VMT_CHECK(struct cfn_hal_gpio_api_s);
 CFN_HAL_CREATE_DRIVER_TYPE(gpio, void, cfn_hal_gpio_api_t, cfn_hal_gpio_phy_t, cfn_hal_gpio_callback_t);
 
 /* Functions inline ------------------------------------------------- */
-CFN_HAL_INLINE void cfn_hal_gpio_populate(cfn_hal_gpio_t           *driver,
-                                          uint32_t                  peripheral_id,
-                                          struct cfn_hal_clock_s   *clock,
-                                          void                     *dependency,
-                                          const cfn_hal_gpio_api_t *api,
-                                          const cfn_hal_gpio_phy_t *phy,
-                                          cfn_hal_gpio_callback_t   callback,
-                                          void                     *user_arg)
+CFN_HAL_INLINE void
+cfn_hal_gpio_populate (cfn_hal_gpio_t           *p_driver,
+                       uint32_t                  peripheral_id,
+                       struct cfn_hal_clock_s   *p_clock,
+                       void                     *p_dependency,
+                       const cfn_hal_gpio_api_t *p_api,
+                       const cfn_hal_gpio_phy_t *p_phy,
+                       cfn_hal_gpio_callback_t   p_callback,
+                       void                     *p_user_arg)
 {
-    CFN_HAL_POPULATE_DRIVER(
-        driver, CFN_HAL_PERIPHERAL_TYPE_GPIO, peripheral_id, clock, dependency, api, phy, NULL, callback, user_arg);
+    CFN_HAL_POPULATE_DRIVER(p_driver,
+                            CFN_HAL_PERIPHERAL_TYPE_GPIO,
+                            peripheral_id,
+                            p_clock,
+                            p_dependency,
+                            p_api,
+                            p_phy,
+                            NULL,
+                            p_callback,
+                            p_user_arg);
 }
 
 /**
@@ -228,22 +240,22 @@ CFN_HAL_INLINE void cfn_hal_gpio_populate(cfn_hal_gpio_t           *driver,
  * @param pin_cfg Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_pin_config_validate(const cfn_hal_gpio_t            *driver,
-                                                                     const cfn_hal_gpio_pin_config_t *pin_cfg)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_gpio_pin_config_validate (const cfn_hal_gpio_t *p_driver, const cfn_hal_gpio_pin_config_t *p_pin_cfg)
 {
-    if (driver == NULL || pin_cfg == NULL)
+    if (p_driver == NULL || p_pin_cfg == NULL)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
 
-    if (pin_cfg->mode >= CFN_HAL_GPIO_CONFIG_MODE_MAX || pin_cfg->pull >= CFN_HAL_GPIO_CONFIG_PULL_MAX ||
-        pin_cfg->speed >= CFN_HAL_GPIO_CONFIG_SPEED_MAX || pin_cfg->strength >= CFN_HAL_GPIO_CONFIG_STRENGTH_MAX ||
-        pin_cfg->default_state >= CFN_HAL_GPIO_STATE_MAX)
+    if (p_pin_cfg->mode >= CFN_HAL_GPIO_CONFIG_MODE_MAX || p_pin_cfg->pull >= CFN_HAL_GPIO_CONFIG_PULL_MAX ||
+        p_pin_cfg->speed >= CFN_HAL_GPIO_CONFIG_SPEED_MAX || p_pin_cfg->strength >= CFN_HAL_GPIO_CONFIG_STRENGTH_MAX ||
+        p_pin_cfg->default_state >= CFN_HAL_GPIO_STATE_MAX)
     {
         return CFN_HAL_ERROR_BAD_CONFIG;
     }
 
-    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, pin_cfg);
+    return cfn_hal_base_config_validate(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, p_pin_cfg);
 }
 
 /**
@@ -251,14 +263,15 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_pin_config_validate(const cfn_h
  * @param driver Pointer to the GPIO driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_init(cfn_hal_gpio_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_gpio_init (cfn_hal_gpio_t *p_driver)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    driver->base.vmt = (const struct cfn_hal_api_base_s *) driver->api;
-    return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO);
+    p_driver->base.vmt = (const struct cfn_hal_api_base_s *) p_driver->api;
+    return cfn_hal_base_init(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO);
 }
 
 /**
@@ -266,13 +279,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_init(cfn_hal_gpio_t *driver)
  * @param driver Pointer to the GPIO driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_deinit(cfn_hal_gpio_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_gpio_deinit (cfn_hal_gpio_t *p_driver)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_deinit(&driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO);
+    return cfn_hal_base_deinit(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO);
 }
 
 /**
@@ -282,21 +296,20 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_deinit(cfn_hal_gpio_t *driver)
  * @param user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_callback_register(cfn_hal_gpio_t               *driver,
-                                                                   const cfn_hal_gpio_callback_t callback,
-                                                                   void                         *user_arg)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_gpio_callback_register (cfn_hal_gpio_t *p_driver, const cfn_hal_gpio_callback_t callback, void *p_user_arg)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->cb          = callback;
-        driver->cb_user_arg = user_arg;
+        p_driver->cb          = callback;
+        p_driver->cb_user_arg = p_user_arg;
     }
 
     return cfn_hal_base_callback_register(
-        &driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, (cfn_hal_callback_t) callback, user_arg);
+        &p_driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, (cfn_hal_callback_t) callback, p_user_arg);
 }
 
 /**
@@ -305,13 +318,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_callback_register(cfn_hal_gpio_
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_power_state_set(cfn_hal_gpio_t *driver, cfn_hal_power_state_t state)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_gpio_power_state_set (cfn_hal_gpio_t *p_driver, cfn_hal_power_state_t state)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_power_state_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, state);
+    return cfn_hal_power_state_set(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, state);
 }
 
 /**
@@ -320,13 +334,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_power_state_set(cfn_hal_gpio_t 
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_event_enable(cfn_hal_gpio_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_gpio_event_enable (cfn_hal_gpio_t *p_driver, uint32_t event_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_event_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, event_mask);
+    return cfn_hal_base_event_enable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, event_mask);
 }
 
 /**
@@ -335,13 +350,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_event_enable(cfn_hal_gpio_t *dr
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_event_disable(cfn_hal_gpio_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_gpio_event_disable (cfn_hal_gpio_t *p_driver, uint32_t event_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_event_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, event_mask);
+    return cfn_hal_base_event_disable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, event_mask);
 }
 
 /**
@@ -350,13 +366,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_event_disable(cfn_hal_gpio_t *d
  * @param event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_event_get(cfn_hal_gpio_t *driver, uint32_t *event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_gpio_event_get (cfn_hal_gpio_t *p_driver, uint32_t *p_event_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_event_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, event_mask);
+    return cfn_hal_base_event_get(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, p_event_mask);
 }
 
 /**
@@ -365,13 +382,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_event_get(cfn_hal_gpio_t *drive
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_error_enable(cfn_hal_gpio_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_gpio_error_enable (cfn_hal_gpio_t *p_driver, uint32_t error_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_error_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, error_mask);
+    return cfn_hal_base_error_enable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, error_mask);
 }
 
 /**
@@ -380,13 +398,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_error_enable(cfn_hal_gpio_t *dr
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_error_disable(cfn_hal_gpio_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_gpio_error_disable (cfn_hal_gpio_t *p_driver, uint32_t error_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_error_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, error_mask);
+    return cfn_hal_base_error_disable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, error_mask);
 }
 
 /**
@@ -395,13 +414,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_error_disable(cfn_hal_gpio_t *d
  * @param error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_error_get(cfn_hal_gpio_t *driver, uint32_t *error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_gpio_error_get (cfn_hal_gpio_t *p_driver, uint32_t *p_error_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, error_mask);
+    return cfn_hal_base_error_get(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_GPIO, p_error_mask);
 }
 
 /* GPIO Specific Functions ------------------------------------------ */
@@ -412,11 +432,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_error_get(cfn_hal_gpio_t *drive
  * @param pin_cfg Pointer to the configuration payload containing the pin_mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_pin_config(cfn_hal_gpio_t                  *port,
-                                                            const cfn_hal_gpio_pin_config_t *pin_cfg)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_gpio_pin_config (cfn_hal_gpio_t *p_port, const cfn_hal_gpio_pin_config_t *p_pin_cfg)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_GPIO, pin_config, port, error, pin_cfg);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_GPIO, pin_config, p_port, error, p_pin_cfg);
     return error;
 }
 
@@ -427,12 +447,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_pin_config(cfn_hal_gpio_t      
  * @param state [out] Pointer to store the read state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_pin_read(cfn_hal_gpio_t       *port,
-                                                          cfn_hal_gpio_pin_t    pin,
-                                                          cfn_hal_gpio_state_t *state)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_gpio_pin_read (cfn_hal_gpio_t *p_port, cfn_hal_gpio_pin_t pin, cfn_hal_gpio_state_t *p_state)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_GPIO, pin_read, port, error, pin, state);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_GPIO, pin_read, p_port, error, pin, p_state);
     return error;
 }
 
@@ -443,12 +462,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_pin_read(cfn_hal_gpio_t       *
  * @param state The state value to write.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_pin_write(cfn_hal_gpio_t      *port,
-                                                           cfn_hal_gpio_pin_t   pin,
-                                                           cfn_hal_gpio_state_t state)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_gpio_pin_write (cfn_hal_gpio_t *p_port, cfn_hal_gpio_pin_t pin, cfn_hal_gpio_state_t state)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_GPIO, pin_write, port, error, pin, state);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_GPIO, pin_write, p_port, error, pin, state);
     return error;
 }
 
@@ -458,10 +476,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_pin_write(cfn_hal_gpio_t      *
  * @param pin A single pin identifier.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_pin_toggle(cfn_hal_gpio_t *port, cfn_hal_gpio_pin_t pin)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_gpio_pin_toggle (cfn_hal_gpio_t *p_port, cfn_hal_gpio_pin_t pin)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_GPIO, pin_toggle, port, error, pin);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_GPIO, pin_toggle, p_port, error, pin);
     return error;
 }
 
@@ -471,10 +490,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_pin_toggle(cfn_hal_gpio_t *port
  * @param port_value [out] Pointer to store the 32-bit port value.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_port_read(cfn_hal_gpio_t *port, uint32_t *port_value)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_gpio_port_read (cfn_hal_gpio_t *p_port, uint32_t *p_port_value)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_GPIO, port_read, port, error, port_value);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_GPIO, port_read, p_port, error, p_port_value);
     return error;
 }
 
@@ -485,22 +505,21 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_port_read(cfn_hal_gpio_t *port,
  * @param port_value The 32-bit value to apply to the masked pins.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_gpio_port_write(cfn_hal_gpio_t *port,
-                                                            uint32_t        pin_mask,
-                                                            uint32_t        port_value)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_gpio_port_write (cfn_hal_gpio_t *p_port, uint32_t pin_mask, uint32_t port_value)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_GPIO, port_write, port, error, pin_mask, port_value);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_GPIO, port_write, p_port, error, pin_mask, port_value);
     return error;
 }
 
-cfn_hal_error_code_t cfn_hal_gpio_construct(cfn_hal_gpio_t           *driver,
-                                            const cfn_hal_gpio_phy_t *phy,
-                                            struct cfn_hal_clock_s   *clock,
-                                            void                     *dependency,
-                                            cfn_hal_gpio_callback_t   callback,
-                                            void                     *user_arg);
-cfn_hal_error_code_t cfn_hal_gpio_destruct(cfn_hal_gpio_t *driver);
+cfn_hal_error_code_t cfn_hal_gpio_construct (cfn_hal_gpio_t           *p_driver,
+                                             const cfn_hal_gpio_phy_t *p_phy,
+                                             struct cfn_hal_clock_s   *p_clock,
+                                             void                     *p_dependency,
+                                             cfn_hal_gpio_callback_t   p_callback,
+                                             void                     *p_user_arg);
+cfn_hal_error_code_t cfn_hal_gpio_destruct (cfn_hal_gpio_t *p_driver);
 #ifdef __cplusplus
 }
 #endif

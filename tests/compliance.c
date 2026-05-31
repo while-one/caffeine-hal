@@ -31,17 +31,20 @@
 #include "cfn_hal_wdt.h"
 
 /* Dummy Implementation for Compliance Testing */
+#define DUMMY_REG_ADDR (0x40000000)
 
-static cfn_hal_error_code_t dummy_init(cfn_hal_driver_t *base)
+static cfn_hal_error_code_t
+dummy_init (cfn_hal_driver_t *p_base)
 {
-    (void) base;
+    (void) p_base;
     return CFN_HAL_ERROR_OK;
 }
 
-static cfn_hal_error_code_t dummy_pin_config(cfn_hal_gpio_t *port, const cfn_hal_gpio_pin_config_t *cfg)
+static cfn_hal_error_code_t
+dummy_pin_config (cfn_hal_gpio_t *p_port, const cfn_hal_gpio_pin_config_t *p_cfg)
 {
-    (void) port;
-    (void) cfg;
+    (void) p_port;
+    (void) p_cfg;
     return CFN_HAL_ERROR_OK;
 }
 
@@ -67,10 +70,12 @@ static const cfn_hal_gpio_api_t DUMMY_GPIO_API = {
     .port_write = NULL,
 };
 
-int main(void)
+int
+main (void)
 {
     /* 1. Test Static Initializer Macros */
-    cfn_hal_gpio_phy_t phy     = { .port = (void *) 0x40000000 };
+    // NOLINTNEXTLINE(performance-no-int-to-ptr)
+    cfn_hal_gpio_phy_t phy     = { .port = (void *) DUMMY_REG_ADDR };
     cfn_hal_gpio_t     gpio    = { 0 };
     gpio.phy                   = &phy;
     gpio.api                   = &DUMMY_GPIO_API;

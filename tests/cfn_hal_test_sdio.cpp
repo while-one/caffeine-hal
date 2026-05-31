@@ -34,7 +34,8 @@ class SdioTest : public ::testing::Test
     cfn_hal_sdio_api_t    api{};
     cfn_hal_sdio_config_t dummy_config{};
 
-    void SetUp() override
+    void
+    SetUp () override
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
@@ -67,7 +68,7 @@ TEST_F(SdioTest, UnimplementedApiReturnsNotSupported)
 
 TEST_F(SdioTest, OnConfigFailureAbortsInit)
 {
-    driver.base.on_config = [](cfn_hal_driver_t *b, void *arg, cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t
+    driver.base.on_config = [] (cfn_hal_driver_t *b, void *arg, cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t
     { return (phase == CFN_HAL_CONFIG_PHASE_INIT) ? CFN_HAL_ERROR_FAIL : CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_sdio_init(&driver), CFN_HAL_ERROR_FAIL);
 }
@@ -76,14 +77,14 @@ TEST_F(SdioTest, OnConfigFailureAbortsInit)
 
 TEST_F(SdioTest, InitSuccess)
 {
-    api.base.init = [](cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.init = [] (cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_sdio_init(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_INITIALIZED);
 }
 
 TEST_F(SdioTest, DeinitSuccess)
 {
-    api.base.deinit    = [](cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.deinit    = [] (cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     EXPECT_EQ(cfn_hal_sdio_deinit(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
@@ -93,7 +94,7 @@ TEST_F(SdioTest, DeinitSuccess)
 
 TEST_F(SdioTest, SendCommand)
 {
-    api.send_command = [](cfn_hal_sdio_t *d, const cfn_hal_sdio_cmd_t *cmd, uint32_t *resp) -> cfn_hal_error_code_t
+    api.send_command = [] (cfn_hal_sdio_t *d, const cfn_hal_sdio_cmd_t *cmd, uint32_t *resp) -> cfn_hal_error_code_t
     {
         *resp = 0xAA55;
         return CFN_HAL_ERROR_OK;
@@ -109,10 +110,10 @@ TEST_F(SdioTest, SendCommand)
 TEST_F(SdioTest, ReadWriteBlocks)
 {
     api.read_blocks =
-        [](cfn_hal_sdio_t *d, uint8_t *buf, uint32_t addr, uint32_t count, uint32_t to) -> cfn_hal_error_code_t
+        [] (cfn_hal_sdio_t *d, uint8_t *buf, uint32_t addr, uint32_t count, uint32_t to) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     api.write_blocks =
-        [](cfn_hal_sdio_t *d, const uint8_t *data, uint32_t addr, uint32_t count, uint32_t to) -> cfn_hal_error_code_t
+        [] (cfn_hal_sdio_t *d, const uint8_t *data, uint32_t addr, uint32_t count, uint32_t to) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
 
     driver.base.status  = CFN_HAL_DRIVER_STATUS_INITIALIZED;
@@ -123,7 +124,7 @@ TEST_F(SdioTest, ReadWriteBlocks)
 
 TEST_F(SdioTest, GetCardInfo)
 {
-    api.get_card_info = [](cfn_hal_sdio_t *d, cfn_hal_sdio_card_info_t *info) -> cfn_hal_error_code_t
+    api.get_card_info = [] (cfn_hal_sdio_t *d, cfn_hal_sdio_card_info_t *info) -> cfn_hal_error_code_t
     {
         info->block_size = 512;
         return CFN_HAL_ERROR_OK;
@@ -137,7 +138,7 @@ TEST_F(SdioTest, GetCardInfo)
 
 TEST_F(SdioTest, WaitCardReady)
 {
-    api.wait_card_ready = [](cfn_hal_sdio_t *d, uint32_t to) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.wait_card_ready = [] (cfn_hal_sdio_t *d, uint32_t to) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
     driver.base.status  = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     EXPECT_EQ(cfn_hal_sdio_wait_card_ready(&driver, 100), CFN_HAL_ERROR_OK);
@@ -147,8 +148,9 @@ TEST_F(SdioTest, WaitCardReady)
 
 TEST_F(SdioTest, EventEnableDisable)
 {
-    api.base.event_enable = [](cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    api.base.event_disable = [](cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t
+    api.base.event_enable = [] (cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t
+    { return CFN_HAL_ERROR_OK; };
+    api.base.event_disable = [] (cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
 
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
@@ -160,7 +162,7 @@ TEST_F(SdioTest, EventEnableDisable)
 
 TEST_F(SdioTest, WithLockMacroWorks)
 {
-    api.wait_card_ready = [](cfn_hal_sdio_t *d, uint32_t to) { return CFN_HAL_ERROR_OK; };
+    api.wait_card_ready = [] (cfn_hal_sdio_t *d, uint32_t to) { return CFN_HAL_ERROR_OK; };
     cfn_hal_error_code_t result;
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     CFN_HAL_WITH_LOCK(&driver, 100, result, cfn_hal_sdio_wait_card_ready, 10);

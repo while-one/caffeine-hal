@@ -34,7 +34,8 @@ class QspiTest : public ::testing::Test
     cfn_hal_qspi_api_t    api{};
     cfn_hal_qspi_config_t dummy_config{};
 
-    void SetUp() override
+    void
+    SetUp () override
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
@@ -67,7 +68,7 @@ TEST_F(QspiTest, UnimplementedApiReturnsNotSupported)
 
 TEST_F(QspiTest, OnConfigFailureAbortsInit)
 {
-    driver.base.on_config = [](cfn_hal_driver_t *b, void *arg, cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t
+    driver.base.on_config = [] (cfn_hal_driver_t *b, void *arg, cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t
     { return (phase == CFN_HAL_CONFIG_PHASE_INIT) ? CFN_HAL_ERROR_FAIL : CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_qspi_init(&driver), CFN_HAL_ERROR_FAIL);
 }
@@ -76,14 +77,14 @@ TEST_F(QspiTest, OnConfigFailureAbortsInit)
 
 TEST_F(QspiTest, InitSuccess)
 {
-    api.base.init = [](cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.init = [] (cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_qspi_init(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_INITIALIZED);
 }
 
 TEST_F(QspiTest, DeinitSuccess)
 {
-    api.base.deinit    = [](cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.deinit    = [] (cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     EXPECT_EQ(cfn_hal_qspi_deinit(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
@@ -93,7 +94,7 @@ TEST_F(QspiTest, DeinitSuccess)
 
 TEST_F(QspiTest, CommandSequence)
 {
-    api.command = [](cfn_hal_qspi_t *d, const cfn_hal_qspi_cmd_t *cmd, uint32_t timeout) -> cfn_hal_error_code_t
+    api.command = [] (cfn_hal_qspi_t *d, const cfn_hal_qspi_cmd_t *cmd, uint32_t timeout) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
 
     driver.base.status     = CFN_HAL_DRIVER_STATUS_INITIALIZED;
@@ -103,9 +104,9 @@ TEST_F(QspiTest, CommandSequence)
 
 TEST_F(QspiTest, TransmitReceive)
 {
-    api.transmit = [](cfn_hal_qspi_t *d, const uint8_t *data, uint32_t timeout) -> cfn_hal_error_code_t
+    api.transmit = [] (cfn_hal_qspi_t *d, const uint8_t *data, uint32_t timeout) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
-    api.receive = [](cfn_hal_qspi_t *d, uint8_t *data, uint32_t timeout) -> cfn_hal_error_code_t
+    api.receive = [] (cfn_hal_qspi_t *d, uint8_t *data, uint32_t timeout) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
 
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
@@ -116,7 +117,7 @@ TEST_F(QspiTest, TransmitReceive)
 
 TEST_F(QspiTest, MemoryMappedMode)
 {
-    api.memory_mapped_enable = [](cfn_hal_qspi_t *d, const cfn_hal_qspi_cmd_t *cmd) -> cfn_hal_error_code_t
+    api.memory_mapped_enable = [] (cfn_hal_qspi_t *d, const cfn_hal_qspi_cmd_t *cmd) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
 
     driver.base.status     = CFN_HAL_DRIVER_STATUS_INITIALIZED;
@@ -126,11 +127,11 @@ TEST_F(QspiTest, MemoryMappedMode)
 
 TEST_F(QspiTest, AutoPollingMode)
 {
-    api.autopolling_enable = [](cfn_hal_qspi_t           *d,
-                                const cfn_hal_qspi_cmd_t *cmd,
-                                uint32_t                  match,
-                                uint32_t                  mask,
-                                uint32_t                  timeout) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.autopolling_enable = [] (cfn_hal_qspi_t           *d,
+                                 const cfn_hal_qspi_cmd_t *cmd,
+                                 uint32_t                  match,
+                                 uint32_t                  mask,
+                                 uint32_t timeout) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
     driver.base.status     = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     cfn_hal_qspi_cmd_t cmd = {};
@@ -141,8 +142,9 @@ TEST_F(QspiTest, AutoPollingMode)
 
 TEST_F(QspiTest, EventEnableDisable)
 {
-    api.base.event_enable = [](cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    api.base.event_disable = [](cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t
+    api.base.event_enable = [] (cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t
+    { return CFN_HAL_ERROR_OK; };
+    api.base.event_disable = [] (cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
 
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
@@ -154,7 +156,7 @@ TEST_F(QspiTest, EventEnableDisable)
 
 TEST_F(QspiTest, WithLockMacroWorks)
 {
-    api.transmit = [](cfn_hal_qspi_t *d, const uint8_t *data, uint32_t timeout) { return CFN_HAL_ERROR_OK; };
+    api.transmit = [] (cfn_hal_qspi_t *d, const uint8_t *data, uint32_t timeout) { return CFN_HAL_ERROR_OK; };
     cfn_hal_error_code_t result;
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     uint8_t dummy      = 0;

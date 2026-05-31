@@ -65,7 +65,8 @@ static const cfn_hal_error_code_t VENDOR_ERROR_MAP[VENDOR_MAX] = {
  * @param status Vendor-specific status code.
  * @return Corresponding cfn_hal_error_code_t.
  */
-static inline cfn_hal_error_code_t cfn_hal_vendor_map_error(int status)
+static inline cfn_hal_error_code_t
+cfn_hal_vendor_map_error (int status)
 {
     if (status < 0 || status >= VENDOR_MAX)
     {

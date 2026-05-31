@@ -26,86 +26,94 @@
 #include "cfn_hal_crypto.h"
 #include "cfn_hal_crypto_port.h"
 
-static cfn_hal_error_code_t port_base_event_get(cfn_hal_driver_t *base, uint32_t *event_mask)
+static cfn_hal_error_code_t
+port_base_event_get (cfn_hal_driver_t *p_base, uint32_t *p_event_mask)
 {
-    CFN_HAL_UNUSED(base);
-    if (event_mask)
+    CFN_HAL_UNUSED(p_base);
+    if (p_event_mask)
     {
-        *event_mask = 0;
+        *p_event_mask = 0;
     }
     return CFN_HAL_ERROR_OK;
 }
 
-static cfn_hal_error_code_t port_base_error_get(cfn_hal_driver_t *base, uint32_t *error_mask)
+static cfn_hal_error_code_t
+port_base_error_get (cfn_hal_driver_t *p_base, uint32_t *p_error_mask)
 {
-    CFN_HAL_UNUSED(base);
-    if (error_mask)
+    CFN_HAL_UNUSED(p_base);
+    if (p_error_mask)
     {
-        *error_mask = 0;
+        *p_error_mask = 0;
     }
     return CFN_HAL_ERROR_OK;
 }
 
-static cfn_hal_error_code_t port_crypto_encrypt(cfn_hal_crypto_t *driver,
-                                                const uint8_t    *in,
-                                                uint8_t          *out, // NOLINT(readability-non-const-parameter)
-                                                size_t            size,
-                                                uint32_t          timeout) // NOLINT(readability-non-const-parameter)
+static cfn_hal_error_code_t
+port_crypto_encrypt (cfn_hal_crypto_t *p_driver,
+                     const uint8_t    *p_in,
+                     uint8_t          *p_out, // NOLINT(readability-non-const-parameter)
+                     size_t            size,
+                     uint32_t          timeout) // NOLINT(readability-non-const-parameter)
 {
-    CFN_HAL_UNUSED(driver);
-    CFN_HAL_UNUSED(in);
-    CFN_HAL_UNUSED(out);
+    CFN_HAL_UNUSED(p_driver);
+    CFN_HAL_UNUSED(p_in);
+    CFN_HAL_UNUSED(p_out);
     CFN_HAL_UNUSED(size);
     CFN_HAL_UNUSED(timeout);
     return CFN_HAL_ERROR_OK;
 }
 
-static cfn_hal_error_code_t port_crypto_decrypt(cfn_hal_crypto_t *driver,
-                                                const uint8_t    *in,
-                                                uint8_t          *out, // NOLINT(readability-non-const-parameter)
-                                                size_t            size,
-                                                uint32_t          timeout) // NOLINT(readability-non-const-parameter)
+static cfn_hal_error_code_t
+port_crypto_decrypt (cfn_hal_crypto_t *p_driver,
+                     const uint8_t    *p_in,
+                     uint8_t          *p_out, // NOLINT(readability-non-const-parameter)
+                     size_t            size,
+                     uint32_t          timeout) // NOLINT(readability-non-const-parameter)
 {
-    CFN_HAL_UNUSED(driver);
-    CFN_HAL_UNUSED(in);
-    CFN_HAL_UNUSED(out);
+    CFN_HAL_UNUSED(p_driver);
+    CFN_HAL_UNUSED(p_in);
+    CFN_HAL_UNUSED(p_out);
     CFN_HAL_UNUSED(size);
     CFN_HAL_UNUSED(timeout);
     return CFN_HAL_ERROR_OK;
 }
 
-static cfn_hal_error_code_t port_crypto_hash_update(cfn_hal_crypto_t *driver, const uint8_t *data, size_t size)
+static cfn_hal_error_code_t
+port_crypto_hash_update (cfn_hal_crypto_t *p_driver, const uint8_t *p_data, size_t size)
 {
-    CFN_HAL_UNUSED(driver);
-    CFN_HAL_UNUSED(data);
+    CFN_HAL_UNUSED(p_driver);
+    CFN_HAL_UNUSED(p_data);
     CFN_HAL_UNUSED(size);
     return CFN_HAL_ERROR_OK;
 }
 
-static cfn_hal_error_code_t port_crypto_hash_finish(cfn_hal_crypto_t *driver,
-                                                    uint8_t          *hash, // NOLINT(readability-non-const-parameter)
-                                                    uint32_t timeout)       // NOLINT(readability-non-const-parameter)
+static cfn_hal_error_code_t
+port_crypto_hash_finish (cfn_hal_crypto_t *p_driver,
+                         uint8_t          *p_hash,  // NOLINT(readability-non-const-parameter)
+                         uint32_t          timeout) // NOLINT(readability-non-const-parameter)
 {
-    CFN_HAL_UNUSED(driver);
-    CFN_HAL_UNUSED(hash);
+    CFN_HAL_UNUSED(p_driver);
+    CFN_HAL_UNUSED(p_hash);
     CFN_HAL_UNUSED(timeout);
     return CFN_HAL_ERROR_OK;
 }
 
-static cfn_hal_error_code_t port_crypto_generate_random(cfn_hal_crypto_t *driver,
-                                                        uint8_t *buffer, // NOLINT(readability-non-const-parameter)
-                                                        size_t   size)     // NOLINT(readability-non-const-parameter)
+static cfn_hal_error_code_t
+port_crypto_generate_random (cfn_hal_crypto_t *p_driver,
+                             uint8_t          *p_buffer, // NOLINT(readability-non-const-parameter)
+                             size_t            size)     // NOLINT(readability-non-const-parameter)
 {
-    CFN_HAL_UNUSED(driver);
-    CFN_HAL_UNUSED(buffer);
+    CFN_HAL_UNUSED(p_driver);
+    CFN_HAL_UNUSED(p_buffer);
     CFN_HAL_UNUSED(size);
     return CFN_HAL_ERROR_OK;
 }
 
-static cfn_hal_error_code_t port_crypto_set_key(cfn_hal_crypto_t *driver, const uint8_t *key, size_t key_size)
+static cfn_hal_error_code_t
+port_crypto_set_key (cfn_hal_crypto_t *p_driver, const uint8_t *p_key, size_t key_size)
 {
-    CFN_HAL_UNUSED(driver);
-    CFN_HAL_UNUSED(key);
+    CFN_HAL_UNUSED(p_driver);
+    CFN_HAL_UNUSED(p_key);
     CFN_HAL_UNUSED(key_size);
     return CFN_HAL_ERROR_OK;
 }
@@ -132,28 +140,30 @@ static const cfn_hal_crypto_api_t CRYPTO_API = {
     .set_key = port_crypto_set_key
 };
 
-cfn_hal_error_code_t cfn_hal_crypto_construct(cfn_hal_crypto_t              *driver,
-                                              const cfn_hal_crypto_config_t *config,
-                                              const cfn_hal_crypto_phy_t    *phy,
-                                              struct cfn_hal_clock_s        *clock,
-                                              void                          *dependency,
-                                              cfn_hal_crypto_callback_t      callback,
-                                              void                          *user_arg)
+cfn_hal_error_code_t
+cfn_hal_crypto_construct (cfn_hal_crypto_t              *p_driver,
+                          const cfn_hal_crypto_config_t *p_config,
+                          const cfn_hal_crypto_phy_t    *p_phy,
+                          struct cfn_hal_clock_s        *p_clock,
+                          void                          *p_dependency,
+                          cfn_hal_crypto_callback_t      p_callback,
+                          void                          *p_user_arg)
 {
-    if ((driver == NULL) || (phy == NULL))
+    if ((p_driver == NULL) || (p_phy == NULL))
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    cfn_hal_crypto_populate(driver, 0, clock, dependency, &CRYPTO_API, phy, config, callback, user_arg);
+    cfn_hal_crypto_populate(p_driver, 0, p_clock, p_dependency, &CRYPTO_API, p_phy, p_config, p_callback, p_user_arg);
     return CFN_HAL_ERROR_OK;
 }
 
-cfn_hal_error_code_t cfn_hal_crypto_destruct(cfn_hal_crypto_t *driver)
+cfn_hal_error_code_t
+cfn_hal_crypto_destruct (cfn_hal_crypto_t *p_driver)
 {
-    if (driver == NULL)
+    if (p_driver == NULL)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    cfn_hal_crypto_populate(driver, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    cfn_hal_crypto_populate(p_driver, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     return CFN_HAL_ERROR_OK;
 }

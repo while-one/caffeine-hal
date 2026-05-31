@@ -140,7 +140,10 @@ typedef struct cfn_hal_i2s_api_s cfn_hal_i2s_api_t;
  * @param error_mask Mask of triggered exception errors.
  * @param user_arg User-defined argument passed during registration.
  */
-typedef void (*cfn_hal_i2s_callback_t)(cfn_hal_i2s_t *driver, uint32_t event_mask, uint32_t error_mask, void *user_arg);
+typedef void (*cfn_hal_i2s_callback_t)(cfn_hal_i2s_t *p_driver,
+                                       uint32_t       event_mask,
+                                       uint32_t       error_mask,
+                                       void          *p_user_arg);
 
 /**
  * @brief I2S Virtual Method Table (VMT).
@@ -150,11 +153,11 @@ struct cfn_hal_i2s_api_s
     cfn_hal_api_base_t base;
 
     /* I2S Specific Extensions */
-    cfn_hal_error_code_t (*transmit_dma)(cfn_hal_i2s_t *driver, const uint16_t *data, size_t size);
-    cfn_hal_error_code_t (*receive_dma)(cfn_hal_i2s_t *driver, uint16_t *data, size_t size);
-    cfn_hal_error_code_t (*pause)(cfn_hal_i2s_t *driver);
-    cfn_hal_error_code_t (*resume)(cfn_hal_i2s_t *driver);
-    cfn_hal_error_code_t (*stop)(cfn_hal_i2s_t *driver);
+    cfn_hal_error_code_t (*transmit_dma)(cfn_hal_i2s_t *p_driver, const uint16_t *p_data, size_t size);
+    cfn_hal_error_code_t (*receive_dma)(cfn_hal_i2s_t *p_driver, uint16_t *p_data, size_t size);
+    cfn_hal_error_code_t (*pause)(cfn_hal_i2s_t *p_driver);
+    cfn_hal_error_code_t (*resume)(cfn_hal_i2s_t *p_driver);
+    cfn_hal_error_code_t (*stop)(cfn_hal_i2s_t *p_driver);
 };
 
 CFN_HAL_VMT_CHECK(struct cfn_hal_i2s_api_s);
@@ -162,18 +165,27 @@ CFN_HAL_VMT_CHECK(struct cfn_hal_i2s_api_s);
 CFN_HAL_CREATE_DRIVER_TYPE(i2s, cfn_hal_i2s_config_t, cfn_hal_i2s_api_t, cfn_hal_i2s_phy_t, cfn_hal_i2s_callback_t);
 
 /* Functions inline ------------------------------------------------- */
-CFN_HAL_INLINE void cfn_hal_i2s_populate(cfn_hal_i2s_t              *driver,
-                                         uint32_t                    peripheral_id,
-                                         struct cfn_hal_clock_s     *clock,
-                                         void                       *dependency,
-                                         const cfn_hal_i2s_api_t    *api,
-                                         const cfn_hal_i2s_phy_t    *phy,
-                                         const cfn_hal_i2s_config_t *config,
-                                         cfn_hal_i2s_callback_t      callback,
-                                         void                       *user_arg)
+CFN_HAL_INLINE void
+cfn_hal_i2s_populate (cfn_hal_i2s_t              *p_driver,
+                      uint32_t                    peripheral_id,
+                      struct cfn_hal_clock_s     *p_clock,
+                      void                       *p_dependency,
+                      const cfn_hal_i2s_api_t    *p_api,
+                      const cfn_hal_i2s_phy_t    *p_phy,
+                      const cfn_hal_i2s_config_t *p_config,
+                      cfn_hal_i2s_callback_t      p_callback,
+                      void                       *p_user_arg)
 {
-    CFN_HAL_POPULATE_DRIVER(
-        driver, CFN_HAL_PERIPHERAL_TYPE_I2S, peripheral_id, clock, dependency, api, phy, config, callback, user_arg);
+    CFN_HAL_POPULATE_DRIVER(p_driver,
+                            CFN_HAL_PERIPHERAL_TYPE_I2S,
+                            peripheral_id,
+                            p_clock,
+                            p_dependency,
+                            p_api,
+                            p_phy,
+                            p_config,
+                            p_callback,
+                            p_user_arg);
 }
 
 /**
@@ -182,21 +194,21 @@ CFN_HAL_INLINE void cfn_hal_i2s_populate(cfn_hal_i2s_t              *driver,
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_config_validate(const cfn_hal_i2s_t        *driver,
-                                                                const cfn_hal_i2s_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2s_config_validate (const cfn_hal_i2s_t *p_driver, const cfn_hal_i2s_config_t *p_config)
 {
-    if (driver == NULL || config == NULL)
+    if (p_driver == NULL || p_config == NULL)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
 
-    if ((config->mode >= CFN_HAL_I2S_CONFIG_MODE_MAX) || (config->standard >= CFN_HAL_I2S_CONFIG_STANDARD_MAX) ||
-        (config->data_format >= CFN_HAL_I2S_CONFIG_DATAFORMAT_MAX))
+    if ((p_config->mode >= CFN_HAL_I2S_CONFIG_MODE_MAX) || (p_config->standard >= CFN_HAL_I2S_CONFIG_STANDARD_MAX) ||
+        (p_config->data_format >= CFN_HAL_I2S_CONFIG_DATAFORMAT_MAX))
     {
         return CFN_HAL_ERROR_BAD_CONFIG;
     }
 
-    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, config);
+    return cfn_hal_base_config_validate(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, p_config);
 }
 
 /**
@@ -204,19 +216,20 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_config_validate(const cfn_hal_i2
  * @param driver Pointer to the I2S driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_init(cfn_hal_i2s_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2s_init (cfn_hal_i2s_t *p_driver)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    driver->base.vmt           = (const struct cfn_hal_api_base_s *) driver->api;
-    cfn_hal_error_code_t error = cfn_hal_i2s_config_validate(driver, driver->config);
+    p_driver->base.vmt         = (const struct cfn_hal_api_base_s *) p_driver->api;
+    cfn_hal_error_code_t error = cfn_hal_i2s_config_validate(p_driver, p_driver->config);
     if (error != CFN_HAL_ERROR_OK)
     {
         return error;
     }
-    return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S);
+    return cfn_hal_base_init(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S);
 }
 
 /**
@@ -224,13 +237,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_init(cfn_hal_i2s_t *driver)
  * @param driver Pointer to the I2S driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_deinit(cfn_hal_i2s_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2s_deinit (cfn_hal_i2s_t *p_driver)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_deinit(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S);
+    return cfn_hal_base_deinit(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S);
 }
 
 /**
@@ -239,21 +253,22 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_deinit(cfn_hal_i2s_t *driver)
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_config_set(cfn_hal_i2s_t *driver, const cfn_hal_i2s_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2s_config_set (cfn_hal_i2s_t *p_driver, const cfn_hal_i2s_config_t *p_config)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    cfn_hal_error_code_t error = cfn_hal_i2s_config_validate(driver, config);
+    cfn_hal_error_code_t error = cfn_hal_i2s_config_validate(p_driver, p_config);
     if (error != CFN_HAL_ERROR_OK)
     {
         return error;
     }
     {
-        driver->config = config;
+        p_driver->config = p_config;
     }
-    return cfn_hal_base_config_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, (const void *) config);
+    return cfn_hal_base_config_set(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, (const void *) p_config);
 }
 
 /**
@@ -262,13 +277,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_config_set(cfn_hal_i2s_t *driver
  * @param config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_config_get(cfn_hal_i2s_t *driver, cfn_hal_i2s_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2s_config_get (cfn_hal_i2s_t *p_driver, cfn_hal_i2s_config_t *p_config)
 {
-    if (!driver || !config || !driver->config)
+    if (!p_driver || !p_config || !p_driver->config)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    *config = *(driver->config);
+    *p_config = *(p_driver->config);
     return CFN_HAL_ERROR_OK;
 }
 
@@ -279,20 +295,19 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_config_get(cfn_hal_i2s_t *driver
  * @param user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_callback_register(cfn_hal_i2s_t               *driver,
-                                                                  const cfn_hal_i2s_callback_t callback,
-                                                                  void                        *user_arg)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2s_callback_register (cfn_hal_i2s_t *p_driver, const cfn_hal_i2s_callback_t callback, void *p_user_arg)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->cb          = callback;
-        driver->cb_user_arg = user_arg;
+        p_driver->cb          = callback;
+        p_driver->cb_user_arg = p_user_arg;
     }
     return cfn_hal_base_callback_register(
-        &driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, (cfn_hal_callback_t) callback, user_arg);
+        &p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, (cfn_hal_callback_t) callback, p_user_arg);
 }
 
 /**
@@ -301,13 +316,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_callback_register(cfn_hal_i2s_t 
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_power_state_set(cfn_hal_i2s_t *driver, cfn_hal_power_state_t state)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2s_power_state_set (cfn_hal_i2s_t *p_driver, cfn_hal_power_state_t state)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_power_state_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, state);
+    return cfn_hal_power_state_set(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, state);
 }
 
 /**
@@ -316,13 +332,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_power_state_set(cfn_hal_i2s_t *d
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_event_enable(cfn_hal_i2s_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2s_event_enable (cfn_hal_i2s_t *p_driver, uint32_t event_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_event_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, event_mask);
+    return cfn_hal_base_event_enable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, event_mask);
 }
 
 /**
@@ -331,13 +348,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_event_enable(cfn_hal_i2s_t *driv
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_event_disable(cfn_hal_i2s_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2s_event_disable (cfn_hal_i2s_t *p_driver, uint32_t event_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_event_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, event_mask);
+    return cfn_hal_base_event_disable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, event_mask);
 }
 
 /**
@@ -346,13 +364,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_event_disable(cfn_hal_i2s_t *dri
  * @param event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_event_get(cfn_hal_i2s_t *driver, uint32_t *event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2s_event_get (cfn_hal_i2s_t *p_driver, uint32_t *p_event_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_event_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, event_mask);
+    return cfn_hal_base_event_get(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, p_event_mask);
 }
 
 /**
@@ -361,13 +380,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_event_get(cfn_hal_i2s_t *driver,
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_error_enable(cfn_hal_i2s_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2s_error_enable (cfn_hal_i2s_t *p_driver, uint32_t error_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_error_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, error_mask);
+    return cfn_hal_base_error_enable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, error_mask);
 }
 
 /**
@@ -376,13 +396,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_error_enable(cfn_hal_i2s_t *driv
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_error_disable(cfn_hal_i2s_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2s_error_disable (cfn_hal_i2s_t *p_driver, uint32_t error_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_error_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, error_mask);
+    return cfn_hal_base_error_disable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, error_mask);
 }
 
 /**
@@ -391,13 +412,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_error_disable(cfn_hal_i2s_t *dri
  * @param error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_error_get(cfn_hal_i2s_t *driver, uint32_t *error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2s_error_get (cfn_hal_i2s_t *p_driver, uint32_t *p_error_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, error_mask);
+    return cfn_hal_base_error_get(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2S, p_error_mask);
 }
 
 /* I2S Specific Functions ------------------------------------------- */
@@ -409,10 +431,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_error_get(cfn_hal_i2s_t *driver,
  * @param size Number of samples to transmit.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_transmit_dma(cfn_hal_i2s_t *driver, const uint16_t *data, size_t size)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2s_transmit_dma (cfn_hal_i2s_t *p_driver, const uint16_t *p_data, size_t size)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_I2S, transmit_dma, driver, error, data, size);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_I2S, transmit_dma, p_driver, error, p_data, size);
     return error;
 }
 
@@ -423,10 +446,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_transmit_dma(cfn_hal_i2s_t *driv
  * @param size Number of samples to receive.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_receive_dma(cfn_hal_i2s_t *driver, uint16_t *data, size_t size)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2s_receive_dma (cfn_hal_i2s_t *p_driver, uint16_t *p_data, size_t size)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_I2S, receive_dma, driver, error, data, size);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_I2S, receive_dma, p_driver, error, p_data, size);
     return error;
 }
 
@@ -435,10 +459,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_receive_dma(cfn_hal_i2s_t *drive
  * @param driver Pointer to the I2S driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_pause(cfn_hal_i2s_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2s_pause (cfn_hal_i2s_t *p_driver)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_I2S, pause, driver, error);
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_I2S, pause, p_driver, error);
     return error;
 }
 
@@ -447,10 +472,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_pause(cfn_hal_i2s_t *driver)
  * @param driver Pointer to the I2S driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_resume(cfn_hal_i2s_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2s_resume (cfn_hal_i2s_t *p_driver)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_I2S, resume, driver, error);
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_I2S, resume, p_driver, error);
     return error;
 }
 
@@ -459,21 +485,22 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_resume(cfn_hal_i2s_t *driver)
  * @param driver Pointer to the I2S driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2s_stop(cfn_hal_i2s_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2s_stop (cfn_hal_i2s_t *p_driver)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_I2S, stop, driver, error);
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_I2S, stop, p_driver, error);
     return error;
 }
 
-cfn_hal_error_code_t cfn_hal_i2s_construct(cfn_hal_i2s_t              *driver,
-                                           const cfn_hal_i2s_config_t *config,
-                                           const cfn_hal_i2s_phy_t    *phy,
-                                           struct cfn_hal_clock_s     *clock,
-                                           void                       *dependency,
-                                           cfn_hal_i2s_callback_t      callback,
-                                           void                       *user_arg);
-cfn_hal_error_code_t cfn_hal_i2s_destruct(cfn_hal_i2s_t *driver);
+cfn_hal_error_code_t cfn_hal_i2s_construct (cfn_hal_i2s_t              *p_driver,
+                                            const cfn_hal_i2s_config_t *p_config,
+                                            const cfn_hal_i2s_phy_t    *p_phy,
+                                            struct cfn_hal_clock_s     *p_clock,
+                                            void                       *p_dependency,
+                                            cfn_hal_i2s_callback_t      p_callback,
+                                            void                       *p_user_arg);
+cfn_hal_error_code_t cfn_hal_i2s_destruct (cfn_hal_i2s_t *p_driver);
 #ifdef __cplusplus
 }
 #endif

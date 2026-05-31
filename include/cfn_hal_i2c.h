@@ -156,12 +156,12 @@ typedef struct cfn_hal_i2c_api_s cfn_hal_i2c_api_t;
  * @param nbr_of_bytes Number of bytes transferred.
  * @param user_arg User-defined argument passed during registration.
  */
-typedef void (*cfn_hal_i2c_callback_t)(cfn_hal_i2c_t *driver,
+typedef void (*cfn_hal_i2c_callback_t)(cfn_hal_i2c_t *p_driver,
                                        uint32_t       event_mask,
                                        uint32_t       error_mask,
-                                       uint8_t       *payload,
+                                       uint8_t       *p_payload,
                                        size_t         nbr_of_bytes,
-                                       void          *user_arg);
+                                       void          *p_user_arg);
 
 /**
  * @brief I2C Virtual Method Table (VMT).
@@ -171,16 +171,18 @@ struct cfn_hal_i2c_api_s
     cfn_hal_api_base_t base;
 
     /* I2C Specific Extensions */
-    cfn_hal_error_code_t (*xfr_irq)(cfn_hal_i2c_t *driver, const cfn_hal_i2c_transaction_t *xfr);
-    cfn_hal_error_code_t (*xfr_irq_abort)(cfn_hal_i2c_t *driver);
-    cfn_hal_error_code_t (*xfr_polling)(cfn_hal_i2c_t *driver, const cfn_hal_i2c_transaction_t *xfr, uint32_t timeout);
-    cfn_hal_error_code_t (*mem_read)(cfn_hal_i2c_t                       *driver,
-                                     const cfn_hal_i2c_mem_transaction_t *mem_xfr,
+    cfn_hal_error_code_t (*xfr_irq)(cfn_hal_i2c_t *p_driver, const cfn_hal_i2c_transaction_t *p_xfr);
+    cfn_hal_error_code_t (*xfr_irq_abort)(cfn_hal_i2c_t *p_driver);
+    cfn_hal_error_code_t (*xfr_polling)(cfn_hal_i2c_t                   *p_driver,
+                                        const cfn_hal_i2c_transaction_t *p_xfr,
+                                        uint32_t                         timeout);
+    cfn_hal_error_code_t (*mem_read)(cfn_hal_i2c_t                       *p_driver,
+                                     const cfn_hal_i2c_mem_transaction_t *p_mem_xfr,
                                      uint32_t                             timeout);
-    cfn_hal_error_code_t (*mem_write)(cfn_hal_i2c_t                       *driver,
-                                      const cfn_hal_i2c_mem_transaction_t *mem_xfr,
+    cfn_hal_error_code_t (*mem_write)(cfn_hal_i2c_t                       *p_driver,
+                                      const cfn_hal_i2c_mem_transaction_t *p_mem_xfr,
                                       uint32_t                             timeout);
-    cfn_hal_error_code_t (*xfr_dma)(cfn_hal_i2c_t *driver, const cfn_hal_i2c_transaction_t *xfr);
+    cfn_hal_error_code_t (*xfr_dma)(cfn_hal_i2c_t *p_driver, const cfn_hal_i2c_transaction_t *p_xfr);
 };
 
 CFN_HAL_VMT_CHECK(struct cfn_hal_i2c_api_s);
@@ -188,18 +190,27 @@ CFN_HAL_VMT_CHECK(struct cfn_hal_i2c_api_s);
 CFN_HAL_CREATE_DRIVER_TYPE(i2c, cfn_hal_i2c_config_t, cfn_hal_i2c_api_t, cfn_hal_i2c_phy_t, cfn_hal_i2c_callback_t);
 
 /* Functions inline ------------------------------------------------- */
-CFN_HAL_INLINE void cfn_hal_i2c_populate(cfn_hal_i2c_t              *driver,
-                                         uint32_t                    peripheral_id,
-                                         struct cfn_hal_clock_s     *clock,
-                                         void                       *dependency,
-                                         const cfn_hal_i2c_api_t    *api,
-                                         const cfn_hal_i2c_phy_t    *phy,
-                                         const cfn_hal_i2c_config_t *config,
-                                         cfn_hal_i2c_callback_t      callback,
-                                         void                       *user_arg)
+CFN_HAL_INLINE void
+cfn_hal_i2c_populate (cfn_hal_i2c_t              *p_driver,
+                      uint32_t                    peripheral_id,
+                      struct cfn_hal_clock_s     *p_clock,
+                      void                       *p_dependency,
+                      const cfn_hal_i2c_api_t    *p_api,
+                      const cfn_hal_i2c_phy_t    *p_phy,
+                      const cfn_hal_i2c_config_t *p_config,
+                      cfn_hal_i2c_callback_t      p_callback,
+                      void                       *p_user_arg)
 {
-    CFN_HAL_POPULATE_DRIVER(
-        driver, CFN_HAL_PERIPHERAL_TYPE_I2C, peripheral_id, clock, dependency, api, phy, config, callback, user_arg);
+    CFN_HAL_POPULATE_DRIVER(p_driver,
+                            CFN_HAL_PERIPHERAL_TYPE_I2C,
+                            peripheral_id,
+                            p_clock,
+                            p_dependency,
+                            p_api,
+                            p_phy,
+                            p_config,
+                            p_callback,
+                            p_user_arg);
 }
 
 /**
@@ -208,20 +219,20 @@ CFN_HAL_INLINE void cfn_hal_i2c_populate(cfn_hal_i2c_t              *driver,
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_config_validate(const cfn_hal_i2c_t        *driver,
-                                                                const cfn_hal_i2c_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2c_config_validate (const cfn_hal_i2c_t *p_driver, const cfn_hal_i2c_config_t *p_config)
 {
-    if (driver == NULL || config == NULL)
+    if (p_driver == NULL || p_config == NULL)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
 
-    if (config->speed >= CFN_HAL_I2C_CONFIG_SPEED_MAX)
+    if (p_config->speed >= CFN_HAL_I2C_CONFIG_SPEED_MAX)
     {
         return CFN_HAL_ERROR_BAD_CONFIG;
     }
 
-    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C, config);
+    return cfn_hal_base_config_validate(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C, p_config);
 }
 
 /**
@@ -229,19 +240,20 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_config_validate(const cfn_hal_i2
  * @param driver Pointer to the I2C driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_init(cfn_hal_i2c_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2c_init (cfn_hal_i2c_t *p_driver)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    driver->base.vmt           = (const struct cfn_hal_api_base_s *) driver->api;
-    cfn_hal_error_code_t error = cfn_hal_i2c_config_validate(driver, driver->config);
+    p_driver->base.vmt         = (const struct cfn_hal_api_base_s *) p_driver->api;
+    cfn_hal_error_code_t error = cfn_hal_i2c_config_validate(p_driver, p_driver->config);
     if (error != CFN_HAL_ERROR_OK)
     {
         return error;
     }
-    return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C);
+    return cfn_hal_base_init(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C);
 }
 
 /**
@@ -249,13 +261,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_init(cfn_hal_i2c_t *driver)
  * @param driver Pointer to the I2C driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_deinit(cfn_hal_i2c_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2c_deinit (cfn_hal_i2c_t *p_driver)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_deinit(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C);
+    return cfn_hal_base_deinit(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C);
 }
 
 /**
@@ -264,21 +277,22 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_deinit(cfn_hal_i2c_t *driver)
  * @param config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_config_set(cfn_hal_i2c_t *driver, const cfn_hal_i2c_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2c_config_set (cfn_hal_i2c_t *p_driver, const cfn_hal_i2c_config_t *p_config)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    cfn_hal_error_code_t error = cfn_hal_i2c_config_validate(driver, config);
+    cfn_hal_error_code_t error = cfn_hal_i2c_config_validate(p_driver, p_config);
     if (error != CFN_HAL_ERROR_OK)
     {
         return error;
     }
     {
-        driver->config = config;
+        p_driver->config = p_config;
     }
-    return cfn_hal_base_config_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C, (const void *) config);
+    return cfn_hal_base_config_set(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C, (const void *) p_config);
 }
 
 /**
@@ -287,13 +301,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_config_set(cfn_hal_i2c_t *driver
  * @param config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_config_get(cfn_hal_i2c_t *driver, cfn_hal_i2c_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2c_config_get (cfn_hal_i2c_t *p_driver, cfn_hal_i2c_config_t *p_config)
 {
-    if (!driver || !config || !driver->config)
+    if (!p_driver || !p_config || !p_driver->config)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    *config = *(driver->config);
+    *p_config = *(p_driver->config);
     return CFN_HAL_ERROR_OK;
 }
 
@@ -304,20 +319,19 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_config_get(cfn_hal_i2c_t *driver
  * @param user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_callback_register(cfn_hal_i2c_t               *driver,
-                                                                  const cfn_hal_i2c_callback_t callback,
-                                                                  void                        *user_arg)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2c_callback_register (cfn_hal_i2c_t *p_driver, const cfn_hal_i2c_callback_t callback, void *p_user_arg)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->cb          = callback;
-        driver->cb_user_arg = user_arg;
+        p_driver->cb          = callback;
+        p_driver->cb_user_arg = p_user_arg;
     }
     return cfn_hal_base_callback_register(
-        &driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C, (cfn_hal_callback_t) callback, user_arg);
+        &p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C, (cfn_hal_callback_t) callback, p_user_arg);
 }
 
 /**
@@ -326,13 +340,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_callback_register(cfn_hal_i2c_t 
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_power_state_set(cfn_hal_i2c_t *driver, cfn_hal_power_state_t state)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2c_power_state_set (cfn_hal_i2c_t *p_driver, cfn_hal_power_state_t state)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_power_state_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C, state);
+    return cfn_hal_power_state_set(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C, state);
 }
 
 /**
@@ -341,13 +356,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_power_state_set(cfn_hal_i2c_t *d
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_event_enable(cfn_hal_i2c_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2c_event_enable (cfn_hal_i2c_t *p_driver, uint32_t event_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_event_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C, event_mask);
+    return cfn_hal_base_event_enable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C, event_mask);
 }
 
 /**
@@ -356,13 +372,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_event_enable(cfn_hal_i2c_t *driv
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_event_disable(cfn_hal_i2c_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2c_event_disable (cfn_hal_i2c_t *p_driver, uint32_t event_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_event_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C, event_mask);
+    return cfn_hal_base_event_disable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C, event_mask);
 }
 
 /**
@@ -371,13 +388,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_event_disable(cfn_hal_i2c_t *dri
  * @param event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_event_get(cfn_hal_i2c_t *driver, uint32_t *event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2c_event_get (cfn_hal_i2c_t *p_driver, uint32_t *p_event_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_event_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C, event_mask);
+    return cfn_hal_base_event_get(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C, p_event_mask);
 }
 
 /**
@@ -386,13 +404,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_event_get(cfn_hal_i2c_t *driver,
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_error_enable(cfn_hal_i2c_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2c_error_enable (cfn_hal_i2c_t *p_driver, uint32_t error_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_error_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C, error_mask);
+    return cfn_hal_base_error_enable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C, error_mask);
 }
 
 /**
@@ -401,13 +420,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_error_enable(cfn_hal_i2c_t *driv
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_error_disable(cfn_hal_i2c_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2c_error_disable (cfn_hal_i2c_t *p_driver, uint32_t error_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_error_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C, error_mask);
+    return cfn_hal_base_error_disable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C, error_mask);
 }
 
 /**
@@ -416,13 +436,14 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_error_disable(cfn_hal_i2c_t *dri
  * @param error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_error_get(cfn_hal_i2c_t *driver, uint32_t *error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2c_error_get (cfn_hal_i2c_t *p_driver, uint32_t *p_error_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C, error_mask);
+    return cfn_hal_base_error_get(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_I2C, p_error_mask);
 }
 
 /* I2C Specific Functions ------------------------------------------- */
@@ -433,10 +454,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_error_get(cfn_hal_i2c_t *driver,
  * @param xfr Pointer to the transaction structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_xfr_irq(cfn_hal_i2c_t *driver, const cfn_hal_i2c_transaction_t *xfr)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2c_xfr_irq (cfn_hal_i2c_t *p_driver, const cfn_hal_i2c_transaction_t *p_xfr)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_I2C, xfr_irq, driver, error, xfr);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_I2C, xfr_irq, p_driver, error, p_xfr);
     return error;
 }
 
@@ -445,10 +467,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_xfr_irq(cfn_hal_i2c_t *driver, c
  * @param driver Pointer to the I2C driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_xfr_irq_abort(cfn_hal_i2c_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2c_xfr_irq_abort (cfn_hal_i2c_t *p_driver)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_I2C, xfr_irq_abort, driver, error);
+    CFN_HAL_CHECK_AND_CALL_FUNC(CFN_HAL_PERIPHERAL_TYPE_I2C, xfr_irq_abort, p_driver, error);
     return error;
 }
 
@@ -459,12 +482,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_xfr_irq_abort(cfn_hal_i2c_t *dri
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_xfr_polling(cfn_hal_i2c_t                   *driver,
-                                                            const cfn_hal_i2c_transaction_t *xfr,
-                                                            uint32_t                         timeout)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2c_xfr_polling (cfn_hal_i2c_t *p_driver, const cfn_hal_i2c_transaction_t *p_xfr, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_I2C, xfr_polling, driver, error, xfr, timeout);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_I2C, xfr_polling, p_driver, error, p_xfr, timeout);
     return error;
 }
 
@@ -475,12 +497,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_xfr_polling(cfn_hal_i2c_t       
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_mem_read(cfn_hal_i2c_t                       *driver,
-                                                         const cfn_hal_i2c_mem_transaction_t *mem_xfr,
-                                                         uint32_t                             timeout)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2c_mem_read (cfn_hal_i2c_t *p_driver, const cfn_hal_i2c_mem_transaction_t *p_mem_xfr, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_I2C, mem_read, driver, error, mem_xfr, timeout);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_I2C, mem_read, p_driver, error, p_mem_xfr, timeout);
     return error;
 }
 
@@ -491,12 +512,11 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_mem_read(cfn_hal_i2c_t          
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_mem_write(cfn_hal_i2c_t                       *driver,
-                                                          const cfn_hal_i2c_mem_transaction_t *mem_xfr,
-                                                          uint32_t                             timeout)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2c_mem_write (cfn_hal_i2c_t *p_driver, const cfn_hal_i2c_mem_transaction_t *p_mem_xfr, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_I2C, mem_write, driver, error, mem_xfr, timeout);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_I2C, mem_write, p_driver, error, p_mem_xfr, timeout);
     return error;
 }
 
@@ -506,20 +526,21 @@ CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_mem_write(cfn_hal_i2c_t         
  * @param xfr Pointer to the transaction structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_i2c_xfr_dma(cfn_hal_i2c_t *driver, const cfn_hal_i2c_transaction_t *xfr)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_i2c_xfr_dma (cfn_hal_i2c_t *p_driver, const cfn_hal_i2c_transaction_t *p_xfr)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_I2C, xfr_dma, driver, error, xfr);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_I2C, xfr_dma, p_driver, error, p_xfr);
     return error;
 }
-cfn_hal_error_code_t cfn_hal_i2c_construct(cfn_hal_i2c_t              *driver,
-                                           const cfn_hal_i2c_config_t *config,
-                                           const cfn_hal_i2c_phy_t    *phy,
-                                           struct cfn_hal_clock_s     *clock,
-                                           void                       *dependency,
-                                           cfn_hal_i2c_callback_t      callback,
-                                           void                       *user_arg);
-cfn_hal_error_code_t cfn_hal_i2c_destruct(cfn_hal_i2c_t *driver);
+cfn_hal_error_code_t cfn_hal_i2c_construct (cfn_hal_i2c_t              *p_driver,
+                                            const cfn_hal_i2c_config_t *p_config,
+                                            const cfn_hal_i2c_phy_t    *p_phy,
+                                            struct cfn_hal_clock_s     *p_clock,
+                                            void                       *p_dependency,
+                                            cfn_hal_i2c_callback_t      p_callback,
+                                            void                       *p_user_arg);
+cfn_hal_error_code_t cfn_hal_i2c_destruct (cfn_hal_i2c_t *p_driver);
 #ifdef __cplusplus
 }
 #endif

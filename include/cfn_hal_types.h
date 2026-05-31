@@ -185,7 +185,7 @@ typedef struct cfn_hal_driver_s
      * Called by the generic HAL to handle hardware-specific setup like pin
      * muxing.
      */
-    cfn_hal_error_code_t (*on_config)(struct cfn_hal_driver_s *base, void *user_arg, cfn_hal_config_phase_t phase);
+    cfn_hal_error_code_t (*on_config)(struct cfn_hal_driver_s *p_base, void *p_user_arg, cfn_hal_config_phase_t phase);
 
     void *on_config_arg; /*!< User argument passed to the on_config hook */
 
