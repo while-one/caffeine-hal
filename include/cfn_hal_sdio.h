@@ -121,15 +121,15 @@ typedef struct cfn_hal_sdio_api_s cfn_hal_sdio_api_t;
 
 /**
  * @brief SDIO callback signature.
- * @param driver Pointer to the SDIO driver instance.
+ * @param p_driver Pointer to the SDIO driver instance.
  * @param event_mask Mask of triggered nominal events.
  * @param error_mask Mask of triggered exception errors.
- * @param user_arg User-defined argument passed during registration.
+ * @param p_user_arg User-defined argument passed during registration.
  */
-typedef void (*cfn_hal_sdio_callback_t)(cfn_hal_sdio_t *driver,
+typedef void (*cfn_hal_sdio_callback_t)(cfn_hal_sdio_t *p_driver,
                                         uint32_t        event_mask,
                                         uint32_t        error_mask,
-                                        void           *user_arg);
+                                        void           *p_user_arg);
 
 /**
  * @brief SDIO Virtual Method Table (VMT).
@@ -139,13 +139,15 @@ struct cfn_hal_sdio_api_s
     cfn_hal_api_base_t base;
 
     /* SDIO Specific Extensions */
-    cfn_hal_error_code_t (*send_command)(cfn_hal_sdio_t *driver, const cfn_hal_sdio_cmd_t *cmd, uint32_t *response);
+    cfn_hal_error_code_t (*send_command)(cfn_hal_sdio_t           *p_driver,
+                                         const cfn_hal_sdio_cmd_t *p_cmd,
+                                         uint32_t                 *p_response);
     cfn_hal_error_code_t (*read_blocks)(
-        cfn_hal_sdio_t *driver, uint8_t *buffer, uint32_t block_addr, uint32_t nbr_of_blocks, uint32_t timeout);
+        cfn_hal_sdio_t *p_driver, uint8_t *p_buffer, uint32_t block_addr, uint32_t nbr_of_blocks, uint32_t timeout);
     cfn_hal_error_code_t (*write_blocks)(
-        cfn_hal_sdio_t *driver, const uint8_t *data, uint32_t block_addr, uint32_t nbr_of_blocks, uint32_t timeout);
-    cfn_hal_error_code_t (*get_card_info)(cfn_hal_sdio_t *driver, cfn_hal_sdio_card_info_t *info);
-    cfn_hal_error_code_t (*wait_card_ready)(cfn_hal_sdio_t *driver, uint32_t timeout);
+        cfn_hal_sdio_t *p_driver, const uint8_t *p_data, uint32_t block_addr, uint32_t nbr_of_blocks, uint32_t timeout);
+    cfn_hal_error_code_t (*get_card_info)(cfn_hal_sdio_t *p_driver, cfn_hal_sdio_card_info_t *p_info);
+    cfn_hal_error_code_t (*wait_card_ready)(cfn_hal_sdio_t *p_driver, uint32_t timeout);
 };
 CFN_HAL_VMT_CHECK(struct cfn_hal_sdio_api_s);
 
@@ -153,325 +155,347 @@ CFN_HAL_CREATE_DRIVER_TYPE(
     sdio, cfn_hal_sdio_config_t, cfn_hal_sdio_api_t, cfn_hal_sdio_phy_t, cfn_hal_sdio_callback_t);
 
 /* Functions inline ------------------------------------------------- */
-CFN_HAL_INLINE void cfn_hal_sdio_populate(cfn_hal_sdio_t              *driver,
-                                          uint32_t                     peripheral_id,
-                                          struct cfn_hal_clock_s      *clock,
-                                          void                        *dependency,
-                                          const cfn_hal_sdio_api_t    *api,
-                                          const cfn_hal_sdio_phy_t    *phy,
-                                          const cfn_hal_sdio_config_t *config,
-                                          cfn_hal_sdio_callback_t      callback,
-                                          void                        *user_arg)
+CFN_HAL_INLINE void
+cfn_hal_sdio_populate (cfn_hal_sdio_t              *p_driver,
+                       uint32_t                     peripheral_id,
+                       struct cfn_hal_clock_s      *p_clock,
+                       void                        *p_dependency,
+                       const cfn_hal_sdio_api_t    *p_api,
+                       const cfn_hal_sdio_phy_t    *p_phy,
+                       const cfn_hal_sdio_config_t *p_config,
+                       cfn_hal_sdio_callback_t      p_callback,
+                       void                        *p_user_arg)
 {
-    CFN_HAL_POPULATE_DRIVER(
-        driver, CFN_HAL_PERIPHERAL_TYPE_SDIO, peripheral_id, clock, dependency, api, phy, config, callback, user_arg);
+    CFN_HAL_POPULATE_DRIVER(p_driver,
+                            CFN_HAL_PERIPHERAL_TYPE_SDIO,
+                            peripheral_id,
+                            p_clock,
+                            p_dependency,
+                            p_api,
+                            p_phy,
+                            p_config,
+                            p_callback,
+                            p_user_arg);
 }
 
 /**
  * @brief Validates the SDIO configuration.
- * @param driver Pointer to the SDIO driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the SDIO driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_config_validate(const cfn_hal_sdio_t        *driver,
-                                                                 const cfn_hal_sdio_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_sdio_config_validate (const cfn_hal_sdio_t *p_driver, const cfn_hal_sdio_config_t *p_config)
 {
-    if (driver == NULL || config == NULL)
+    if (p_driver == NULL || p_config == NULL)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
 
-    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO, config);
+    return cfn_hal_base_config_validate(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO, p_config);
 }
 
 /**
  * @brief Initializes the SDIO driver.
- * @param driver Pointer to the SDIO driver instance.
+ * @param p_driver Pointer to the SDIO driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_init(cfn_hal_sdio_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_sdio_init (cfn_hal_sdio_t *p_driver)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    driver->base.vmt           = (const struct cfn_hal_api_base_s *) driver->api;
-    cfn_hal_error_code_t error = cfn_hal_sdio_config_validate(driver, driver->config);
+    p_driver->base.vmt         = (const struct cfn_hal_api_base_s *) p_driver->api;
+    cfn_hal_error_code_t error = cfn_hal_sdio_config_validate(p_driver, p_driver->config);
     if (error != CFN_HAL_ERROR_OK)
     {
         return error;
     }
-    return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO);
+    return cfn_hal_base_init(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO);
 }
 
 /**
  * @brief Deinitializes the SDIO driver.
- * @param driver Pointer to the SDIO driver instance.
+ * @param p_driver Pointer to the SDIO driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_deinit(cfn_hal_sdio_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_sdio_deinit (cfn_hal_sdio_t *p_driver)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_deinit(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO);
+    return cfn_hal_base_deinit(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO);
 }
 
 /**
  * @brief Sets the SDIO configuration.
- * @param driver Pointer to the SDIO driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the SDIO driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_config_set(cfn_hal_sdio_t *driver, const cfn_hal_sdio_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_sdio_config_set (cfn_hal_sdio_t *p_driver, const cfn_hal_sdio_config_t *p_config)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    cfn_hal_error_code_t error = cfn_hal_sdio_config_validate(driver, config);
+    cfn_hal_error_code_t error = cfn_hal_sdio_config_validate(p_driver, p_config);
     if (error != CFN_HAL_ERROR_OK)
     {
         return error;
     }
     {
-        driver->config = config;
+        p_driver->config = p_config;
     }
-    return cfn_hal_base_config_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO, (const void *) config);
+    return cfn_hal_base_config_set(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO, (const void *) p_config);
 }
 
 /**
  * @brief Gets the current SDIO configuration.
- * @param driver Pointer to the SDIO driver instance.
- * @param config [out] Pointer to store the configuration.
+ * @param p_driver Pointer to the SDIO driver instance.
+ * @param p_config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_config_get(cfn_hal_sdio_t *driver, cfn_hal_sdio_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_sdio_config_get (cfn_hal_sdio_t *p_driver, cfn_hal_sdio_config_t *p_config)
 {
-    if (!driver || !config || !driver->config)
+    if (!p_driver || !p_config || !p_driver->config)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    *config = *(driver->config);
+    *p_config = *(p_driver->config);
     return CFN_HAL_ERROR_OK;
 }
 
 /**
  * @brief Registers a callback for SDIO events and errors.
- * @param driver Pointer to the SDIO driver instance.
+ * @param p_driver Pointer to the SDIO driver instance.
  * @param callback The callback function to register.
- * @param user_arg User-defined argument passed to the callback.
+ * @param p_user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_callback_register(cfn_hal_sdio_t               *driver,
-                                                                   const cfn_hal_sdio_callback_t callback,
-                                                                   void                         *user_arg)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_sdio_callback_register (cfn_hal_sdio_t *p_driver, const cfn_hal_sdio_callback_t callback, void *p_user_arg)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->cb          = callback;
-        driver->cb_user_arg = user_arg;
+        p_driver->cb          = callback;
+        p_driver->cb_user_arg = p_user_arg;
     }
     return cfn_hal_base_callback_register(
-        &driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO, (cfn_hal_callback_t) callback, user_arg);
+        &p_driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO, (cfn_hal_callback_t) callback, p_user_arg);
 }
 
 /**
  * @brief Sets the SDIO power state.
- * @param driver Pointer to the SDIO driver instance.
+ * @param p_driver Pointer to the SDIO driver instance.
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_power_state_set(cfn_hal_sdio_t *driver, cfn_hal_power_state_t state)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_sdio_power_state_set (cfn_hal_sdio_t *p_driver, cfn_hal_power_state_t state)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_power_state_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO, state);
+    return cfn_hal_power_state_set(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO, state);
 }
 
 /**
  * @brief Enables one or more SDIO nominal events.
- * @param driver Pointer to the SDIO driver instance.
+ * @param p_driver Pointer to the SDIO driver instance.
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_event_enable(cfn_hal_sdio_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_sdio_event_enable (cfn_hal_sdio_t *p_driver, uint32_t event_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_event_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO, event_mask);
+    return cfn_hal_base_event_enable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO, event_mask);
 }
 
 /**
  * @brief Disables one or more SDIO nominal events.
- * @param driver Pointer to the SDIO driver instance.
+ * @param p_driver Pointer to the SDIO driver instance.
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_event_disable(cfn_hal_sdio_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_sdio_event_disable (cfn_hal_sdio_t *p_driver, uint32_t event_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_event_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO, event_mask);
+    return cfn_hal_base_event_disable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO, event_mask);
 }
 
 /**
  * @brief Retrieves the current SDIO nominal event status.
- * @param driver Pointer to the SDIO driver instance.
- * @param event_mask [out] Pointer to store the event mask.
+ * @param p_driver Pointer to the SDIO driver instance.
+ * @param p_event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_event_get(cfn_hal_sdio_t *driver, uint32_t *event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_sdio_event_get (cfn_hal_sdio_t *p_driver, uint32_t *p_event_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_event_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO, event_mask);
+    return cfn_hal_base_event_get(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO, p_event_mask);
 }
 
 /**
  * @brief Enables one or more SDIO exception errors.
- * @param driver Pointer to the SDIO driver instance.
+ * @param p_driver Pointer to the SDIO driver instance.
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_error_enable(cfn_hal_sdio_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_sdio_error_enable (cfn_hal_sdio_t *p_driver, uint32_t error_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_error_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO, error_mask);
+    return cfn_hal_base_error_enable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO, error_mask);
 }
 
 /**
  * @brief Disables one or more SDIO exception errors.
- * @param driver Pointer to the SDIO driver instance.
+ * @param p_driver Pointer to the SDIO driver instance.
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_error_disable(cfn_hal_sdio_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_sdio_error_disable (cfn_hal_sdio_t *p_driver, uint32_t error_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_error_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO, error_mask);
+    return cfn_hal_base_error_disable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO, error_mask);
 }
 
 /**
  * @brief Retrieves the current SDIO exception error status.
- * @param driver Pointer to the SDIO driver instance.
- * @param error_mask [out] Pointer to store the error mask.
+ * @param p_driver Pointer to the SDIO driver instance.
+ * @param p_error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_error_get(cfn_hal_sdio_t *driver, uint32_t *error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_sdio_error_get (cfn_hal_sdio_t *p_driver, uint32_t *p_error_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO, error_mask);
+    return cfn_hal_base_error_get(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_SDIO, p_error_mask);
 }
 
 /* SDIO Specific Functions ------------------------------------------ */
 
 /**
  * @brief Sends an SD/MMC command and waits for a response.
- * @param driver Pointer to the SDIO driver instance.
- * @param cmd Pointer to the command configuration structure.
- * @param response [out] Pointer to store the card response.
+ * @param p_driver Pointer to the SDIO driver instance.
+ * @param p_cmd Pointer to the command configuration structure.
+ * @param p_response [out] Pointer to store the card response.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_send_command(cfn_hal_sdio_t           *driver,
-                                                              const cfn_hal_sdio_cmd_t *cmd,
-                                                              uint32_t                 *response)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_sdio_send_command (cfn_hal_sdio_t *p_driver, const cfn_hal_sdio_cmd_t *p_cmd, uint32_t *p_response)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SDIO, send_command, driver, error, cmd, response);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SDIO, send_command, p_driver, error, p_cmd, p_response);
     return error;
 }
 
 /**
  * @brief Reads data blocks from the SD card.
- * @param driver Pointer to the SDIO driver instance.
- * @param buffer Pointer to the destination memory.
+ * @param p_driver Pointer to the SDIO driver instance.
+ * @param p_buffer Pointer to the destination memory.
  * @param block_addr Address of the first block to read.
  * @param nbr_of_blocks Number of blocks to transfer.
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_read_blocks(
-    cfn_hal_sdio_t *driver, uint8_t *buffer, uint32_t block_addr, uint32_t nbr_of_blocks, uint32_t timeout)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_sdio_read_blocks (
+    cfn_hal_sdio_t *p_driver, uint8_t *p_buffer, uint32_t block_addr, uint32_t nbr_of_blocks, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
-        CFN_HAL_PERIPHERAL_TYPE_SDIO, read_blocks, driver, error, buffer, block_addr, nbr_of_blocks, timeout);
+        CFN_HAL_PERIPHERAL_TYPE_SDIO, read_blocks, p_driver, error, p_buffer, block_addr, nbr_of_blocks, timeout);
     return error;
 }
 
 /**
  * @brief Writes data blocks to the SD card.
- * @param driver Pointer to the SDIO driver instance.
- * @param data Pointer to the source data.
+ * @param p_driver Pointer to the SDIO driver instance.
+ * @param p_data Pointer to the source data.
  * @param block_addr Address of the first block to write.
  * @param nbr_of_blocks Number of blocks to transfer.
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_write_blocks(
-    cfn_hal_sdio_t *driver, const uint8_t *data, uint32_t block_addr, uint32_t nbr_of_blocks, uint32_t timeout)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_sdio_write_blocks (
+    cfn_hal_sdio_t *p_driver, const uint8_t *p_data, uint32_t block_addr, uint32_t nbr_of_blocks, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
     CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
-        CFN_HAL_PERIPHERAL_TYPE_SDIO, write_blocks, driver, error, data, block_addr, nbr_of_blocks, timeout);
+        CFN_HAL_PERIPHERAL_TYPE_SDIO, write_blocks, p_driver, error, p_data, block_addr, nbr_of_blocks, timeout);
     return error;
 }
 
 /**
  * @brief Retrieves card-specific registers and capacity.
- * @param driver Pointer to the SDIO driver instance.
- * @param info [out] Pointer to the card info structure.
+ * @param p_driver Pointer to the SDIO driver instance.
+ * @param p_info [out] Pointer to the card info structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_get_card_info(cfn_hal_sdio_t *driver, cfn_hal_sdio_card_info_t *info)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_sdio_get_card_info (cfn_hal_sdio_t *p_driver, cfn_hal_sdio_card_info_t *p_info)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SDIO, get_card_info, driver, error, info);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SDIO, get_card_info, p_driver, error, p_info);
     return error;
 }
 
 /**
  * @brief Waits until the SD card is no longer busy.
- * @param driver Pointer to the SDIO driver instance.
+ * @param p_driver Pointer to the SDIO driver instance.
  * @param timeout Timeout duration in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_sdio_wait_card_ready(cfn_hal_sdio_t *driver, uint32_t timeout)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_sdio_wait_card_ready (cfn_hal_sdio_t *p_driver, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SDIO, wait_card_ready, driver, error, timeout);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_SDIO, wait_card_ready, p_driver, error, timeout);
     return error;
 }
-cfn_hal_error_code_t cfn_hal_sdio_construct(cfn_hal_sdio_t              *driver,
-                                            const cfn_hal_sdio_config_t *config,
-                                            const cfn_hal_sdio_phy_t    *phy,
-                                            struct cfn_hal_clock_s      *clock,
-                                            void                        *dependency,
-                                            cfn_hal_sdio_callback_t      callback,
-                                            void                        *user_arg);
-cfn_hal_error_code_t cfn_hal_sdio_destruct(cfn_hal_sdio_t *driver);
+cfn_hal_error_code_t cfn_hal_sdio_construct (cfn_hal_sdio_t              *p_driver,
+                                             const cfn_hal_sdio_config_t *p_config,
+                                             const cfn_hal_sdio_phy_t    *p_phy,
+                                             struct cfn_hal_clock_s      *p_clock,
+                                             void                        *p_dependency,
+                                             cfn_hal_sdio_callback_t      p_callback,
+                                             void                        *p_user_arg);
+cfn_hal_error_code_t cfn_hal_sdio_destruct (cfn_hal_sdio_t *p_driver);
 #ifdef __cplusplus
 }
 #endif

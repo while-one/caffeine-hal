@@ -34,7 +34,8 @@ class PwmTest : public ::testing::Test
     cfn_hal_pwm_api_t    api{};
     cfn_hal_pwm_config_t dummy_config{};
 
-    void SetUp() override
+    void
+    SetUp () override
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
@@ -68,7 +69,7 @@ TEST_F(PwmTest, UnimplementedApiReturnsNotSupported)
 
 TEST_F(PwmTest, OnConfigFailureAbortsInit)
 {
-    driver.base.on_config = [](cfn_hal_driver_t *b, void *arg, cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t
+    driver.base.on_config = [] (cfn_hal_driver_t *b, void *arg, cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t
     { return (phase == CFN_HAL_CONFIG_PHASE_INIT) ? CFN_HAL_ERROR_FAIL : CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_pwm_init(&driver), CFN_HAL_ERROR_FAIL);
 }
@@ -77,14 +78,14 @@ TEST_F(PwmTest, OnConfigFailureAbortsInit)
 
 TEST_F(PwmTest, InitSuccess)
 {
-    api.base.init = [](cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.init = [] (cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_pwm_init(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_INITIALIZED);
 }
 
 TEST_F(PwmTest, DeinitSuccess)
 {
-    api.base.deinit    = [](cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.deinit    = [] (cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     EXPECT_EQ(cfn_hal_pwm_deinit(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
@@ -105,7 +106,7 @@ TEST_F(PwmTest, ConfigSetGet)
 
 TEST_F(PwmTest, CallbackRegister)
 {
-    cfn_hal_pwm_callback_t callback = [](cfn_hal_pwm_t *d, uint32_t e, uint32_t err, void *arg) {};
+    cfn_hal_pwm_callback_t callback = [] (cfn_hal_pwm_t *d, uint32_t e, uint32_t err, void *arg) {};
     EXPECT_EQ(cfn_hal_pwm_callback_register(&driver, callback, (void *) 0x1234), CFN_HAL_ERROR_OK);
     EXPECT_EQ((void *) (uintptr_t) driver.cb, (void *) (uintptr_t) callback);
     EXPECT_EQ(driver.cb_user_arg, (void *) 0x1234);
@@ -115,8 +116,8 @@ TEST_F(PwmTest, CallbackRegister)
 
 TEST_F(PwmTest, StartStop)
 {
-    api.start          = [](cfn_hal_pwm_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    api.stop           = [](cfn_hal_pwm_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.start          = [] (cfn_hal_pwm_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.stop           = [] (cfn_hal_pwm_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     EXPECT_EQ(cfn_hal_pwm_start(&driver), CFN_HAL_ERROR_OK);
@@ -125,8 +126,8 @@ TEST_F(PwmTest, StartStop)
 
 TEST_F(PwmTest, SetFrequencyAndDuty)
 {
-    api.set_frequency  = [](cfn_hal_pwm_t *d, uint32_t freq) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    api.set_duty_cycle = [](cfn_hal_pwm_t *d, uint32_t duty) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.set_frequency  = [] (cfn_hal_pwm_t *d, uint32_t freq) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.set_duty_cycle = [] (cfn_hal_pwm_t *d, uint32_t duty) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     EXPECT_EQ(cfn_hal_pwm_set_frequency(&driver, 2000), CFN_HAL_ERROR_OK);
@@ -137,10 +138,11 @@ TEST_F(PwmTest, SetFrequencyAndDuty)
 
 TEST_F(PwmTest, EventEnableDisable)
 {
-    api.base.event_enable = [](cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    api.base.event_disable = [](cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t
+    api.base.event_enable = [] (cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
-    api.base.event_get = [](cfn_hal_driver_t *d, uint32_t *mask) -> cfn_hal_error_code_t
+    api.base.event_disable = [] (cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t
+    { return CFN_HAL_ERROR_OK; };
+    api.base.event_get = [] (cfn_hal_driver_t *d, uint32_t *mask) -> cfn_hal_error_code_t
     {
         *mask = CFN_HAL_PWM_EVENT_PERIOD_MATCH;
         return CFN_HAL_ERROR_OK;
@@ -157,10 +159,11 @@ TEST_F(PwmTest, EventEnableDisable)
 
 TEST_F(PwmTest, ErrorEnableDisable)
 {
-    api.base.error_enable = [](cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    api.base.error_disable = [](cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t
+    api.base.error_enable = [] (cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
-    api.base.error_get = [](cfn_hal_driver_t *d, uint32_t *mask) -> cfn_hal_error_code_t
+    api.base.error_disable = [] (cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t
+    { return CFN_HAL_ERROR_OK; };
+    api.base.error_get = [] (cfn_hal_driver_t *d, uint32_t *mask) -> cfn_hal_error_code_t
     {
         *mask = CFN_HAL_PWM_ERROR_FAULT;
         return CFN_HAL_ERROR_OK;
@@ -179,7 +182,7 @@ TEST_F(PwmTest, ErrorEnableDisable)
 
 TEST_F(PwmTest, WithLockMacroWorks)
 {
-    api.start = [](cfn_hal_pwm_t *d) { return CFN_HAL_ERROR_OK; };
+    api.start = [] (cfn_hal_pwm_t *d) { return CFN_HAL_ERROR_OK; };
     cfn_hal_error_code_t result;
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     CFN_HAL_WITH_LOCK(&driver, 100, result, cfn_hal_pwm_start);

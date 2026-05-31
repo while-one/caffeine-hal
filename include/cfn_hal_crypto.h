@@ -98,15 +98,15 @@ typedef struct cfn_hal_crypto_api_s cfn_hal_crypto_api_t;
 
 /**
  * @brief Crypto callback signature.
- * @param driver Pointer to the Crypto driver instance.
+ * @param p_driver Pointer to the Crypto driver instance.
  * @param event_mask Mask of triggered nominal events.
  * @param error_mask Mask of triggered exception errors.
- * @param user_arg User-defined argument passed during registration.
+ * @param p_user_arg User-defined argument passed during registration.
  */
-typedef void (*cfn_hal_crypto_callback_t)(cfn_hal_crypto_t *driver,
+typedef void (*cfn_hal_crypto_callback_t)(cfn_hal_crypto_t *p_driver,
                                           uint32_t          event_mask,
                                           uint32_t          error_mask,
-                                          void             *user_arg);
+                                          void             *p_user_arg);
 
 /**
  * @brief Crypto Virtual Method Table (VMT).
@@ -117,13 +117,13 @@ struct cfn_hal_crypto_api_s
 
     /* Crypto Specific Extensions */
     cfn_hal_error_code_t (*encrypt)(
-        cfn_hal_crypto_t *driver, const uint8_t *in, uint8_t *out, size_t size, uint32_t timeout);
+        cfn_hal_crypto_t *p_driver, const uint8_t *p_in, uint8_t *p_out, size_t size, uint32_t timeout);
     cfn_hal_error_code_t (*decrypt)(
-        cfn_hal_crypto_t *driver, const uint8_t *in, uint8_t *out, size_t size, uint32_t timeout);
-    cfn_hal_error_code_t (*hash_update)(cfn_hal_crypto_t *driver, const uint8_t *data, size_t size);
-    cfn_hal_error_code_t (*hash_finish)(cfn_hal_crypto_t *driver, uint8_t *hash, uint32_t timeout);
-    cfn_hal_error_code_t (*generate_random)(cfn_hal_crypto_t *driver, uint8_t *buffer, size_t size);
-    cfn_hal_error_code_t (*set_key)(cfn_hal_crypto_t *driver, const uint8_t *key, size_t key_size);
+        cfn_hal_crypto_t *p_driver, const uint8_t *p_in, uint8_t *p_out, size_t size, uint32_t timeout);
+    cfn_hal_error_code_t (*hash_update)(cfn_hal_crypto_t *p_driver, const uint8_t *p_data, size_t size);
+    cfn_hal_error_code_t (*hash_finish)(cfn_hal_crypto_t *p_driver, uint8_t *p_hash, uint32_t timeout);
+    cfn_hal_error_code_t (*generate_random)(cfn_hal_crypto_t *p_driver, uint8_t *p_buffer, size_t size);
+    cfn_hal_error_code_t (*set_key)(cfn_hal_crypto_t *p_driver, const uint8_t *p_key, size_t key_size);
 };
 
 CFN_HAL_VMT_CHECK(struct cfn_hal_crypto_api_s);
@@ -131,347 +131,364 @@ CFN_HAL_VMT_CHECK(struct cfn_hal_crypto_api_s);
 CFN_HAL_CREATE_DRIVER_TYPE(
     crypto, cfn_hal_crypto_config_t, cfn_hal_crypto_api_t, cfn_hal_crypto_phy_t, cfn_hal_crypto_callback_t);
 /* Functions inline ------------------------------------------------- */
-CFN_HAL_INLINE void cfn_hal_crypto_populate(cfn_hal_crypto_t              *driver,
-                                            uint32_t                       peripheral_id,
-                                            struct cfn_hal_clock_s        *clock,
-                                            void                          *dependency,
-                                            const cfn_hal_crypto_api_t    *api,
-                                            const cfn_hal_crypto_phy_t    *phy,
-                                            const cfn_hal_crypto_config_t *config,
-                                            cfn_hal_crypto_callback_t      callback,
-                                            void                          *user_arg)
+CFN_HAL_INLINE void
+cfn_hal_crypto_populate (cfn_hal_crypto_t              *p_driver,
+                         uint32_t                       peripheral_id,
+                         struct cfn_hal_clock_s        *p_clock,
+                         void                          *p_dependency,
+                         const cfn_hal_crypto_api_t    *p_api,
+                         const cfn_hal_crypto_phy_t    *p_phy,
+                         const cfn_hal_crypto_config_t *p_config,
+                         cfn_hal_crypto_callback_t      p_callback,
+                         void                          *p_user_arg)
 {
-    CFN_HAL_POPULATE_DRIVER(
-        driver, CFN_HAL_PERIPHERAL_TYPE_CRYPTO, peripheral_id, clock, dependency, api, phy, config, callback, user_arg);
+    CFN_HAL_POPULATE_DRIVER(p_driver,
+                            CFN_HAL_PERIPHERAL_TYPE_CRYPTO,
+                            peripheral_id,
+                            p_clock,
+                            p_dependency,
+                            p_api,
+                            p_phy,
+                            p_config,
+                            p_callback,
+                            p_user_arg);
 }
 
 /**
  * @brief Validates the Crypto configuration.
- * @param driver Pointer to the CRYPTO driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the CRYPTO driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_config_validate(const cfn_hal_crypto_t        *driver,
-                                                                   const cfn_hal_crypto_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_crypto_config_validate (const cfn_hal_crypto_t *p_driver, const cfn_hal_crypto_config_t *p_config)
 {
-    if (driver == NULL || config == NULL)
+    if (p_driver == NULL || p_config == NULL)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
 
-    if (config->algo >= CFN_HAL_CRYPTO_ALGO_MAX)
+    if (p_config->algo >= CFN_HAL_CRYPTO_ALGO_MAX)
     {
         return CFN_HAL_ERROR_BAD_CONFIG;
     }
 
-    return cfn_hal_base_config_validate(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO, config);
+    return cfn_hal_base_config_validate(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO, p_config);
 }
 
 /**
  * @brief Initializes the Crypto driver.
- * @param driver Pointer to the Crypto driver instance.
+ * @param p_driver Pointer to the Crypto driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_init(cfn_hal_crypto_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_crypto_init (cfn_hal_crypto_t *p_driver)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    driver->base.vmt           = (const struct cfn_hal_api_base_s *) driver->api;
-    cfn_hal_error_code_t error = cfn_hal_crypto_config_validate(driver, driver->config);
+    p_driver->base.vmt         = (const struct cfn_hal_api_base_s *) p_driver->api;
+    cfn_hal_error_code_t error = cfn_hal_crypto_config_validate(p_driver, p_driver->config);
     if (error != CFN_HAL_ERROR_OK)
     {
         return error;
     }
-    return cfn_hal_base_init(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO);
+    return cfn_hal_base_init(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO);
 }
 
 /**
  * @brief Deinitializes the Crypto driver.
- * @param driver Pointer to the Crypto driver instance.
+ * @param p_driver Pointer to the Crypto driver instance.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_deinit(cfn_hal_crypto_t *driver)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_crypto_deinit (cfn_hal_crypto_t *p_driver)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_deinit(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO);
+    return cfn_hal_base_deinit(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO);
 }
 
 /**
  * @brief Sets the Crypto configuration.
- * @param driver Pointer to the Crypto driver instance.
- * @param config Pointer to the configuration structure.
+ * @param p_driver Pointer to the Crypto driver instance.
+ * @param p_config Pointer to the configuration structure.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_config_set(cfn_hal_crypto_t              *driver,
-                                                              const cfn_hal_crypto_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_crypto_config_set (cfn_hal_crypto_t *p_driver, const cfn_hal_crypto_config_t *p_config)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->config = config;
+        p_driver->config = p_config;
     }
-    return cfn_hal_base_config_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO, (const void *) config);
+    return cfn_hal_base_config_set(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO, (const void *) p_config);
 }
 
 /**
  * @brief Gets the current Crypto configuration.
- * @param driver Pointer to the Crypto driver instance.
- * @param config [out] Pointer to store the configuration.
+ * @param p_driver Pointer to the Crypto driver instance.
+ * @param p_config [out] Pointer to store the configuration.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_config_get(cfn_hal_crypto_t *driver, cfn_hal_crypto_config_t *config)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_crypto_config_get (cfn_hal_crypto_t *p_driver, cfn_hal_crypto_config_t *p_config)
 {
-    if (!driver || !config || !driver->config)
+    if (!p_driver || !p_config || !p_driver->config)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    *config = *(driver->config);
+    *p_config = *(p_driver->config);
     return CFN_HAL_ERROR_OK;
 }
 
 /**
  * @brief Registers a callback for Crypto events and errors.
- * @param driver Pointer to the Crypto driver instance.
+ * @param p_driver Pointer to the Crypto driver instance.
  * @param callback The callback function to register.
- * @param user_arg User-defined argument passed to the callback.
+ * @param p_user_arg User-defined argument passed to the callback.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_callback_register(cfn_hal_crypto_t               *driver,
-                                                                     const cfn_hal_crypto_callback_t callback,
-                                                                     void                           *user_arg)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_crypto_callback_register (cfn_hal_crypto_t               *p_driver,
+                                  const cfn_hal_crypto_callback_t callback,
+                                  void                           *p_user_arg)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
     {
-        driver->cb          = callback;
-        driver->cb_user_arg = user_arg;
+        p_driver->cb          = callback;
+        p_driver->cb_user_arg = p_user_arg;
     }
     return cfn_hal_base_callback_register(
-        &driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO, (cfn_hal_callback_t) callback, user_arg);
+        &p_driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO, (cfn_hal_callback_t) callback, p_user_arg);
 }
 
 /**
  * @brief Sets the Crypto power state.
- * @param driver Pointer to the Crypto driver instance.
+ * @param p_driver Pointer to the Crypto driver instance.
  * @param state Target power state.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_power_state_set(cfn_hal_crypto_t     *driver,
-                                                                   cfn_hal_power_state_t state)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_crypto_power_state_set (cfn_hal_crypto_t *p_driver, cfn_hal_power_state_t state)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_power_state_set(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO, state);
+    return cfn_hal_power_state_set(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO, state);
 }
 
 /**
  * @brief Enables one or more Crypto nominal events.
- * @param driver Pointer to the Crypto driver instance.
+ * @param p_driver Pointer to the Crypto driver instance.
  * @param event_mask Mask of events to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_event_enable(cfn_hal_crypto_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_crypto_event_enable (cfn_hal_crypto_t *p_driver, uint32_t event_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_event_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO, event_mask);
+    return cfn_hal_base_event_enable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO, event_mask);
 }
 
 /**
  * @brief Disables one or more Crypto nominal events.
- * @param driver Pointer to the Crypto driver instance.
+ * @param p_driver Pointer to the Crypto driver instance.
  * @param event_mask Mask of events to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_event_disable(cfn_hal_crypto_t *driver, uint32_t event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_crypto_event_disable (cfn_hal_crypto_t *p_driver, uint32_t event_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_event_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO, event_mask);
+    return cfn_hal_base_event_disable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO, event_mask);
 }
 
 /**
  * @brief Retrieves the current Crypto nominal event status.
- * @param driver Pointer to the Crypto driver instance.
- * @param event_mask [out] Pointer to store the event mask.
+ * @param p_driver Pointer to the Crypto driver instance.
+ * @param p_event_mask [out] Pointer to store the event mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_event_get(cfn_hal_crypto_t *driver, uint32_t *event_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_crypto_event_get (cfn_hal_crypto_t *p_driver, uint32_t *p_event_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_event_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO, event_mask);
+    return cfn_hal_base_event_get(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO, p_event_mask);
 }
 
 /**
  * @brief Enables one or more Crypto exception errors.
- * @param driver Pointer to the Crypto driver instance.
+ * @param p_driver Pointer to the Crypto driver instance.
  * @param error_mask Mask of errors to enable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_error_enable(cfn_hal_crypto_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_crypto_error_enable (cfn_hal_crypto_t *p_driver, uint32_t error_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_error_enable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO, error_mask);
+    return cfn_hal_base_error_enable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO, error_mask);
 }
 
 /**
  * @brief Disables one or more Crypto exception errors.
- * @param driver Pointer to the Crypto driver instance.
+ * @param p_driver Pointer to the Crypto driver instance.
  * @param error_mask Mask of errors to disable.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_error_disable(cfn_hal_crypto_t *driver, uint32_t error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_crypto_error_disable (cfn_hal_crypto_t *p_driver, uint32_t error_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_error_disable(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO, error_mask);
+    return cfn_hal_base_error_disable(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO, error_mask);
 }
 
 /**
  * @brief Retrieves the current Crypto exception error status.
- * @param driver Pointer to the Crypto driver instance.
- * @param error_mask [out] Pointer to store the error mask.
+ * @param p_driver Pointer to the Crypto driver instance.
+ * @param p_error_mask [out] Pointer to store the error mask.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_error_get(cfn_hal_crypto_t *driver, uint32_t *error_mask)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_crypto_error_get (cfn_hal_crypto_t *p_driver, uint32_t *p_error_mask)
 {
-    if (!driver)
+    if (!p_driver)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    return cfn_hal_base_error_get(&driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO, error_mask);
+    return cfn_hal_base_error_get(&p_driver->base, CFN_HAL_PERIPHERAL_TYPE_CRYPTO, p_error_mask);
 }
 
 /* CRYPTO Specific Functions ---------------------------------------- */
 
 /**
  * @brief Encrypts a block of data.
- * @param driver Pointer to the Crypto driver instance.
- * @param in Pointer to the plaintext data.
- * @param out Pointer to the buffer where ciphertext will be stored.
+ * @param p_driver Pointer to the Crypto driver instance.
+ * @param p_in Pointer to the plaintext data.
+ * @param p_out Pointer to the buffer where ciphertext will be stored.
  * @param size Number of bytes to encrypt.
  * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_crypto_encrypt(cfn_hal_crypto_t *driver, const uint8_t *in, uint8_t *out, size_t size, uint32_t timeout)
+cfn_hal_crypto_encrypt (cfn_hal_crypto_t *p_driver, const uint8_t *p_in, uint8_t *p_out, size_t size, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, encrypt, driver, error, in, out, size, timeout);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
+        CFN_HAL_PERIPHERAL_TYPE_CRYPTO, encrypt, p_driver, error, p_in, p_out, size, timeout);
     return error;
 }
 
 /**
  * @brief Decrypts a block of data.
- * @param driver Pointer to the Crypto driver instance.
- * @param in Pointer to the ciphertext data.
- * @param out Pointer to the buffer where plaintext will be stored.
+ * @param p_driver Pointer to the Crypto driver instance.
+ * @param p_in Pointer to the ciphertext data.
+ * @param p_out Pointer to the buffer where plaintext will be stored.
  * @param size Number of bytes to decrypt.
  * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
 CFN_HAL_INLINE cfn_hal_error_code_t
-cfn_hal_crypto_decrypt(cfn_hal_crypto_t *driver, const uint8_t *in, uint8_t *out, size_t size, uint32_t timeout)
+cfn_hal_crypto_decrypt (cfn_hal_crypto_t *p_driver, const uint8_t *p_in, uint8_t *p_out, size_t size, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, decrypt, driver, error, in, out, size, timeout);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(
+        CFN_HAL_PERIPHERAL_TYPE_CRYPTO, decrypt, p_driver, error, p_in, p_out, size, timeout);
     return error;
 }
 
 /**
  * @brief Feeds data into the hashing engine.
- * @param driver Pointer to the Crypto driver instance.
- * @param data Pointer to the data to be hashed.
+ * @param p_driver Pointer to the Crypto driver instance.
+ * @param p_data Pointer to the data to be hashed.
  * @param size Number of bytes to process.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_hash_update(cfn_hal_crypto_t *driver,
-                                                               const uint8_t    *data,
-                                                               size_t            size)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_crypto_hash_update (cfn_hal_crypto_t *p_driver, const uint8_t *p_data, size_t size)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, hash_update, driver, error, data, size);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, hash_update, p_driver, error, p_data, size);
     return error;
 }
 
 /**
  * @brief Finalizes the hash calculation and retrieves the digest.
- * @param driver Pointer to the Crypto driver instance.
- * @param hash [out] Pointer to the buffer where the digest will be stored.
+ * @param p_driver Pointer to the Crypto driver instance.
+ * @param p_hash [out] Pointer to the buffer where the digest will be stored.
  * @param timeout Maximum time to wait for completion in milliseconds.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_hash_finish(cfn_hal_crypto_t *driver,
-                                                               uint8_t          *hash,
-                                                               uint32_t          timeout)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_crypto_hash_finish (cfn_hal_crypto_t *p_driver, uint8_t *p_hash, uint32_t timeout)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, hash_finish, driver, error, hash, timeout);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, hash_finish, p_driver, error, p_hash, timeout);
     return error;
 }
 
 /**
  * @brief Generates cryptographically secure random numbers.
- * @param driver Pointer to the Crypto driver instance.
- * @param buffer [out] Pointer to the buffer to be filled with random data.
+ * @param p_driver Pointer to the Crypto driver instance.
+ * @param p_buffer [out] Pointer to the buffer to be filled with random data.
  * @param size Number of bytes to generate.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_generate_random(cfn_hal_crypto_t *driver,
-                                                                   uint8_t          *buffer,
-                                                                   size_t            size)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_crypto_generate_random (cfn_hal_crypto_t *p_driver, uint8_t *p_buffer, size_t size)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, generate_random, driver, error, buffer, size);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, generate_random, p_driver, error, p_buffer, size);
     return error;
 }
 
 /**
  * @brief Sets the cryptographic key for symmetric algorithms.
- * @param driver Pointer to the Crypto driver instance.
- * @param key Pointer to the key data.
+ * @param p_driver Pointer to the Crypto driver instance.
+ * @param p_key Pointer to the key data.
  * @param key_size Size of the key in bytes.
  * @return CFN_HAL_ERROR_OK on success, or a specific error code on failure.
  */
-CFN_HAL_INLINE cfn_hal_error_code_t cfn_hal_crypto_set_key(cfn_hal_crypto_t *driver,
-                                                           const uint8_t    *key,
-                                                           size_t            key_size)
+CFN_HAL_INLINE cfn_hal_error_code_t
+cfn_hal_crypto_set_key (cfn_hal_crypto_t *p_driver, const uint8_t *p_key, size_t key_size)
 {
     cfn_hal_error_code_t error = CFN_HAL_ERROR_OK;
-    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, set_key, driver, error, key, key_size);
+    CFN_HAL_CHECK_AND_CALL_FUNC_VARG(CFN_HAL_PERIPHERAL_TYPE_CRYPTO, set_key, p_driver, error, p_key, key_size);
     return error;
 }
-cfn_hal_error_code_t cfn_hal_crypto_construct(cfn_hal_crypto_t              *driver,
-                                              const cfn_hal_crypto_config_t *config,
-                                              const cfn_hal_crypto_phy_t    *phy,
-                                              struct cfn_hal_clock_s        *clock,
-                                              void                          *dependency,
-                                              cfn_hal_crypto_callback_t      callback,
-                                              void                          *user_arg);
-cfn_hal_error_code_t cfn_hal_crypto_destruct(cfn_hal_crypto_t *driver);
+cfn_hal_error_code_t cfn_hal_crypto_construct (cfn_hal_crypto_t              *p_driver,
+                                               const cfn_hal_crypto_config_t *p_config,
+                                               const cfn_hal_crypto_phy_t    *p_phy,
+                                               struct cfn_hal_clock_s        *p_clock,
+                                               void                          *p_dependency,
+                                               cfn_hal_crypto_callback_t      p_callback,
+                                               void                          *p_user_arg);
+cfn_hal_error_code_t cfn_hal_crypto_destruct (cfn_hal_crypto_t *p_driver);
 #ifdef __cplusplus
 }
 #endif

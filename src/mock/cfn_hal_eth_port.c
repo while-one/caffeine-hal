@@ -26,69 +26,86 @@
 #include "cfn_hal_eth.h"
 #include "cfn_hal_eth_port.h"
 
-static cfn_hal_error_code_t port_base_event_get(cfn_hal_driver_t *base, uint32_t *event_mask)
+static cfn_hal_error_code_t
+port_base_event_get (cfn_hal_driver_t *p_base, uint32_t *p_event_mask)
 {
-    CFN_HAL_UNUSED(base);
-    if (event_mask)
+    CFN_HAL_UNUSED(p_base);
+    if (p_event_mask)
     {
-        *event_mask = 0;
+        *p_event_mask = 0;
     }
-    return CFN_HAL_ERROR_OK;
-}
-
-static cfn_hal_error_code_t port_base_error_get(cfn_hal_driver_t *base, uint32_t *error_mask)
-{
-    CFN_HAL_UNUSED(base);
-    if (error_mask)
-    {
-        *error_mask = 0;
-    }
-    return CFN_HAL_ERROR_OK;
-}
-
-static cfn_hal_error_code_t port_eth_start(cfn_hal_eth_t *driver)
-{
-    CFN_HAL_UNUSED(driver);
-    return CFN_HAL_ERROR_OK;
-}
-
-static cfn_hal_error_code_t port_eth_stop(cfn_hal_eth_t *driver)
-{
-    CFN_HAL_UNUSED(driver);
     return CFN_HAL_ERROR_OK;
 }
 
 static cfn_hal_error_code_t
-port_eth_transmit_frame(cfn_hal_eth_t *driver, const uint8_t *frame, size_t length, uint32_t timeout)
+port_base_error_get (cfn_hal_driver_t *p_base, uint32_t *p_error_mask)
 {
-    CFN_HAL_UNUSED(driver);
-    CFN_HAL_UNUSED(frame);
+    CFN_HAL_UNUSED(p_base);
+    if (p_error_mask)
+    {
+        *p_error_mask = 0;
+    }
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t
+port_eth_start (cfn_hal_eth_t *p_driver)
+{
+    CFN_HAL_UNUSED(p_driver);
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t
+port_eth_stop (cfn_hal_eth_t *p_driver)
+{
+    CFN_HAL_UNUSED(p_driver);
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t
+port_eth_transmit_frame (cfn_hal_eth_t *p_driver, const uint8_t *p_frame, size_t length, uint32_t timeout)
+{
+    CFN_HAL_UNUSED(p_driver);
+    CFN_HAL_UNUSED(p_frame);
     CFN_HAL_UNUSED(length);
     CFN_HAL_UNUSED(timeout);
     return CFN_HAL_ERROR_OK;
 }
 
-static cfn_hal_error_code_t port_eth_receive_frame(cfn_hal_eth_t *driver,
-                                                   uint8_t       *buffer, // NOLINT(readability-non-const-parameter)
-                                                   size_t         max_length,
-                                                   size_t  *received_length, // NOLINT(readability-non-const-parameter)
-                                                   uint32_t timeout)         // NOLINT(readability-non-const-parameter)
+static cfn_hal_error_code_t
+port_eth_receive_frame (cfn_hal_eth_t *p_driver,
+                        uint8_t       *p_buffer, // NOLINT(readability-non-const-parameter)
+                        size_t         max_length,
+                        size_t        *p_received_length, // NOLINT(readability-non-const-parameter)
+                        uint32_t       timeout)           // NOLINT(readability-non-const-parameter)
 {
-    CFN_HAL_UNUSED(driver);
-    CFN_HAL_UNUSED(buffer);
+    CFN_HAL_UNUSED(p_driver);
+    CFN_HAL_UNUSED(p_buffer);
     CFN_HAL_UNUSED(max_length);
-    CFN_HAL_UNUSED(received_length);
+    CFN_HAL_UNUSED(p_received_length);
     CFN_HAL_UNUSED(timeout);
     return CFN_HAL_ERROR_OK;
 }
 
-static cfn_hal_error_code_t port_eth_read_phy_reg(cfn_hal_eth_t *driver,
-                                                  uint16_t       phy_addr,
-                                                  uint16_t       reg_addr,
-                                                  uint16_t      *value, // NOLINT(readability-non-const-parameter)
-                                                  uint32_t       timeout)     // NOLINT(readability-non-const-parameter)
+static cfn_hal_error_code_t
+port_eth_read_phy_reg (cfn_hal_eth_t *p_driver,
+                       uint16_t       phy_addr,
+                       uint16_t       reg_addr,
+                       uint16_t      *p_value, // NOLINT(readability-non-const-parameter)
+                       uint32_t       timeout) // NOLINT(readability-non-const-parameter)
 {
-    CFN_HAL_UNUSED(driver);
+    CFN_HAL_UNUSED(p_driver);
+    CFN_HAL_UNUSED(phy_addr);
+    CFN_HAL_UNUSED(reg_addr);
+    CFN_HAL_UNUSED(p_value);
+    CFN_HAL_UNUSED(timeout);
+    return CFN_HAL_ERROR_OK;
+}
+
+static cfn_hal_error_code_t
+port_eth_write_phy_reg (cfn_hal_eth_t *p_driver, uint16_t phy_addr, uint16_t reg_addr, uint16_t value, uint32_t timeout)
+{
+    CFN_HAL_UNUSED(p_driver);
     CFN_HAL_UNUSED(phy_addr);
     CFN_HAL_UNUSED(reg_addr);
     CFN_HAL_UNUSED(value);
@@ -97,21 +114,10 @@ static cfn_hal_error_code_t port_eth_read_phy_reg(cfn_hal_eth_t *driver,
 }
 
 static cfn_hal_error_code_t
-port_eth_write_phy_reg(cfn_hal_eth_t *driver, uint16_t phy_addr, uint16_t reg_addr, uint16_t value, uint32_t timeout)
+port_eth_get_link_status (cfn_hal_eth_t *p_driver, cfn_hal_eth_link_status_t *p_status, uint32_t timeout)
 {
-    CFN_HAL_UNUSED(driver);
-    CFN_HAL_UNUSED(phy_addr);
-    CFN_HAL_UNUSED(reg_addr);
-    CFN_HAL_UNUSED(value);
-    CFN_HAL_UNUSED(timeout);
-    return CFN_HAL_ERROR_OK;
-}
-
-static cfn_hal_error_code_t
-port_eth_get_link_status(cfn_hal_eth_t *driver, cfn_hal_eth_link_status_t *status, uint32_t timeout)
-{
-    CFN_HAL_UNUSED(driver);
-    CFN_HAL_UNUSED(status);
+    CFN_HAL_UNUSED(p_driver);
+    CFN_HAL_UNUSED(p_status);
     CFN_HAL_UNUSED(timeout);
     return CFN_HAL_ERROR_OK;
 }
@@ -139,28 +145,30 @@ static const cfn_hal_eth_api_t ETH_API = {
     .get_link_status = port_eth_get_link_status
 };
 
-cfn_hal_error_code_t cfn_hal_eth_construct(cfn_hal_eth_t              *driver,
-                                           const cfn_hal_eth_config_t *config,
-                                           const cfn_hal_eth_phy_t    *phy,
-                                           struct cfn_hal_clock_s     *clock,
-                                           void                       *dependency,
-                                           cfn_hal_eth_callback_t      callback,
-                                           void                       *user_arg)
+cfn_hal_error_code_t
+cfn_hal_eth_construct (cfn_hal_eth_t              *p_driver,
+                       const cfn_hal_eth_config_t *p_config,
+                       const cfn_hal_eth_phy_t    *p_phy,
+                       struct cfn_hal_clock_s     *p_clock,
+                       void                       *p_dependency,
+                       cfn_hal_eth_callback_t      p_callback,
+                       void                       *p_user_arg)
 {
-    if ((driver == NULL) || (phy == NULL))
+    if ((p_driver == NULL) || (p_phy == NULL))
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    cfn_hal_eth_populate(driver, 0, clock, dependency, &ETH_API, phy, config, callback, user_arg);
+    cfn_hal_eth_populate(p_driver, 0, p_clock, p_dependency, &ETH_API, p_phy, p_config, p_callback, p_user_arg);
     return CFN_HAL_ERROR_OK;
 }
 
-cfn_hal_error_code_t cfn_hal_eth_destruct(cfn_hal_eth_t *driver)
+cfn_hal_error_code_t
+cfn_hal_eth_destruct (cfn_hal_eth_t *p_driver)
 {
-    if (driver == NULL)
+    if (p_driver == NULL)
     {
         return CFN_HAL_ERROR_BAD_PARAM;
     }
-    cfn_hal_eth_populate(driver, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    cfn_hal_eth_populate(p_driver, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     return CFN_HAL_ERROR_OK;
 }

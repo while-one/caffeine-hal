@@ -34,7 +34,8 @@ class RtcTest : public ::testing::Test
     cfn_hal_rtc_api_t    api{};
     cfn_hal_rtc_config_t dummy_config{};
 
-    void SetUp() override
+    void
+    SetUp () override
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
@@ -67,7 +68,7 @@ TEST_F(RtcTest, UnimplementedApiReturnsNotSupported)
 
 TEST_F(RtcTest, OnConfigFailureAbortsInit)
 {
-    driver.base.on_config = [](cfn_hal_driver_t *b, void *arg, cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t
+    driver.base.on_config = [] (cfn_hal_driver_t *b, void *arg, cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t
     { return (phase == CFN_HAL_CONFIG_PHASE_INIT) ? CFN_HAL_ERROR_FAIL : CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_rtc_init(&driver), CFN_HAL_ERROR_FAIL);
 }
@@ -76,14 +77,14 @@ TEST_F(RtcTest, OnConfigFailureAbortsInit)
 
 TEST_F(RtcTest, InitSuccess)
 {
-    api.base.init = [](cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.init = [] (cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_rtc_init(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_INITIALIZED);
 }
 
 TEST_F(RtcTest, DeinitSuccess)
 {
-    api.base.deinit    = [](cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.deinit    = [] (cfn_hal_driver_t *d) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     EXPECT_EQ(cfn_hal_rtc_deinit(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
@@ -93,8 +94,8 @@ TEST_F(RtcTest, DeinitSuccess)
 
 TEST_F(RtcTest, SetGetTime)
 {
-    api.set_time = [](cfn_hal_rtc_t *d, cfn_hal_rtc_time_t *time) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    api.get_time = [](cfn_hal_rtc_t *d, cfn_hal_rtc_time_t *time) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.set_time = [] (cfn_hal_rtc_t *d, cfn_hal_rtc_time_t *time) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.get_time = [] (cfn_hal_rtc_t *d, cfn_hal_rtc_time_t *time) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
     driver.base.status      = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     cfn_hal_rtc_time_t time = {};
@@ -104,17 +105,17 @@ TEST_F(RtcTest, SetGetTime)
 
 TEST_F(RtcTest, AlarmManagement)
 {
-    api.set_alarm = [](cfn_hal_rtc_t *d, uint32_t id, cfn_hal_rtc_time_t *time) -> cfn_hal_error_code_t
+    api.set_alarm = [] (cfn_hal_rtc_t *d, uint32_t id, cfn_hal_rtc_time_t *time) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
-    api.get_alarm = [](cfn_hal_rtc_t *d, uint32_t id, bool *elapsed, cfn_hal_rtc_time_t *time) -> cfn_hal_error_code_t
+    api.get_alarm = [] (cfn_hal_rtc_t *d, uint32_t id, bool *elapsed, cfn_hal_rtc_time_t *time) -> cfn_hal_error_code_t
     {
         *elapsed = true;
         return CFN_HAL_ERROR_OK;
     };
-    api.stop_alarm             = [](cfn_hal_rtc_t *d, uint32_t id) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.stop_alarm          = [] (cfn_hal_rtc_t *d, uint32_t id) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
-    driver.base.status         = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    cfn_hal_rtc_time_t time    = {};
+    driver.base.status      = CFN_HAL_DRIVER_STATUS_INITIALIZED;
+    cfn_hal_rtc_time_t time = {};
     bool               elapsed = false;
 
     EXPECT_EQ(cfn_hal_rtc_set_alarm(&driver, 1, &time), CFN_HAL_ERROR_OK);
@@ -127,8 +128,9 @@ TEST_F(RtcTest, AlarmManagement)
 
 TEST_F(RtcTest, EventEnableDisable)
 {
-    api.base.event_enable = [](cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    api.base.event_disable = [](cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t
+    api.base.event_enable = [] (cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t
+    { return CFN_HAL_ERROR_OK; };
+    api.base.event_disable = [] (cfn_hal_driver_t *d, uint32_t mask) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
 
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
@@ -140,7 +142,7 @@ TEST_F(RtcTest, EventEnableDisable)
 
 TEST_F(RtcTest, WithLockMacroWorks)
 {
-    api.set_time = [](cfn_hal_rtc_t *d, cfn_hal_rtc_time_t *t) { return CFN_HAL_ERROR_OK; };
+    api.set_time = [] (cfn_hal_rtc_t *d, cfn_hal_rtc_time_t *t) { return CFN_HAL_ERROR_OK; };
     cfn_hal_error_code_t result;
     driver.base.status            = CFN_HAL_DRIVER_STATUS_INITIALIZED;
     cfn_hal_rtc_time_t dummy_time = {};

@@ -42,7 +42,8 @@ class LockTest : public ::testing::Test
         int      func_arg_val = 0;
     } mock_state;
 
-    void SetUp() override
+    void
+    SetUp () override
     {
         memset(&base, 0, sizeof(base));
         memset(&api, 0, sizeof(api));
@@ -58,7 +59,7 @@ class LockTest : public ::testing::Test
 
 TEST_F(LockTest, LockCallsVmt)
 {
-    api.lock = [](cfn_hal_driver_t *b, uint32_t timeout) -> cfn_hal_error_code_t
+    api.lock = [] (cfn_hal_driver_t *b, uint32_t timeout) -> cfn_hal_error_code_t
     {
         auto *state = static_cast<MockState *>(b->extension);
         state->lock_calls++;
@@ -73,7 +74,7 @@ TEST_F(LockTest, LockCallsVmt)
 
 TEST_F(LockTest, UnlockCallsVmt)
 {
-    api.unlock = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t
+    api.unlock = [] (cfn_hal_driver_t *b) -> cfn_hal_error_code_t
     {
         auto *state = static_cast<MockState *>(b->extension);
         state->unlock_calls++;
@@ -86,14 +87,14 @@ TEST_F(LockTest, UnlockCallsVmt)
 
 TEST_F(LockTest, LockFailureReturnsError)
 {
-    api.lock = [](cfn_hal_driver_t *b, uint32_t timeout) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_BUSY; };
+    api.lock = [] (cfn_hal_driver_t *b, uint32_t timeout) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_BUSY; };
 
     EXPECT_EQ(cfn_hal_base_lock(&base, 10), CFN_HAL_ERROR_BUSY);
 }
 
 TEST_F(LockTest, LockTimeoutReturnsError)
 {
-    api.lock = [](cfn_hal_driver_t *b, uint32_t timeout) -> cfn_hal_error_code_t
+    api.lock = [] (cfn_hal_driver_t *b, uint32_t timeout) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_TIMING_TIMEOUT; };
 
     EXPECT_EQ(cfn_hal_base_lock(&base, 10), CFN_HAL_ERROR_TIMING_TIMEOUT);
@@ -116,18 +117,18 @@ TEST_F(LockTest, NullBaseReturnsBadParam)
 
 TEST_F(LockTest, WithLockMacroSuccess)
 {
-    api.lock = [](cfn_hal_driver_t *b, uint32_t timeout) -> cfn_hal_error_code_t
+    api.lock = [] (cfn_hal_driver_t *b, uint32_t timeout) -> cfn_hal_error_code_t
     {
         static_cast<MockState *>(b->extension)->lock_calls++;
         return CFN_HAL_ERROR_OK;
     };
-    api.unlock = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t
+    api.unlock = [] (cfn_hal_driver_t *b) -> cfn_hal_error_code_t
     {
         static_cast<MockState *>(b->extension)->unlock_calls++;
         return CFN_HAL_ERROR_OK;
     };
 
-    auto dummy_func = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t
+    auto dummy_func = [] (cfn_hal_driver_t *b) -> cfn_hal_error_code_t
     {
         static_cast<MockState *>(b->extension)->func_calls++;
         return CFN_HAL_ERROR_OK;
@@ -144,9 +145,9 @@ TEST_F(LockTest, WithLockMacroSuccess)
 
 TEST_F(LockTest, WithLockMacroFailureInLock)
 {
-    api.lock        = [](cfn_hal_driver_t *b, uint32_t timeout) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_BUSY; };
+    api.lock        = [] (cfn_hal_driver_t *b, uint32_t timeout) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_BUSY; };
 
-    auto dummy_func = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t
+    auto dummy_func = [] (cfn_hal_driver_t *b) -> cfn_hal_error_code_t
     {
         static_cast<MockState *>(b->extension)->func_calls++;
         return CFN_HAL_ERROR_OK;
@@ -161,10 +162,10 @@ TEST_F(LockTest, WithLockMacroFailureInLock)
 
 TEST_F(LockTest, WithLockMacroWithArguments)
 {
-    api.lock   = [](cfn_hal_driver_t *b, uint32_t timeout) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    api.unlock = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.lock   = [] (cfn_hal_driver_t *b, uint32_t timeout) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.unlock = [] (cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
-    auto dummy_func_args = [](cfn_hal_driver_t *b, int arg1, int arg2) -> cfn_hal_error_code_t
+    auto dummy_func_args = [] (cfn_hal_driver_t *b, int arg1, int arg2) -> cfn_hal_error_code_t
     {
         static_cast<MockState *>(b->extension)->func_arg_val = arg1 + arg2;
         return CFN_HAL_ERROR_OK;
@@ -180,7 +181,7 @@ TEST_F(LockTest, WithLockMacroWithArguments)
 TEST_F(LockTest, WithLockMacroNullDriverReturnsBadParam)
 {
     cfn_hal_error_code_t result;
-    auto                 dummy_func = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    auto                 dummy_func = [] (cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
     CFN_HAL_WITH_LOCK((cfn_hal_driver_t *) nullptr, 100, result, dummy_func);
     EXPECT_EQ(result, CFN_HAL_ERROR_BAD_PARAM);
@@ -194,12 +195,12 @@ class BaseTest : public LockTest
 
 TEST_F(BaseTest, ConfigSetCallsVmtValidate)
 {
-    api.config_validate = [](const cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t
+    api.config_validate = [] (const cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t
     {
         static_cast<MockState *>(b->extension)->func_calls++;
         return CFN_HAL_ERROR_OK;
     };
-    api.config_set   = [](cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.config_set   = [] (cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
     int dummy_config = 42;
     EXPECT_EQ(cfn_hal_base_config_set(&base, CFN_HAL_PERIPHERAL_TYPE_GPIO, &dummy_config), CFN_HAL_ERROR_OK);
@@ -208,9 +209,9 @@ TEST_F(BaseTest, ConfigSetCallsVmtValidate)
 
 TEST_F(BaseTest, ConfigSetAbortsOnVmtValidateFailure)
 {
-    api.config_validate = [](const cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t
+    api.config_validate = [] (const cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_BAD_CONFIG; };
-    api.config_set = [](cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t
+    api.config_set = [] (cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t
     {
         static_cast<MockState *>(b->extension)->func_calls++;
         return CFN_HAL_ERROR_OK;
@@ -223,7 +224,7 @@ TEST_F(BaseTest, ConfigSetAbortsOnVmtValidateFailure)
 
 TEST_F(BaseTest, ConfigValidateGeneric)
 {
-    api.config_validate = [](const cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t
+    api.config_validate = [] (const cfn_hal_driver_t *b, const void *c) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
     int dummy_config = 42;
     EXPECT_EQ(cfn_hal_base_config_validate(&base, CFN_HAL_PERIPHERAL_TYPE_GPIO, &dummy_config), CFN_HAL_ERROR_OK);

@@ -33,7 +33,8 @@ class GpioTest : public ::testing::Test
     cfn_hal_gpio_t     driver{};
     cfn_hal_gpio_api_t api{};
 
-    void SetUp() override
+    void
+    SetUp () override
     {
         memset(&driver, 0, sizeof(driver));
         memset(&api, 0, sizeof(api));
@@ -86,9 +87,9 @@ TEST_F(GpioTest, BaseConfigReturnsNotSupported)
 
 TEST_F(GpioTest, OnConfigFailureAbortsInit)
 {
-    driver.base.on_config = [](cfn_hal_driver_t      *b,
-                               void                  *user_arg,
-                               cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_FAIL; };
+    driver.base.on_config = [] (cfn_hal_driver_t      *b,
+                                void                  *user_arg,
+                                cfn_hal_config_phase_t phase) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_FAIL; };
     EXPECT_EQ(cfn_hal_gpio_init(&driver), CFN_HAL_ERROR_FAIL);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
 }
@@ -97,7 +98,7 @@ TEST_F(GpioTest, OnConfigFailureAbortsInit)
 
 TEST_F(GpioTest, InitSuccess)
 {
-    api.base.init = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.init = [] (cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_gpio_init(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_INITIALIZED);
 }
@@ -105,7 +106,7 @@ TEST_F(GpioTest, InitSuccess)
 TEST_F(GpioTest, DeinitSuccess)
 {
     driver.base.status = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.deinit    = [](cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.base.deinit    = [] (cfn_hal_driver_t *b) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
     EXPECT_EQ(cfn_hal_gpio_deinit(&driver), CFN_HAL_ERROR_OK);
     EXPECT_EQ(driver.base.status, CFN_HAL_DRIVER_STATUS_CONSTRUCTED);
 }
@@ -114,7 +115,7 @@ TEST_F(GpioTest, DeinitSuccess)
 
 TEST_F(GpioTest, PinConfigSuccess)
 {
-    api.pin_config = [](cfn_hal_gpio_t *port, const cfn_hal_gpio_pin_config_t *cfg) -> cfn_hal_error_code_t
+    api.pin_config = [] (cfn_hal_gpio_t *port, const cfn_hal_gpio_pin_config_t *cfg) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
 
     cfn_hal_gpio_pin_config_t cfg = { .pin_mask = CFN_HAL_GPIO_PIN_0, .mode = CFN_HAL_GPIO_CONFIG_MODE_INPUT };
@@ -125,7 +126,7 @@ TEST_F(GpioTest, PinConfigSuccess)
 TEST_F(GpioTest, CallbackRegister)
 {
     driver.base.status         = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.callback_register = [](cfn_hal_driver_t *b, cfn_hal_callback_t cb, void *arg) -> cfn_hal_error_code_t
+    api.base.callback_register = [] (cfn_hal_driver_t *b, cfn_hal_callback_t cb, void *arg) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_gpio_callback_register(&driver, nullptr, nullptr), CFN_HAL_ERROR_OK);
@@ -135,14 +136,14 @@ TEST_F(GpioTest, CallbackRegister)
 
 TEST_F(GpioTest, PinReadWriteToggleSuccess)
 {
-    api.pin_read = [](cfn_hal_gpio_t *d, cfn_hal_gpio_pin_t p, cfn_hal_gpio_state_t *s) -> cfn_hal_error_code_t
+    api.pin_read = [] (cfn_hal_gpio_t *d, cfn_hal_gpio_pin_t p, cfn_hal_gpio_state_t *s) -> cfn_hal_error_code_t
     {
         *s = CFN_HAL_GPIO_STATE_HIGH;
         return CFN_HAL_ERROR_OK;
     };
-    api.pin_write = [](cfn_hal_gpio_t *d, cfn_hal_gpio_pin_t p, cfn_hal_gpio_state_t s) -> cfn_hal_error_code_t
+    api.pin_write = [] (cfn_hal_gpio_t *d, cfn_hal_gpio_pin_t p, cfn_hal_gpio_state_t s) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
-    api.pin_toggle = [](cfn_hal_gpio_t *d, cfn_hal_gpio_pin_t p) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
+    api.pin_toggle = [] (cfn_hal_gpio_t *d, cfn_hal_gpio_pin_t p) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
 
     cfn_hal_gpio_state_t state;
     EXPECT_EQ(cfn_hal_gpio_pin_read(&driver, CFN_HAL_GPIO_PIN_0, &state), CFN_HAL_ERROR_OK);
@@ -153,12 +154,12 @@ TEST_F(GpioTest, PinReadWriteToggleSuccess)
 
 TEST_F(GpioTest, PortReadWriteSuccess)
 {
-    api.port_read = [](cfn_hal_gpio_t *d, uint32_t *val) -> cfn_hal_error_code_t
+    api.port_read = [] (cfn_hal_gpio_t *d, uint32_t *val) -> cfn_hal_error_code_t
     {
         *val = 0xFFFFFFFF;
         return CFN_HAL_ERROR_OK;
     };
-    api.port_write = [](cfn_hal_gpio_t *d, uint32_t mask, uint32_t val) -> cfn_hal_error_code_t
+    api.port_write = [] (cfn_hal_gpio_t *d, uint32_t mask, uint32_t val) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
 
     uint32_t port_val = 0;
@@ -170,8 +171,9 @@ TEST_F(GpioTest, PortReadWriteSuccess)
 TEST_F(GpioTest, EventEnableDisable)
 {
     driver.base.status    = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.event_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    api.base.event_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
+    api.base.event_enable = [] (cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
+    { return CFN_HAL_ERROR_OK; };
+    api.base.event_disable = [] (cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_gpio_event_enable(&driver, CFN_HAL_GPIO_EVENT_RISING), CFN_HAL_ERROR_OK);
@@ -181,8 +183,9 @@ TEST_F(GpioTest, EventEnableDisable)
 TEST_F(GpioTest, ErrorEnableDisable)
 {
     driver.base.status    = CFN_HAL_DRIVER_STATUS_INITIALIZED;
-    api.base.error_enable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t { return CFN_HAL_ERROR_OK; };
-    api.base.error_disable = [](cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
+    api.base.error_enable = [] (cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
+    { return CFN_HAL_ERROR_OK; };
+    api.base.error_disable = [] (cfn_hal_driver_t *b, uint32_t mask) -> cfn_hal_error_code_t
     { return CFN_HAL_ERROR_OK; };
 
     EXPECT_EQ(cfn_hal_gpio_error_enable(&driver, CFN_HAL_GPIO_ERROR_GENERAL), CFN_HAL_ERROR_OK);
@@ -191,7 +194,7 @@ TEST_F(GpioTest, ErrorEnableDisable)
 
 TEST_F(GpioTest, WithLockMacroWorks)
 {
-    api.pin_toggle = [](cfn_hal_gpio_t *d, cfn_hal_gpio_pin_t p) { return CFN_HAL_ERROR_OK; };
+    api.pin_toggle = [] (cfn_hal_gpio_t *d, cfn_hal_gpio_pin_t p) { return CFN_HAL_ERROR_OK; };
     cfn_hal_error_code_t result;
     CFN_HAL_WITH_LOCK(&driver, 100, result, cfn_hal_gpio_pin_toggle, CFN_HAL_GPIO_PIN_0);
     EXPECT_EQ(result, CFN_HAL_ERROR_OK);
